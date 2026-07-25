@@ -8,8 +8,9 @@ North star: [Stripe's API documentation](https://docs.stripe.com/api) — the
 reference bar for developer experience. Applied here: versioned surfaces
 where the picker switches *everything*, plain-language actions over raw
 endpoints, and interfaces generated from the source of truth rather than
-hand-maintained. (Per-language code samples were deliberately dropped — in
-an agentic workflow an assistant writes the snippet for free.)
+hand-maintained. (Per-language code samples are back by explicit request:
+cURL/Python/JavaScript/Go/Rust from one persisted dropdown, on the endpoints
+intro and mirroring the live console request.)
 
 ## Now
 
