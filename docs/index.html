@@ -15,8 +15,8 @@
   document.documentElement.setAttribute("data-theme", t);
 })();
 </script>
-<title>AMR Emulator — spec-faithful emulators of AMR robot REST APIs</title>
-<meta name="description" content="Develop and harden MiR robot integrations without a robot: every tracked MiR software version of the REST API on one public endpoint, with a live console built from the official MiR API documentation.">
+<title>AMR Emulator — a MiR robot API you can develop against, no robot required</title>
+<meta name="description" content="A free, spec-faithful emulator of the MiR robot REST API. Get a private virtual robot at a public URL, build and test your integration in any language, then point the same code at your real robot's IP.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%2300bfff'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%2300bfff'/><circle cx='66' cy='46' r='7' fill='%2300bfff'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -442,7 +442,7 @@ table.plain td:last-child { color: var(--ink-dim); }
     </div>
     <div>
       <h1>AMR Emulator</h1>
-      <div class="sub">Every tracked MiR version, one serverless endpoint</div>
+      <div class="sub">A fake MiR robot with real behavior — develop against it like the real thing</div>
     </div>
     <div class="head-right">
       <div class="led-box"><span class="led" id="led"></span><span id="led-text">probing&hellip;</span></div>
@@ -457,24 +457,49 @@ table.plain td:last-child { color: var(--ink-dim); }
 <div class="wrap">
 
   <div class="hero">
-    <h2>Simulate an AMR<br><span>without owning one.</span></h2>
+    <h2>A MiR robot you can develop against.<br><span>No robot required.</span></h2>
     <p>
-      It manages the versions so you don't have to: one endpoint speaks every tracked MiR software
-      generation. Build and test your integration against the demo, then point the same code at your
-      real robot's IP to switch over.
+      Mobile Industrial Robots (MiR) AMRs — the autonomous carts that haul material around
+      factories — are controlled entirely through a REST API. This site is a faithful emulator
+      of that API, built from MiR's official documentation and running at one public URL.
+      Write your integration against it in any language; when it works, swap this URL for your
+      real robot's IP address and the same code drives the robot.
     </p>
     <div class="cta">
       <a class="btn btn-primary" href="#console">Use the live console</a>
+      <a class="btn btn-ghost" href="#endpoints">See the endpoints</a>
       <a class="btn btn-ghost" href="#compare">Compare versions</a>
-      <a class="btn btn-ghost" href="#endpoints">Endpoints</a>
+    </div>
+  </div>
+
+  <div class="cards" style="margin-top:30px">
+    <div class="card">
+      <h3>A fake robot, real behavior</h3>
+      <p>Same auth, same JSON, same status codes as a physical MiR. Missions queue and execute
+        over simulated time, the battery drains and charges, PLC registers hold what you write —
+        <code>GET /status</code> answers like the real thing.</p>
+    </div>
+    <div class="card">
+      <h3>Every version, side by side</h3>
+      <p>Robots in the field run different software. The emulator serves every tracked MiR
+        software version at once — pick the one your robot runs, or diff two versions to
+        preflight an upgrade. It re-syncs itself weekly from MiR's official docs.</p>
+    </div>
+    <div class="card">
+      <h3>Private, breakable, free</h3>
+      <p>One click gives you a private virtual robot nobody else can touch. Inject emergency
+        stops, drain the battery, block its path — harden your error handling without risking
+        hardware. No signup, nothing to install.</p>
     </div>
   </div>
 
   <h2 class="sect-title" id="endpoints">Endpoints</h2>
   <p class="lead">
-    One public base URL — <code>https://amr-emulator.com</code>. Put a tracked MiR software
-    version in the path and call the same API a real robot serves. When your integration works
-    here, point the same code at your robot's IP and it carries over.
+    Everything hangs off one public base URL: <code>https://amr-emulator.com</code>. Put the MiR
+    software version you want in the path — <code>/3.8.1/api/v2.0.0/status</code> is robot
+    software 3.8.1, <code>/latest/&hellip;</code> is the newest — and call the same paths a real
+    robot serves. On a real robot there's no version prefix, so switching over is just changing
+    the base URL.
   </p>
   <table class="plain">
     <tr><th>Path</th><th>What it serves</th></tr>
@@ -487,15 +512,30 @@ table.plain td:last-child { color: var(--ink-dim); }
     <tr><td>/</td><td>JSON index of everything above — browsers get this page instead.</td></tr>
     <tr><td>/healthz</td><td>Liveness + the list of tracked versions.</td></tr>
   </table>
-  <div class="body-label sample-head" style="margin-top:18px">Your first request
+  <p class="lead" style="margin-top:22px">
+    <b>Your first request.</b> Copy it, run it, and a robot answers with its live status —
+    state, battery, position. The credentials in it are the working defaults
+    (<code>distributor</code>/<code>distributor</code>, MiR's factory default account), so it
+    works as-is. Pick your language:
+  </p>
+  <div class="body-label sample-head" style="margin-top:12px">Your first request
     <select class="lang-select" id="lang-first" aria-label="code sample language"></select>
     <button class="copy-btn" type="button" data-target="sample-first">Copy</button>
   </div>
   <pre class="resp sample" id="sample-first"></pre>
 
   <div id="console">
+    <h2 class="sect-title">Try it in your browser</h2>
+    <p class="lead" style="margin-bottom:20px">
+      Everything below is a live client for the emulator — no setup, the defaults already work.
+      Top to bottom: <b>Endpoint</b> is where requests go (this demo, or a MiR on your own
+      network), <b>Credentials</b> are prefilled with the factory defaults, <b>Software
+      version</b> picks which robot generation you're talking to, and the <b>Request console</b>
+      lets you browse every operation in that version's API and send it for real. The code
+      sample underneath always mirrors the request you've built.
+    </p>
     <section class="panel">
-      <div class="panel-head">Endpoint</div>
+      <div class="panel-head">Endpoint <span class="tag">where requests go</span></div>
       <div class="panel-body auth ep-compact">
         <label class="radio">
           <input type="radio" name="ep" id="ep-demo" checked>
@@ -524,7 +564,7 @@ table.plain td:last-child { color: var(--ink-dim); }
     </section>
 
     <section class="panel" style="margin-top:18px">
-      <div class="panel-head">Credentials</div>
+      <div class="panel-head">Credentials <span class="tag">the defaults already work</span></div>
       <div class="panel-body auth">
         <div class="cred-cols">
           <div class="session-feature">
@@ -546,6 +586,9 @@ table.plain td:last-child { color: var(--ink-dim); }
             <div class="row" id="apikey-row" style="display:none">
               <div style="flex:1"><label for="apikey">fleet api key <span class="dim">(x-api-key header)</span></label><input type="text" id="apikey" value="distributor" autocomplete="off"></div>
             </div>
+            <div class="hint" style="margin-top:6px">MiR robots ship with <code>distributor</code>/<code>distributor</code>;
+              the emulator does too. Below is the header that actually goes on the wire &mdash; MiR
+              hashes the password before Basic-encoding it.</div>
             <div class="token" id="token-view"></div>
           </div>
         </div>
@@ -606,8 +649,9 @@ table.plain td:last-child { color: var(--ink-dim); }
   </div>
   <h2 class="sect-title" id="compare">Compare versions</h2>
   <p class="lead">
-    Preflight an upgrade: the structural API changes between any two tracked versions of one
-    family (robot or fleet; descriptions ignored) &mdash; served by
+    Upgrading a robot's software? Diff any two tracked versions to see exactly which API
+    operations get added, removed, or changed before you commit to the upgrade. Your scripts
+    can get the same answer from
     <code>GET /_emulator/diff?from=&hellip;&amp;to=&hellip;</code> on this endpoint.
   </p>
   <div class="cmp-row">
