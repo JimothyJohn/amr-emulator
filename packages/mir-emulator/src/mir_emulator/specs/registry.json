@@ -2,7 +2,7 @@
   "source": "https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/",
   "selection_rule": {
     "minors_per_major": 4,
-    "policy": "For every major release line that publishes REST API files, track the latest patch of each of its newest 4 minor lines."
+    "policy": "For every major release line that publishes REST API files, track the latest patch of each of its newest 4 minor lines. Once a minor line is tracked it is permanent: it keeps updating to its latest published patch but is never dropped, even when newer minors push it past the newest-4 window or the portal stops publishing it."
   },
   "updated": "2026-07-04",
   "tracked": [

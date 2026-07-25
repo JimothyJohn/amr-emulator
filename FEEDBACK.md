@@ -5,7 +5,8 @@ This document collects concrete, version-specific issues we found while building
 MiR Fleet Enterprise Integration API. Every finding below was observed either in the
 official API definitions themselves or in behavior we had to special-case to stay
 faithful to real robots. We track the latest patch of the newest four minor lines of
-each major release:
+each major release, and once a minor line is tracked it stays tracked permanently
+(updated to its latest patch, never dropped). Currently:
 
 - **Robot REST API** (`/api/v2.0.0`): 2.10.5.8, 2.12.0.4, 2.13.5.4, 2.14.7, 3.5.4, 3.5.6, 3.6.7, 3.7.2, 3.8.1
 - **Fleet Enterprise Integration API** (`/api/v1`): 1.3.1, 1.4.2, 1.5.0

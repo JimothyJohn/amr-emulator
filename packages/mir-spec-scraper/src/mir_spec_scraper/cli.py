@@ -9,7 +9,10 @@ version); this pipeline picks one robot PDF per selected version (MIR250
 preferred; FLEET and HOOK are different APIs and are excluded), converts it to
 Swagger 2.0 (pdf_convert), and updates the bundled registry. Registry entries
 with "pinned": true are never dropped or overwritten — that keeps the official
-3.5.4 swagger.json around as the converter's correctness oracle.
+3.5.4 swagger.json around as the converter's correctness oracle. Tracked minor
+lines are permanent: a version is only ever replaced by a newer patch of its
+own line, never erased because newer minors pushed it out of the selection
+window or the portal stopped publishing it.
 
 Exit code is 0 unless something actually broke; "no credentials" and "nothing
 new" are normal outcomes. Inside GitHub Actions, ``changed`` and ``summary``
@@ -34,7 +37,7 @@ from pathlib import Path
 
 from mir_spec_scraper.portal import PortalClient, PortalFile
 from mir_spec_scraper.summarize import SummaryError, summarizer_from_env
-from mir_spec_scraper.versions import format_version, select_tracked
+from mir_spec_scraper.versions import format_version, line_of, select_tracked
 
 DEFAULT_SPECS_DIR = Path("packages/mir-emulator/src/mir_emulator/specs")
 
@@ -193,7 +196,14 @@ def sync(
         majors_seen = sorted({f.version[0] for f in files}, reverse=True)
         lines.append(f"portal: {len(files)} files, latest {latest_seen}, majors {majors_seen}")
 
-        targets = select_tracked([f.version for f in files], minors_per_major=minors_per_major)
+        # Already-tracked minor lines are permanent: they keep refreshing to
+        # their latest patch but are never rotated out by newer minors.
+        keep_lines = {line_of(v) for v in existing}
+        targets = select_tracked(
+            [f.version for f in files],
+            minors_per_major=minors_per_major,
+            keep_lines=keep_lines,
+        )
         tracked = []
         for version in targets:
             version_str = format_version(version)
@@ -272,14 +282,28 @@ def sync(
             )
 
         tracked.extend(pinned.values())
-        tracked.sort(key=lambda t: [int(p) for p in t["mir_version"].split(".")], reverse=True)
+        # A tracked version is only ever superseded by a newer patch of its
+        # own minor line — never erased because the line aged out of the
+        # selection window or vanished from the portal.
+        newest_per_line: dict[tuple[int, int], list[int]] = {}
+        for t in tracked:
+            key = [int(p) for p in str(t["mir_version"]).split(".")]
+            newest_per_line[(key[0], key[1])] = max(newest_per_line.get((key[0], key[1]), key), key)
+        present = {t["mir_version"] for t in tracked}
+        for version_str, entry in sorted(existing.items()):
+            key = [int(p) for p in version_str.split(".")]
+            replacement = newest_per_line.get((key[0], key[1]))
+            if version_str not in present and (replacement is None or replacement < key):
+                tracked.append(entry)
+                lines.append(f"kept {version_str}: no replacement published on the portal")
+        tracked.sort(key=lambda t: [int(p) for p in str(t["mir_version"]).split(".")], reverse=True)
     finally:
         client.close()
 
     dropped = set(existing) - {t["mir_version"] for t in tracked}
     if dropped:
         changed = True
-        lines.append(f"dropped (no longer selected): {', '.join(sorted(dropped))}")
+        lines.append(f"superseded by a newer patch: {', '.join(sorted(dropped))}")
 
     if changed and not dry_run:
         registry["tracked"] = tracked

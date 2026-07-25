@@ -5,6 +5,10 @@ name: Scrape MiR portal for new API versions
 # a PR whose body carries an API changelog. Anything the pipeline could not
 # handle (conversion warnings, unusable files) is filed as an issue instead of
 # being silently skipped.
+#
+# The robot-API half needs portal credentials; the Fleet Enterprise half is
+# public OpenAPI JSON and runs regardless — the sync CLI skips the portal
+# half on its own when the secrets are absent.
 
 on:
   schedule:
@@ -26,9 +30,9 @@ jobs:
       pull-requests: write
       issues: write
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: astral-sh/setup-uv@d31148d669074a8d0a63714ba94f3201e7020bc3 # v8.3.0
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           python-version: "3.12"
 
@@ -38,14 +42,13 @@ jobs:
           MIR_PORTAL_EMAIL: ${{ secrets.MIR_PORTAL_EMAIL }}
         run: |
           if [ -z "$MIR_PORTAL_EMAIL" ]; then
-            echo "::notice::MIR_PORTAL_EMAIL/MIR_PORTAL_PASSWORD secrets are not set; skipping scrape. Create a free account at supportportal.mobile-industrial-robots.com and add the secrets to enable self-updating."
+            echo "::notice::MIR_PORTAL_EMAIL/MIR_PORTAL_PASSWORD secrets are not set; skipping the robot-API half (the public Fleet sync still runs). Create a free account at supportportal.mobile-industrial-robots.com and add the secrets to enable robot-API self-updating."
             echo "available=false" >> "$GITHUB_OUTPUT"
           else
             echo "available=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Sync (locked)
-        if: steps.creds.outputs.available == 'true'
         run: uv sync --locked --all-packages
 
       - name: Live portal gate (login, listing parse, PDF->swagger oracle)
@@ -56,7 +59,6 @@ jobs:
         run: uv run pytest -q -m live_portal
 
       - name: Scrape and update specs
-        if: steps.creds.outputs.available == 'true'
         id: scrape
         env:
           MIR_PORTAL_EMAIL: ${{ secrets.MIR_PORTAL_EMAIL }}
@@ -66,11 +68,11 @@ jobs:
         run: uv run mir-spec-scraper sync --report scrape-report.md
 
       - name: Test against the updated spec set before proposing it
-        if: steps.creds.outputs.available == 'true' && steps.scrape.outputs.changed == 'true'
+        if: steps.scrape.outputs.changed == 'true'
         run: uv run pytest -q -m "not integration and not live_portal"
 
       - name: Open PR with new API versions
-        if: steps.creds.outputs.available == 'true' && steps.scrape.outputs.changed == 'true'
+        if: steps.scrape.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           branch: scrape/update-specs
@@ -82,10 +84,9 @@ jobs:
 
       - name: File an issue when the pipeline needs attention
         if: >
-          steps.creds.outputs.available == 'true' &&
-          (contains(steps.scrape.outputs.summary, 'kept previous') ||
-           contains(steps.scrape.outputs.summary, 'no usable') ||
-           contains(steps.scrape.outputs.summary, 'refusing'))
+          contains(steps.scrape.outputs.summary, 'kept previous') ||
+          contains(steps.scrape.outputs.summary, 'no usable') ||
+          contains(steps.scrape.outputs.summary, 'refusing')
         env:
           GH_TOKEN: ${{ github.token }}
           SUMMARY: ${{ steps.scrape.outputs.summary }}

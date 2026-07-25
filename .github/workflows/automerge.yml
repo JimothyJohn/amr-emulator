@@ -1,0 +1,32 @@
+name: Auto-merge
+
+# Enables GitHub auto-merge on PRs into dev from trusted authors (repo owner
+# and Dependabot), so green required checks land them without a manual click.
+# Merging still waits on the dev branch-protection checks; drafts are skipped,
+# so "keep it draft" remains the deliberate opt-out. dev -> master stays a
+# manual merge — this never touches master-based PRs.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+permissions: {}
+
+jobs:
+  enable:
+    if: >-
+      github.event.pull_request.base.ref == 'dev' &&
+      !github.event.pull_request.draft &&
+      (github.event.pull_request.user.login == 'JimothyJohn' ||
+       github.event.pull_request.user.login == 'dependabot[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --merge "$PR_URL"

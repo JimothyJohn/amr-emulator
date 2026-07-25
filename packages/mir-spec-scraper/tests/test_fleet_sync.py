@@ -93,13 +93,26 @@ def test_resync_is_idempotent(specs_dir):
     assert "no changes" in summary
 
 
-def test_selection_drops_old_minor_lines_and_prunes_files(specs_dir):
+def test_tracked_minor_line_survives_newer_minors(specs_dir):
+    """The seeded 1.3 line stays tracked even once it falls outside the
+    newest-4 window — once tracked, never rotated out."""
     published = {f"1.{m}.0": _openapi(f"1.{m}.0") for m in range(3, 9)}  # 1.3..1.8
     changed, _ = sync_fleet(specs_dir, client=_client(published))
     assert changed
     tracked = [t["fleet_version"] for t in _registry(specs_dir)["fleet"]["tracked"]]
-    assert tracked == ["1.8.0", "1.7.0", "1.6.0", "1.5.0"]
-    assert not (specs_dir / "fleet" / "1.3.0" / "openapi_v1.json").exists()
+    assert tracked == ["1.8.0", "1.7.0", "1.6.0", "1.5.0", "1.3.0"]
+    assert (specs_dir / "fleet" / "1.3.0" / "openapi_v1.json").is_file()
+
+
+def test_old_tracked_line_still_gets_patch_updates(specs_dir):
+    published = {f"1.{m}.0": _openapi(f"1.{m}.0") for m in range(4, 9)}
+    published["1.3.1"] = _openapi("1.3.1")  # newer patch of the old 1.3 line
+    changed, _ = sync_fleet(specs_dir, client=_client(published))
+    assert changed
+    tracked = [t["fleet_version"] for t in _registry(specs_dir)["fleet"]["tracked"]]
+    assert "1.3.1" in tracked and "1.3.0" not in tracked
+    assert (specs_dir / "fleet" / "1.3.1" / "openapi_v1.json").is_file()
+    assert not (specs_dir / "fleet" / "1.3.0").exists(), "superseded patch pruned"
 
 
 def test_non_openapi_payload_is_skipped(specs_dir):
@@ -179,9 +192,21 @@ def test_missing_extras_never_block_the_version(specs_dir):
     assert "top_module: skipped" in summary
 
 
-def test_dropped_version_directory_is_fully_pruned(specs_dir):
+def test_superseded_patch_directory_is_fully_pruned(specs_dir):
     published = {"1.3.0": _openapi("1.3.0")}
     sync_fleet(specs_dir, client=_client_with_extras(published, extras={"1.3.0"}))
-    published = {f"1.{m}.0": _openapi(f"1.{m}.0") for m in range(4, 9)}  # 1.3.0 gone
+    published = {"1.3.1": _openapi("1.3.1")}
     sync_fleet(specs_dir, client=_client_with_extras(published))
     assert not (specs_dir / "fleet" / "1.3.0").exists()
+    assert (specs_dir / "fleet" / "1.3.1" / "openapi_v1.json").is_file()
+
+
+def test_failed_replacement_patch_keeps_the_old_entry(specs_dir):
+    """If the newer patch of a tracked line can't be fetched, the line keeps
+    its previous spec instead of losing coverage."""
+    published = {"1.3.1": b"<html>login page</html>", "1.4.0": _openapi("1.4.0")}
+    _changed, summary = sync_fleet(specs_dir, client=_client(published))
+    assert "1.3.1: skipped" in summary
+    tracked = [t["fleet_version"] for t in _registry(specs_dir)["fleet"]["tracked"]]
+    assert "1.3.0" in tracked, "old patch must survive a broken replacement"
+    assert (specs_dir / "fleet" / "1.3.0" / "openapi_v1.json").is_file()

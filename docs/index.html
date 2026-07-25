@@ -15,8 +15,8 @@
   document.documentElement.setAttribute("data-theme", t);
 })();
 </script>
-<title>AMR Emulator — spec-faithful emulators of AMR robot REST APIs</title>
-<meta name="description" content="Develop and harden MiR robot integrations without a robot: every tracked MiR software version of the REST API on one public endpoint, with a live console built from the official MiR API documentation.">
+<title>AMR Emulator — a MiR robot API you can develop against, no robot required</title>
+<meta name="description" content="A free, spec-faithful emulator of the MiR robot REST API. Get a private virtual robot at a public URL, build and test your integration in any language, then point the same code at your real robot's IP.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%2300bfff'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%2300bfff'/><circle cx='66' cy='46' r='7' fill='%2300bfff'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,6 +220,18 @@ textarea { width: 100%; min-height: 96px; resize: vertical; line-height: 1.5; ma
 .cmp-col.chg li::before { content: "~ "; color: var(--amber); font-weight: 700; }
 .cmp-clean { color: var(--green); font-weight: 600; font-size: 14px; }
 
+
+/* ---------- code samples (language dropdown, Stripe-style) ---------- */
+.sample-head { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.sample-head select.lang-select { width: auto; font-size: 12px; padding: 4px 10px; }
+.copy-btn {
+  cursor: pointer; font-weight: 600; font-size: 11px;
+  background: var(--surface); color: var(--ink-dim);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px;
+  transition: color .15s, border-color .15s;
+}
+.copy-btn:hover { color: var(--blue-deep); border-color: var(--brand); }
+pre.sample { max-height: 380px; }
 
 /* ---------- response ---------- */
 .resp-meta {
@@ -430,7 +442,7 @@ table.plain td:last-child { color: var(--ink-dim); }
     </div>
     <div>
       <h1>AMR Emulator</h1>
-      <div class="sub">Every tracked MiR version, one serverless endpoint</div>
+      <div class="sub">A fake MiR robot with real behavior — develop against it like the real thing</div>
     </div>
     <div class="head-right">
       <div class="led-box"><span class="led" id="led"></span><span id="led-text">probing&hellip;</span></div>
@@ -445,39 +457,85 @@ table.plain td:last-child { color: var(--ink-dim); }
 <div class="wrap">
 
   <div class="hero">
-    <h2>Simulate an AMR<br><span>without owning one.</span></h2>
+    <h2>A MiR robot you can develop against.<br><span>No robot required.</span></h2>
     <p>
-      It manages the versions so you don't have to: one endpoint speaks every tracked MiR software
-      generation. Build and test your integration against the demo, then point the same code at your
-      real robot's IP to switch over.
+      Mobile Industrial Robots (MiR) AMRs — the autonomous carts that haul material around
+      factories — are controlled entirely through a REST API. This site is a faithful emulator
+      of that API, built from MiR's official documentation and running at one public URL.
+      Write your integration against it in any language; when it works, swap this URL for your
+      real robot's IP address and the same code drives the robot.
     </p>
     <div class="cta">
       <a class="btn btn-primary" href="#console">Use the live console</a>
+      <a class="btn btn-ghost" href="#endpoints">See the endpoints</a>
       <a class="btn btn-ghost" href="#compare">Compare versions</a>
-      <a class="btn btn-ghost" href="#endpoints">Endpoints</a>
     </div>
   </div>
 
-  <h2 class="sect-title" id="docs">Documentation &amp; primary sources</h2>
-  <p class="lead">Everything here is derived from MiR's official API docs. Check it against the sources:</p>
-  <div class="cards">
+  <div class="cards" style="margin-top:30px">
     <div class="card">
-      <h3>The official MiR Fleet API docs</h3>
-      <p>MiR's <b>Fleet Enterprise Integration API</b> as a public
-        <a href="https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/index.html?urls.primaryName=MiR+Fleet+Integration+API+v1" rel="noopener">Swagger UI</a>
-        (no login). Served here verbatim at <code>/fleet/&lt;version&gt;/openapi.json</code>.</p>
+      <h3>A fake robot, real behavior</h3>
+      <p>Same auth, same JSON, same status codes as a physical MiR. Missions queue and execute
+        over simulated time, the battery drains and charges, PLC registers hold what you write —
+        <code>GET /status</code> answers like the real thing.</p>
     </div>
     <div class="card">
-      <h3>The official MiR robot API docs</h3>
-      <p>The REST API reference on MiR's
-        <a href="https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/" rel="noopener">support portal</a>
-        — one PDF per version, behind a free account. The primary source for every spec used here.</p>
+      <h3>Every version, side by side</h3>
+      <p>Robots in the field run different software. The emulator serves every tracked MiR
+        software version at once — pick the one your robot runs, or diff two versions to
+        preflight an upgrade. It re-syncs itself weekly from MiR's official docs.</p>
+    </div>
+    <div class="card">
+      <h3>Private, breakable, free</h3>
+      <p>One click gives you a private virtual robot nobody else can touch. Inject emergency
+        stops, drain the battery, block its path — harden your error handling without risking
+        hardware. No signup, nothing to install.</p>
     </div>
   </div>
+
+  <h2 class="sect-title" id="endpoints">Endpoints</h2>
+  <p class="lead">
+    Everything hangs off one public base URL: <code>https://amr-emulator.com</code>. Put the MiR
+    software version you want in the path — <code>/3.8.1/api/v2.0.0/status</code> is robot
+    software 3.8.1, <code>/latest/&hellip;</code> is the newest — and call the same paths a real
+    robot serves. On a real robot there's no version prefix, so switching over is just changing
+    the base URL.
+  </p>
+  <table class="plain">
+    <tr><th>Path</th><th>What it serves</th></tr>
+    <tr><td>/&lt;version&gt;/api/v2.0.0/&hellip;</td><td>The emulated MiR robot REST API for that software version (also <code>/latest/&hellip;</code>).</td></tr>
+    <tr><td>/fleet/&lt;version&gt;/api/v1/&hellip;</td><td>The emulated MiR Fleet Enterprise Integration API (also <code>/fleet/latest/&hellip;</code>); auth is an <code>x-api-key</code> header, default key <code>distributor</code>. Each fleet embeds robot emulators it controls over their own REST API.</td></tr>
+    <tr><td>/&lt;version&gt;/swagger.json</td><td>Machine-readable spec, Swagger 2.0 (and <code>/&lt;version&gt;/openapi.json</code> for OpenAPI 3.0).</td></tr>
+    <tr><td>/fleet/&lt;version&gt;/openapi.json</td><td>The official Fleet OpenAPI 3 document, served verbatim.</td></tr>
+    <tr><td>/&lt;version&gt;/</td><td>Per-version JSON index: operation count, auth, session header, spec provenance.</td></tr>
+    <tr><td>/console</td><td>This page (also served at <code>/</code> to browsers) — catalog, telemetry, virtual robot sessions.</td></tr>
+    <tr><td>/</td><td>JSON index of everything above — browsers get this page instead.</td></tr>
+    <tr><td>/healthz</td><td>Liveness + the list of tracked versions.</td></tr>
+  </table>
+  <p class="lead" style="margin-top:22px">
+    <b>Your first request.</b> Copy it, run it, and a robot answers with its live status —
+    state, battery, position. The credentials in it are the working defaults
+    (<code>distributor</code>/<code>distributor</code>, MiR's factory default account), so it
+    works as-is. Pick your language:
+  </p>
+  <div class="body-label sample-head" style="margin-top:12px">Your first request
+    <select class="lang-select" id="lang-first" aria-label="code sample language"></select>
+    <button class="copy-btn" type="button" data-target="sample-first">Copy</button>
+  </div>
+  <pre class="resp sample" id="sample-first"></pre>
 
   <div id="console">
+    <h2 class="sect-title">Try it in your browser</h2>
+    <p class="lead" style="margin-bottom:20px">
+      Everything below is a live client for the emulator — no setup, the defaults already work.
+      Top to bottom: <b>Endpoint</b> is where requests go (this demo, or a MiR on your own
+      network), <b>Credentials</b> are prefilled with the factory defaults, <b>Software
+      version</b> picks which robot generation you're talking to, and the <b>Request console</b>
+      lets you browse every operation in that version's API and send it for real. The code
+      sample underneath always mirrors the request you've built.
+    </p>
     <section class="panel">
-      <div class="panel-head">Endpoint</div>
+      <div class="panel-head">Endpoint <span class="tag">where requests go</span></div>
       <div class="panel-body auth ep-compact">
         <label class="radio">
           <input type="radio" name="ep" id="ep-demo" checked>
@@ -506,7 +564,7 @@ table.plain td:last-child { color: var(--ink-dim); }
     </section>
 
     <section class="panel" style="margin-top:18px">
-      <div class="panel-head">Credentials</div>
+      <div class="panel-head">Credentials <span class="tag">the defaults already work</span></div>
       <div class="panel-body auth">
         <div class="cred-cols">
           <div class="session-feature">
@@ -528,6 +586,9 @@ table.plain td:last-child { color: var(--ink-dim); }
             <div class="row" id="apikey-row" style="display:none">
               <div style="flex:1"><label for="apikey">fleet api key <span class="dim">(x-api-key header)</span></label><input type="text" id="apikey" value="distributor" autocomplete="off"></div>
             </div>
+            <div class="hint" style="margin-top:6px">MiR robots ship with <code>distributor</code>/<code>distributor</code>;
+              the emulator does too. Below is the header that actually goes on the wire &mdash; MiR
+              hashes the password before Basic-encoding it.</div>
             <div class="token" id="token-view"></div>
           </div>
         </div>
@@ -566,6 +627,11 @@ table.plain td:last-child { color: var(--ink-dim); }
             </div>
             <div class="body-label" id="body-label">request body &mdash; JSON</div>
             <textarea id="body" spellcheck="false"></textarea>
+            <div class="body-label sample-head">Code sample
+              <select class="lang-select" id="lang-live" aria-label="code sample language"></select>
+              <button class="copy-btn" type="button" data-target="sample-live">Copy</button>
+            </div>
+            <pre class="resp sample" id="sample-live"></pre>
             <div class="resp-meta" id="resp-meta" style="display:none">
               <span class="status-big" id="resp-status"></span>
               <span id="resp-time"></span>
@@ -583,8 +649,9 @@ table.plain td:last-child { color: var(--ink-dim); }
   </div>
   <h2 class="sect-title" id="compare">Compare versions</h2>
   <p class="lead">
-    Preflight an upgrade: the structural API changes between any two tracked versions of one
-    family (robot or fleet; descriptions ignored) &mdash; served by
+    Upgrading a robot's software? Diff any two tracked versions to see exactly which API
+    operations get added, removed, or changed before you commit to the upgrade. Your scripts
+    can get the same answer from
     <code>GET /_emulator/diff?from=&hellip;&amp;to=&hellip;</code> on this endpoint.
   </p>
   <div class="cmp-row">
@@ -595,18 +662,22 @@ table.plain td:last-child { color: var(--ink-dim); }
   </div>
   <div id="cmp-result" class="hint">connect to the demo endpoint to compare versions&hellip;</div>
 
-  <h2 class="sect-title" id="endpoints">Endpoints</h2>
-  <table class="plain">
-    <tr><th>Path</th><th>What it serves</th></tr>
-    <tr><td>/console</td><td>This page (also served at <code>/</code> to browsers) — catalog, telemetry, virtual robot sessions.</td></tr>
-    <tr><td>/&lt;version&gt;/api/v2.0.0/&hellip;</td><td>The emulated MiR robot REST API for that software version (also <code>/latest/&hellip;</code>).</td></tr>
-    <tr><td>/fleet/&lt;version&gt;/api/v1/&hellip;</td><td>The emulated MiR Fleet Enterprise Integration API (also <code>/fleet/latest/&hellip;</code>); auth is an <code>x-api-key</code> header, default key <code>distributor</code>. Each fleet embeds robot emulators it controls over their own REST API.</td></tr>
-    <tr><td>/fleet/&lt;version&gt;/openapi.json</td><td>The official Fleet OpenAPI 3 document, served verbatim.</td></tr>
-    <tr><td>/&lt;version&gt;/swagger.json</td><td>Machine-readable spec, Swagger 2.0 (and <code>/&lt;version&gt;/openapi.json</code> for OpenAPI 3.0).</td></tr>
-    <tr><td>/&lt;version&gt;/</td><td>Per-version JSON index: operation count, auth, session header, spec provenance.</td></tr>
-    <tr><td>/</td><td>JSON index of everything above — browsers get this page instead.</td></tr>
-    <tr><td>/healthz</td><td>Liveness + the list of tracked versions.</td></tr>
-  </table>
+  <h2 class="sect-title" id="docs">Documentation &amp; primary sources</h2>
+  <p class="lead">Everything here is derived from MiR's official API docs. Check it against the sources:</p>
+  <div class="cards">
+    <div class="card">
+      <h3>The official MiR Fleet API docs</h3>
+      <p>MiR's <b>Fleet Enterprise Integration API</b> as a public
+        <a href="https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/index.html?urls.primaryName=MiR+Fleet+Integration+API+v1" rel="noopener">Swagger UI</a>
+        (no login). Served here verbatim at <code>/fleet/&lt;version&gt;/openapi.json</code>.</p>
+    </div>
+    <div class="card">
+      <h3>The official MiR robot API docs</h3>
+      <p>The REST API reference on MiR's
+        <a href="https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/" rel="noopener">support portal</a>
+        — one PDF per version, behind a free account. The primary source for every spec used here.</p>
+    </div>
+  </div>
 
   <footer>
     <div>
@@ -732,7 +803,259 @@ function highlight(json) {
     });
 }
 
+/* ---------- multi-language code samples (Stripe-style: pick a language once
+   from either dropdown, every sample on the page follows, choice persists
+   across visits) ----------
+   Each sampler emits a complete, runnable program: robot samples derive MiR's
+   Basic BASE64(user ":" SHA-256-hex(password)) token in-language, fleet
+   samples send the x-api-key header, both carry X-MiR-Session when a virtual
+   robot session is active and target the selected software version. */
+const LANG_KEY = "mir-console-lang";
+const LANGS = [["curl", "cURL"], ["python", "Python"], ["javascript", "JavaScript"], ["go", "Go"], ["rust", "Rust"]];
+let lang = "curl";
+try {
+  const storedLang = localStorage.getItem(LANG_KEY);
+  if (LANGS.some(([id]) => id === storedLang)) lang = storedLang;
+} catch { /* private mode */ }
+
+function compactBody(raw) {
+  if (!raw) return "";
+  try { return JSON.stringify(JSON.parse(raw)); } catch { return raw; }
+}
+const shQ = (s) => "'" + String(s).replace(/'/g, "'\\''") + "'";
+const dq = (s) => JSON.stringify(String(s)); // valid literal in py/js/go (and rust for JSON-safe text)
+const pyS = (s) => {
+  s = String(s);
+  return (!s.includes("'") && !s.includes("\\") && !s.includes("\n")) ? "'" + s + "'" : dq(s);
+};
+
+const SAMPLERS = {
+  curl(c) {
+    let out;
+    if (c.fleet) {
+      out = "curl -X " + c.method + " " + shQ(c.url) + " \\\n  -H " + shQ("x-api-key: " + c.apikey);
+    } else {
+      out =
+        "# MiR auth: Basic BASE64(user \":\" SHA-256-hex(password))\n" +
+        "HASH=$(printf '%s' " + shQ(c.pass) + " | shasum -a 256 | cut -d' ' -f1)\n" +
+        "TOKEN=$(printf '%s:%s' " + shQ(c.user) + " \"$HASH\" | base64 | tr -d '\\n')\n" +
+        "curl -X " + c.method + " " + shQ(c.url) + " \\\n  -H \"Authorization: Basic $TOKEN\"";
+    }
+    if (c.session) out += " \\\n  -H " + shQ("X-MiR-Session: " + c.session);
+    if (c.body) out += " \\\n  -H 'Content-Type: application/json' \\\n  -d " + shQ(c.body);
+    return out;
+  },
+  python(c) {
+    const lines = c.fleet
+      ? [
+        "import requests  # pip install requests",
+        "",
+        "headers = {\"x-api-key\": " + pyS(c.apikey) + "}",
+      ]
+      : [
+        "import base64, hashlib",
+        "",
+        "import requests  # pip install requests",
+        "",
+        "USER, PASSWORD = " + pyS(c.user) + ", " + pyS(c.pass),
+        "digest = hashlib.sha256(PASSWORD.encode()).hexdigest()",
+        "token = base64.b64encode(f\"{USER}:{digest}\".encode()).decode()",
+        "headers = {\"Authorization\": \"Basic \" + token}",
+      ];
+    if (c.session) lines.push("headers[\"X-MiR-Session\"] = " + pyS(c.session) + "  # your virtual robot");
+    lines.push("");
+    if (c.body) {
+      lines.push(
+        "resp = requests." + c.method.toLowerCase() + "(",
+        "    " + pyS(c.url) + ",",
+        "    headers={**headers, \"Content-Type\": \"application/json\"},",
+        "    data=" + pyS(c.body) + ",",
+        ")");
+    } else {
+      lines.push("resp = requests." + c.method.toLowerCase() + "(" + pyS(c.url) + ", headers=headers)");
+    }
+    lines.push("print(resp.status_code)", "print(resp.json())");
+    return lines.join("\n");
+  },
+  javascript(c) {
+    const lines = c.fleet
+      ? [
+        "// Node 18+ or the browser — fetch is built in",
+        "const headers = { \"x-api-key\": " + dq(c.apikey) + " };",
+      ]
+      : [
+        "// Node 18+ or the browser — fetch and WebCrypto are built in",
+        "const USER = " + dq(c.user) + ", PASSWORD = " + dq(c.pass) + ";",
+        "",
+        "const digest = await crypto.subtle.digest(\"SHA-256\", new TextEncoder().encode(PASSWORD));",
+        "const hex = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, \"0\")).join(\"\");",
+        "const headers = { Authorization: \"Basic \" + btoa(USER + \":\" + hex) };",
+      ];
+    if (c.session) lines.push("headers[\"X-MiR-Session\"] = " + dq(c.session) + "; // your virtual robot");
+    lines.push("");
+    if (c.body) {
+      lines.push(
+        "headers[\"Content-Type\"] = \"application/json\";",
+        "const resp = await fetch(" + dq(c.url) + ", {",
+        "  method: " + dq(c.method) + ",",
+        "  headers,",
+        "  body: " + dq(c.body) + ",",
+        "});");
+    } else {
+      lines.push("const resp = await fetch(" + dq(c.url) + ", { method: " + dq(c.method) + ", headers });");
+    }
+    lines.push("console.log(resp.status, await resp.json());");
+    return lines.join("\n");
+  },
+  go(c) {
+    const imports = ["\"fmt\"", "\"io\"", "\"net/http\""];
+    if (!c.fleet) imports.push("\"crypto/sha256\"", "\"encoding/base64\"", "\"encoding/hex\"");
+    if (c.body) imports.push("\"strings\"");
+    const lines = [
+      "package main",
+      "",
+      "import (",
+      ...imports.sort().map((i) => "\t" + i),
+      ")",
+      "",
+      "func main() {",
+    ];
+    if (!c.fleet) {
+      lines.push(
+        "\tuser, password := " + dq(c.user) + ", " + dq(c.pass),
+        "\tsum := sha256.Sum256([]byte(password))",
+        "\ttoken := base64.StdEncoding.EncodeToString([]byte(user + \":\" + hex.EncodeToString(sum[:])))",
+        "");
+    }
+    lines.push(
+      c.body
+        ? "\treq, err := http.NewRequest(" + dq(c.method) + ", " + dq(c.url) + ", strings.NewReader(" + dq(c.body) + "))"
+        : "\treq, err := http.NewRequest(" + dq(c.method) + ", " + dq(c.url) + ", nil)",
+      "\tif err != nil {",
+      "\t\tpanic(err)",
+      "\t}",
+      c.fleet
+        ? "\treq.Header.Set(\"x-api-key\", " + dq(c.apikey) + ")"
+        : "\treq.Header.Set(\"Authorization\", \"Basic \"+token)");
+    if (c.session) lines.push("\treq.Header.Set(\"X-MiR-Session\", " + dq(c.session) + ") // your virtual robot");
+    if (c.body) lines.push("\treq.Header.Set(\"Content-Type\", \"application/json\")");
+    lines.push(
+      "",
+      "\tresp, err := http.DefaultClient.Do(req)",
+      "\tif err != nil {",
+      "\t\tpanic(err)",
+      "\t}",
+      "\tdefer resp.Body.Close()",
+      "\tbody, _ := io.ReadAll(resp.Body)",
+      "\tfmt.Println(resp.Status)",
+      "\tfmt.Println(string(body))",
+      "}");
+    return lines.join("\n");
+  },
+  rust(c) {
+    const lines = c.fleet
+      ? [
+        "// Cargo.toml: reqwest = { version = \"0.12\", features = [\"blocking\"] }",
+        "",
+        "fn main() -> Result<(), Box<dyn std::error::Error>> {",
+      ]
+      : [
+        "// Cargo.toml: reqwest = { version = \"0.12\", features = [\"blocking\"] },",
+        "//             sha2 = \"0.10\", hex = \"0.4\", base64 = \"0.22\"",
+        "use base64::Engine;",
+        "use sha2::{Digest, Sha256};",
+        "",
+        "fn main() -> Result<(), Box<dyn std::error::Error>> {",
+        "    let (user, password) = (" + dq(c.user) + ", " + dq(c.pass) + ");",
+        "    let digest = hex::encode(Sha256::digest(password.as_bytes()));",
+        "    let token = base64::engine::general_purpose::STANDARD.encode(format!(\"{user}:{digest}\"));",
+        "",
+      ];
+    lines.push(
+      "    let client = reqwest::blocking::Client::new();",
+      "    let resp = client",
+      "        ." + c.method.toLowerCase() + "(" + dq(c.url) + ")",
+      c.fleet
+        ? "        .header(\"x-api-key\", " + dq(c.apikey) + ")"
+        : "        .header(\"Authorization\", format!(\"Basic {token}\"))");
+    if (c.session) lines.push("        .header(\"X-MiR-Session\", " + dq(c.session) + ") // your virtual robot");
+    if (c.body) lines.push(
+      "        .header(\"Content-Type\", \"application/json\")",
+      "        .body(" + dq(c.body) + ")");
+    lines.push(
+      "        .send()?;",
+      "    println!(\"{}\", resp.status());",
+      "    println!(\"{}\", resp.text()?);",
+      "    Ok(())",
+      "}");
+    return lines.join("\n");
+  },
+};
+
+/* The live console sample mirrors the request being built; before a
+   connection succeeds it falls back to the public demo endpoint so the
+   sample is always a runnable program. */
+function sampleUrl(v, p) {
+  if (BASE) return fullPath(v, p);
+  const root = currentKind === "mirfleet"
+    ? DEFAULT_BASE + "/fleet/" + (v || "latest")
+    : DEFAULT_BASE + "/" + (v || "latest");
+  return root + apiPrefix() + (p.startsWith("/") ? p : "/" + p);
+}
+function sampleCtx() {
+  const m = $("method").value;
+  return {
+    method: m,
+    url: sampleUrl(currentVersion || "latest", $("path").value || "/"),
+    fleet: currentKind === "mirfleet",
+    user: $("user").value || "distributor",
+    pass: $("pass").value || "distributor",
+    apikey: apiKey(),
+    session: sessionId(),
+    body: ["POST", "PUT", "PATCH"].includes(m) ? compactBody($("body").value.trim()) : "",
+  };
+}
+/* The endpoints section's hello-world: GET /status on the newest robot version. */
+function firstSampleCtx() {
+  const base = MODE === "robot" && BASE ? BASE : (BASE || DEFAULT_BASE) + "/latest";
+  return {
+    method: "GET",
+    url: base + "/api/v2.0.0/status",
+    fleet: false,
+    user: $("user").value || "distributor",
+    pass: $("pass").value || "distributor",
+    apikey: apiKey(),
+    session: sessionId(),
+    body: "",
+  };
+}
+
+function renderLangSelects() {
+  document.querySelectorAll("select.lang-select").forEach((sel) => {
+    if (!sel.options.length) {
+      LANGS.forEach(([key, label]) => {
+        const o = document.createElement("option");
+        o.value = key;
+        o.textContent = label;
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", () => {
+        lang = sel.value;
+        try { localStorage.setItem(LANG_KEY, lang); } catch { /* private mode */ }
+        renderLangSelects();
+        renderSamples();
+      });
+    }
+    sel.value = lang;
+  });
+}
+function renderSamples() {
+  $("sample-first").textContent = SAMPLERS[lang](firstSampleCtx());
+  $("sample-live").textContent = SAMPLERS[lang](sampleCtx());
+}
+
 async function refreshSample() {
+  renderSamples();
   $("token-view").innerHTML = currentKind === "mirfleet"
     ? "<b>x-api-key:</b> " + esc(apiKey())
     : "<b>Authorization:</b> Basic " + esc(await authToken());
@@ -1391,6 +1714,16 @@ try {
   $("session").value = localStorage.getItem(SESSION_KEY) ?? newSessionId();
   localStorage.setItem(SESSION_KEY, $("session").value);
 } catch { $("session").value = newSessionId(); }
+renderLangSelects();
+document.querySelectorAll("button.copy-btn").forEach((b) => {
+  b.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText($(b.dataset.target).textContent);
+      b.textContent = "Copied";
+      setTimeout(() => { b.textContent = "Copy"; }, 1200);
+    } catch { /* clipboard needs a secure context; the sample is selectable */ }
+  });
+});
 $("ep-demo").addEventListener("change", () => { syncEndpointForm(); connectTo(DEFAULT_BASE); });
 $("ep-custom").addEventListener("change", () => { syncEndpointForm(); $("custom-url").focus(); });
 $("custom-url").addEventListener("input", syncEndpointForm);

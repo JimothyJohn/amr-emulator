@@ -8,14 +8,14 @@ license = "MIT"
 license-files = ["LICENSE"]
 dependencies = [
     "starlette>=0.40",
-    "uvicorn>=0.50.0",
+    "uvicorn>=0.51.0",
     "jsonschema>=4.20",
     "pyyaml>=6.0",
     "httpx>=0.27",
 ]
 
 [project.optional-dependencies]
-ws = ["websockets>=12"]
+ws = ["websockets>=16.1.1"]
 
 [project.scripts]
 mir-emulator = "mir_emulator.cli:main"

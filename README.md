@@ -78,7 +78,10 @@ for the canonical reference; the emulator links to it rather than rebuilding it.
 ## Tracked versions
 
 `packages/mir-emulator/src/mir_emulator/specs/registry.json` is the
-authoritative list (versions, hashes, provenance, source PDF URLs). Currently:
+authoritative list (versions, hashes, provenance, source PDF URLs). New
+releases are picked up as the latest patch of each major's newest 4 minor
+lines; once tracked, a minor line is permanent — it keeps updating to its
+latest patch but is never dropped. Currently:
 
 | Family | Versions | Source |
 |---|---|---|

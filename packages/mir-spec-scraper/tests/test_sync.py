@@ -111,13 +111,48 @@ def test_pinned_entries_survive_and_win(specs_dir):
     assert entry["pinned"] and entry["sha256"] == "x", "pinned entry must not be overwritten"
 
 
-def test_dropped_version_dir_is_removed(specs_dir):
+def test_superseded_patch_dir_is_removed(specs_dir):
     sync(specs_dir, 1, dry_run=False, client=_portal({"3.0.0": _swagger("3.0.0")}))
     assert (specs_dir / "3.0.0").is_dir()
-    changed, _ = sync(specs_dir, 1, dry_run=False, client=_portal({"4.0.0": _swagger("4.0.0")}))
+    changed, _ = sync(specs_dir, 1, dry_run=False, client=_portal({"3.0.1": _swagger("3.0.1")}))
     assert changed
-    assert not (specs_dir / "3.0.0").exists(), "superseded spec dir should be pruned"
-    assert (specs_dir / "4.0.0" / "swagger.json").is_file()
+    assert not (specs_dir / "3.0.0").exists(), "superseded patch dir should be pruned"
+    assert (specs_dir / "3.0.1" / "swagger.json").is_file()
+
+
+def test_tracked_minor_line_survives_newer_minors(specs_dir):
+    """Once tracked, a minor line is never rotated out by newer minor lines."""
+    sync(specs_dir, 2, dry_run=False, client=_portal({"3.1.0": _swagger("3.1.0")}))
+    versions = {f"3.{m}.0": _swagger(f"3.{m}.0") for m in (1, 2, 3, 4)}
+    changed, _ = sync(specs_dir, 2, dry_run=False, client=_portal(versions))
+    assert changed
+    tracked = {t["mir_version"] for t in _registry(specs_dir)["tracked"]}
+    assert tracked == {"3.4.0", "3.3.0", "3.1.0"}, "3.1 line must not be dropped"
+    assert (specs_dir / "3.1.0" / "swagger.json").is_file()
+
+
+def test_tracked_line_kept_when_portal_stops_publishing_it(specs_dir):
+    sync(specs_dir, 1, dry_run=False, client=_portal({"3.0.0": _swagger("3.0.0")}))
+    changed, summary = sync(
+        specs_dir, 1, dry_run=False, client=_portal({"4.0.0": _swagger("4.0.0")})
+    )
+    assert changed
+    tracked = {t["mir_version"] for t in _registry(specs_dir)["tracked"]}
+    assert tracked == {"4.0.0", "3.0.0"}
+    assert (specs_dir / "3.0.0" / "swagger.json").is_file()
+    assert "kept 3.0.0" in summary
+
+
+def test_tracked_line_still_gets_patch_updates_when_beyond_cap(specs_dir):
+    """An old line beyond the newest-N window keeps receiving its patches."""
+    sync(specs_dir, 1, dry_run=False, client=_portal({"3.1.0": _swagger("3.1.0")}))
+    versions = {"3.2.0": _swagger("3.2.0"), "3.1.1": _swagger("3.1.1")}
+    changed, _ = sync(specs_dir, 1, dry_run=False, client=_portal(versions))
+    assert changed
+    tracked = {t["mir_version"] for t in _registry(specs_dir)["tracked"]}
+    assert tracked == {"3.2.0", "3.1.1"}, "old line updates to its newest patch"
+    assert not (specs_dir / "3.1.0").exists(), "superseded patch dir should be pruned"
+    assert (specs_dir / "3.1.1" / "swagger.json").is_file()
 
 
 def test_broken_file_keeps_previous_and_continues(specs_dir):

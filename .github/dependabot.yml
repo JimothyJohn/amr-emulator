@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
+    target-branch: dev
     schedule:
       interval: weekly
       day: monday
@@ -12,10 +13,16 @@ updates:
       codeql-action:
         patterns:
           - github/codeql-action*
+      actions-minor-and-patch:
+        update-types: [minor, patch]
 
   - package-ecosystem: uv
     directory: /
+    target-branch: dev
     schedule:
       interval: weekly
       day: monday
     labels: [dependencies, automated]
+    groups:
+      python-minor-and-patch:
+        update-types: [minor, patch]
