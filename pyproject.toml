@@ -8,9 +8,9 @@ members = ["packages/*"]
 dev = [
     "pytest>=8.0",
     "httpx>=0.27",
-    "hypothesis>=6.157.2",
-    "ruff>=0.15.22",
-    "ty>=0.0.61",
+    "hypothesis>=6.164.0",
+    "ruff>=0.16.1",
+    "ty>=0.0.65",
     "pytest-cov>=7.1.0",
     "openapi-python-client>=0.29.0",
 ]
