@@ -630,19 +630,30 @@ class VirtualAGV:
 
     async def _on_instant_actions(self, doc: dict) -> None:
         problems = validation_errors_for(self.profile.version, "instantActions", doc)
+        actions = doc.get("actions")
         if problems:
             self.report_semantic_error(
                 "validation", {"topic": "instantActions"}, f"schema violations: {problems[:3]}"
             )
-            return
+            # Compatibility: some deployed masters (e.g. NVIDIA Isaac Mission
+            # Dispatch) still publish the VDA 5050 1.x message shape — the
+            # array is named `instantActions` instead of `actions`. The
+            # deviation stays reported above, but the actions are executed so
+            # off-spec masters remain usable against the emulator.
+            actions = doc.get("instantActions")
+            if not isinstance(actions, list):
+                return
         self.errors.clear_for(Clear.NEW_INSTANT_ACTION)
-        for action in doc.get("actions", []):
-            self._start_instant_action(action)
+        for action in actions or []:
+            if isinstance(action, dict):
+                self._start_instant_action(action)
 
     def _start_instant_action(self, action: dict) -> None:
         # 2.0.0 names the field actionName in instant actions; 2.1+ actionType.
         action_type = action.get("actionType") or action.get("actionName") or ""
         action_id = action.get("actionId") or f"instant-{uuid.uuid4()}"
+        if action_id in self._runs:
+            return  # idempotent redelivery of an already-received action
         state = {"actionId": action_id, "actionStatus": "WAITING", "actionType": action_type}
         self.instant_action_states.append(state)
         run = ActionRun(action=action, state=state, origin="instant")

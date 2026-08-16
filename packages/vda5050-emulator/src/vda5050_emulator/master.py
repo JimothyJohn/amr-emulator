@@ -243,6 +243,7 @@ def make_node(
     theta: float | None = None,
     actions: list[dict] | None = None,
     deviation: float | None = None,
+    version: str = "3.0.0",
 ) -> dict:
     node: dict[str, Any] = {
         "nodeId": node_id,
@@ -255,7 +256,11 @@ def make_node(
         if theta is not None:
             position["theta"] = theta
         if deviation is not None:
-            position["allowedDeviationXY"] = {"a": deviation, "b": deviation, "theta": 0.0}
+            # 3.0 defines the deviation as an ellipse object; 2.x as a radius.
+            if version.startswith("2."):
+                position["allowedDeviationXY"] = deviation
+            else:
+                position["allowedDeviationXY"] = {"a": deviation, "b": deviation, "theta": 0.0}
         node["nodePosition"] = position
     return node
 

@@ -79,6 +79,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--map-id", default="map-0", help="mapId the robots start on (default map-0)"
     )
     parser.add_argument(
+        "--state-interval",
+        type=float,
+        default=30.0,
+        metavar="SECONDS",
+        help="periodic state publish interval in simulated seconds (events always publish; "
+        "lower this below a master control's heartbeat timeout)",
+    )
+    parser.add_argument(
         "--visualization-interval",
         type=float,
         default=1.0,
@@ -128,6 +136,7 @@ async def _run(args: argparse.Namespace) -> int:
             map_id=args.map_id,
             x=float(index - 1) * 2.0,
             visualization_interval=args.visualization_interval,
+            default_state_interval=args.state_interval,
             username=args.username,
             password=args.password,
         )
