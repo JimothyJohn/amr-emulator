@@ -4,13 +4,12 @@ from urllib.parse import quote
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_cart_type import GetCartType
 from ...models.put_cart_type import PutCartType
+from ...types import Response
 
 
 def _get_kwargs(

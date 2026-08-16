@@ -127,7 +127,7 @@ latest patch but is never dropped. Currently:
 ```python
 from mir_emulator import create_app, supported_versions
 
-app = create_app("3.8.1")   # ASGI app: run under uvicorn, or hit with httpx/TestClient
+app = create_app("3.8.1")  # ASGI app: run under uvicorn, or hit with httpx/TestClient
 ```
 
 ## Layout

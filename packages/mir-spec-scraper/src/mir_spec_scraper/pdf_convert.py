@@ -305,7 +305,7 @@ def _inline_sub_schemas(doc: dict) -> None:
         if isinstance(node, dict):
             ref = node.get("$ref", "")
             target = ref.rsplit("/", 1)[-1] if ref.startswith("#/definitions/") else None
-            if target in subs and target not in stack:
+            if target is not None and target in subs and target not in stack:
                 inlined = resolve(dict(subs[target]), (*stack, target))
                 inlined.update({k: v for k, v in node.items() if k != "$ref"})
                 return inlined

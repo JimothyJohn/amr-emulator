@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 
-from ..types import UNSET, Unset
-
 from ..models.entry_position_type import EntryPositionType
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.pose_1 import Pose1

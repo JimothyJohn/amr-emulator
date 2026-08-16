@@ -4,13 +4,12 @@ from urllib.parse import quote
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_position_transition_list import GetPositionTransitionList
 from ...models.put_position_transition_list import PutPositionTransitionList
+from ...types import Response
 
 
 def _get_kwargs(
