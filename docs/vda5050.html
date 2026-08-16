@@ -16,38 +16,52 @@
 </script>
 <title>VDA 5050 Emulator — drive a standard mobile robot fleet, no robots required · advin.io</title>
 <meta name="description" content="Spec-faithful VDA 5050 robot emulator (2.0.0/2.1.0/3.0.0) with an embedded MQTT broker, validated against NVIDIA Isaac Mission Dispatch and the InOrbit/OTTO connector. An advin.io project.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23f97316'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%23f97316'/><circle cx='66' cy='46' r='7' fill='%23f97316'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%2300a052'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%2300a052'/><circle cx='66' cy='46' r='7' fill='%2300a052'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Chakra+Petch:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
+/* VDA brand system — palette lifted from vda.de's own design tokens
+   (--vda-green #00a052 / dark #00783e, --vda-orange #eb5a23 / ally #cd4813,
+   --vda-sand #e9e7dc / #57554a, --vda-green-light #c2fcdf); primary font on
+   vda.de resolves to Arial. Darker/lighter variants chosen per token family
+   where WCAG AA contrast requires (computed, not eyeballed). The advin.io
+   header/footer keep the maker identity. */
 :root {
   color-scheme: light;
-  --paper: #fcfcfc;
+  --paper: #fcfcfa;
   --ink: #0d0d0d;
   --ink-soft: #3d3d3d;
   --faint: #8a8a8a;
-  --line: #e3e3e0;
-  --card: #ffffff;
-  --code-bg: #f4f4f1;
-  --accent: #f97316;
+  --line: #d8d5c7;
+  --card: #f4f3ec;
+  --code-bg: #edebe2;
+  --accent: #00783e;
   --accent-ink: #ffffff;
-  --good: #1d7a4f;
+  --cta-bg: #cd4813;
+  --cta-hover: #eb5a23;
+  --cta-text: #cd4813;
+  --good: #00783e;
   --bad: #c0392b;
-  --display: 'Big Shoulders Display', sans-serif;
+  --display: Arial, Helvetica, sans-serif;
+  --wordmark-font: 'Big Shoulders Display', sans-serif;
   --label: 'Chakra Petch', sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #0d0d0d;
-  --ink: #fcfcfc;
-  --ink-soft: #cfcfcb;
-  --faint: #8a8a8a;
-  --line: #262626;
-  --card: #151515;
-  --code-bg: #1a1a18;
-  --good: #4cc38a;
+  --paper: #121210;
+  --ink: #fcfcfa;
+  --ink-soft: #d6d4ca;
+  --faint: #8f8d84;
+  --line: #3a382f;
+  --card: #1b1a16;
+  --code-bg: #201e19;
+  --accent: #00a052;
+  --cta-bg: #eb5a23;
+  --cta-hover: #cd4813;
+  --cta-text: #eb5a23;
+  --good: #00a052;
   --bad: #ef6a5a;
 }
 * { box-sizing: border-box; }
@@ -56,7 +70,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 16px/1.65 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font: 16px/1.65 Arial, Helvetica, sans-serif;
 }
 a { color: var(--ink); text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); }
@@ -70,7 +84,7 @@ a:hover { color: var(--accent); }
 }
 .app-header .bar { display: flex; align-items: center; gap: 1rem; padding: .65rem 1.25rem; max-width: 68rem; margin: 0 auto; }
 .wordmark {
-  font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: .02em;
+  font-family: var(--wordmark-font); font-weight: 800; font-size: 1.35rem; letter-spacing: .02em;
   text-decoration: none; color: var(--ink);
 }
 .wordmark:hover { color: var(--accent); }
@@ -92,7 +106,7 @@ a:hover { color: var(--accent); }
 
 .hero { padding: 3.5rem 0 2.25rem; border-bottom: 1px solid var(--line); }
 .hero h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 1.02; margin: 0 0 .75rem; letter-spacing: .01em; }
-.hero h1 em { font-style: normal; color: var(--accent); }
+.hero h1 em { font-style: normal; color: var(--cta-text); }
 .hero .sub { color: var(--ink-soft); max-width: 44rem; font-size: 1.06rem; }
 .kicker { font-family: var(--label); font-size: .78rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8rem; }
 
@@ -131,11 +145,12 @@ td code { white-space: nowrap; }
 
 .btn {
   font-family: var(--label); letter-spacing: .06em; text-transform: uppercase; font-size: .8rem;
-  background: var(--accent); color: var(--accent-ink); border: none; border-radius: .4rem;
+  background: var(--cta-bg); color: #fff; border: none; border-radius: .4rem;
   padding: .55rem 1rem; cursor: pointer; text-decoration: none; display: inline-block;
 }
 .btn.secondary { background: none; color: var(--ink); border: 1px solid var(--line); }
-.btn:hover { filter: brightness(1.08); }
+.btn:hover { background: var(--cta-hover); }
+.btn.secondary:hover { background: none; border-color: var(--accent); color: var(--accent); }
 
 .note { font-size: .82rem; color: var(--faint); }
 .ok { color: var(--good); }

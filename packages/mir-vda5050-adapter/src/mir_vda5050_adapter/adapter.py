@@ -197,26 +197,48 @@ class MiRVDA5050Adapter:
     # ------------------------------------------------------------- MiR side
 
     def _ingest_status(self, status: dict) -> None:
-        position = status.get("position") or {}
-        self.x = float(position.get("x", self.x))
-        self.y = float(position.get("y", self.y))
-        self.theta = math.radians(float(position.get("orientation", 0.0)))
-        self.map_id = status.get("map_id", self.map_id) or self.map_id
-        self.battery = float(status.get("battery_percentage", self.battery))
-        state_id = int(status.get("state_id", MIR_READY))
+        """Fold one GET /status document into the adapter's view.
+
+        Defensive on purpose: a real MiR under upgrade/fault can return
+        partial or malformed fields, and a single bad document must neither
+        kill the poll loop nor leak non-finite numbers into published state
+        (json.dumps would emit literal NaN — invalid JSON on the wire).
+        Unusable fields keep their previous value.
+        """
+        if not isinstance(status, dict):
+            return
+        position = status.get("position")
+        position = position if isinstance(position, dict) else {}
+        self.x = _finite(position.get("x"), self.x)
+        self.y = _finite(position.get("y"), self.y)
+        orientation = _finite(position.get("orientation"), math.degrees(self.theta))
+        self.theta = math.radians(orientation)
+        map_id = status.get("map_id")
+        if isinstance(map_id, str) and map_id:
+            self.map_id = map_id
+        self.battery = min(100.0, max(0.0, _finite(status.get("battery_percentage"), self.battery)))
+        try:
+            state_id = int(status.get("state_id", MIR_READY))
+        except (TypeError, ValueError):
+            state_id = MIR_READY
         driving = state_id == MIR_EXECUTING
         paused = state_id == MIR_PAUSE
         if driving != self.driving or paused != self.paused:
             self.touch()
         self.driving, self.paused = driving, paused
-        self.mir_errors = list(status.get("errors") or [])
+        errors = status.get("errors")
+        self.mir_errors = (
+            [e for e in errors if isinstance(e, dict)] if isinstance(errors, list) else []
+        )
 
     async def _poll_loop(self) -> None:
         while True:
             await asyncio.sleep(self.config.poll_interval)
             try:
                 status = await self.mir.status()
-            except (httpx.HTTPError, OSError):
+            except (httpx.HTTPError, OSError, ValueError):
+                # ValueError covers a MiR answering 200 with a non-JSON body
+                # (reverse-proxy error pages during robot reboots do this).
                 self._report(
                     "not_available",
                     {},
@@ -413,9 +435,30 @@ class MiRVDA5050Adapter:
         if not decision.is_update and waypoints:
             waypoints = waypoints[1:]
         if waypoints:
-            self._queue_entry_id = await self.mir.enqueue_route(
-                f"vda-{doc['orderId']}-u{doc['orderUpdateId']}", waypoints, self.map_id
-            )
+            try:
+                self._queue_entry_id = await self.mir.enqueue_route(
+                    f"vda-{doc['orderId']}-u{doc['orderUpdateId']}", waypoints, self.map_id
+                )
+            except (httpx.HTTPError, OSError, ValueError, KeyError) as exc:
+                # MiR died mid-translation (possibly after creating some
+                # positions/actions). Without this rollback the adapter kept a
+                # phantom active order with no mission behind it, rejecting
+                # every subsequent order with OTHER_ORDER_ACTIVE until a
+                # manual cancel. Abort observably instead: back to idle
+                # (ids kept, per 6.6.7 spirit) with the failure reported.
+                self.node_states = []
+                self.edge_states = []
+                self._pending = []
+                self._queue_entry_id = None
+                # NEW_ORDER retention (Table 9 style: until the next order
+                # is accepted) — not_available's default CONDITION retention
+                # would leave this error stranded forever.
+                self._report(
+                    "not_available",
+                    {"orderId": doc["orderId"]},
+                    f"order aborted: MiR mission enqueue failed ({exc!r})",
+                    clear=Clear.NEW_ORDER,
+                )
         self.touch()
 
     # -- instant actions ----------------------------------------------------
@@ -589,18 +632,24 @@ class MiRVDA5050Adapter:
         await self._publish("factsheet", body, retain=True)
 
     def _report(
-        self, key: str, references: dict, detail: str = "", *, condition_key: str = ""
+        self,
+        key: str,
+        references: dict,
+        detail: str = "",
+        *,
+        condition_key: str = "",
+        clear: Clear | None = None,
     ) -> None:
         if key not in self.profile.error_names:
             return
-        level, clear = PREDEFINED.get(SEMANTIC_V3[key], ("WARNING", Clear.NEW_ORDER))
+        level, default_clear = PREDEFINED.get(SEMANTIC_V3[key], ("WARNING", Clear.NEW_ORDER))
         self.errors.report(
             ErrorEntry(
                 error_type=self.profile.error_type(key),
                 references={k: str(v) for k, v in references.items()},
                 description=detail,
                 level=level,
-                clear=clear,
+                clear=clear or default_clear,
                 condition_key=condition_key,
             )
         )
@@ -617,6 +666,14 @@ class _FactsheetShim:
         self.default_state_interval = config.state_interval
         self.visualization_interval = 0
         self.software_version = "mir-vda5050-adapter"
+
+
+def _finite(value: Any, fallback: float) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return fallback
+    return number if math.isfinite(number) else fallback
 
 
 def _digest(doc: dict) -> str:

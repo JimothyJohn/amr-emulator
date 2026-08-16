@@ -16,38 +16,50 @@
 </script>
 <title>Omron ARCL Emulator — an LD/HD AMR that speaks ARCL, no robot required · advin.io</title>
 <meta name="description" content="Faithful emulator of Omron's ARCL telnet interface (LD/HD AMRs + Fleet Manager queuing), implemented from the public I617-E-02 reference manual with per-command provenance. An advin.io project.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23e1261c'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%23e1261c'/><circle cx='66' cy='46' r='7' fill='%23e1261c'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23005eb8'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%23005eb8'/><circle cx='66' cy='46' r='7' fill='%23005eb8'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Chakra+Petch:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
+/* Omron Industrial Automation palette — lifted from industrial.omron.eu's
+   application stylesheet (primary blue #005eb8 — also on automation.omron.com
+   — deep blue #063c70, ink #34383c/#4c5157, surface ramp #f8f8f8/#f0f0f0/
+   #dfdfdf, success green #62b300, alert red #ec1700). Dark-mode link blue
+   #4da3e0 is a lightened tint of #005eb8 chosen for WCAG AA contrast
+   (computed); fills keep the true #005eb8 with white ink in both themes.
+   The advin.io header/footer keep the maker identity. */
 :root {
   color-scheme: light;
   --paper: #fcfcfc;
-  --ink: #0d0d0d;
-  --ink-soft: #3d3d3d;
-  --faint: #8a8a8a;
-  --line: #e3e3e0;
-  --card: #ffffff;
-  --code-bg: #f4f4f1;
-  --accent: #e1261c;
+  --ink: #34383c;
+  --ink-soft: #4c5157;
+  --faint: #82878d;
+  --line: #dfdfdf;
+  --card: #f8f8f8;
+  --code-bg: #f0f0f0;
+  --accent: #005eb8;
+  --accent-fill: #005eb8;
+  --accent-deep: #063c70;
   --accent-ink: #ffffff;
-  --good: #1d7a4f;
-  --bad: #c0392b;
+  --good: #3f7300;
+  --bad: #c2130a;
   --display: 'Big Shoulders Display', sans-serif;
   --label: 'Chakra Petch', sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #0d0d0d;
-  --ink: #fcfcfc;
-  --ink-soft: #cfcfcb;
-  --faint: #8a8a8a;
-  --line: #262626;
-  --card: #151515;
-  --code-bg: #1a1a18;
-  --good: #4cc38a;
+  --paper: #0d1014;
+  --ink: #f2f4f6;
+  --ink-soft: #c6cbd1;
+  --faint: #848a91;
+  --line: #242b33;
+  --card: #131a21;
+  --code-bg: #171e26;
+  --accent: #4da3e0;
+  --accent-fill: #005eb8;
+  --accent-deep: #063c70;
+  --good: #62b300;
   --bad: #ef6a5a;
 }
 * { box-sizing: border-box; }
@@ -64,7 +76,7 @@ a:hover { color: var(--accent); }
 .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
 
 .app-header {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--accent-deep);
   background: var(--paper);
   position: sticky; top: 0; z-index: 50;
 }
@@ -103,7 +115,7 @@ section .lead { color: var(--ink-soft); max-width: 46rem; margin-top: 0; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); gap: 1rem; margin-top: 1.4rem; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: .5rem; padding: 1.1rem 1.2rem; }
 .card h3 { margin: 0 0 .4rem; font-family: var(--label); font-size: .95rem; letter-spacing: .04em; }
-.card .tag { display: inline-block; font-family: var(--label); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border-radius: .3rem; padding: .15rem .5rem; margin-bottom: .6rem; }
+.card .tag { display: inline-block; font-family: var(--label); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; background: var(--accent-fill); color: var(--accent-ink); border-radius: .3rem; padding: .15rem .5rem; margin-bottom: .6rem; }
 .card p { margin: .3rem 0; color: var(--ink-soft); font-size: .92rem; }
 
 pre, .term {
@@ -121,7 +133,7 @@ pre code { background: none; padding: 0; }
   background: none; border: 1px solid var(--line); color: var(--ink-soft); border-radius: .35rem;
   padding: .4rem .8rem; cursor: pointer;
 }
-.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tabs button[aria-selected="true"] { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--accent-ink); }
 .tabpanel[hidden] { display: none; }
 
 table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-size: .88rem; }
@@ -131,7 +143,7 @@ td code { white-space: nowrap; }
 
 .btn {
   font-family: var(--label); letter-spacing: .06em; text-transform: uppercase; font-size: .8rem;
-  background: var(--accent); color: var(--accent-ink); border: none; border-radius: .4rem;
+  background: var(--accent-fill); color: var(--accent-ink); border: none; border-radius: .4rem;
   padding: .55rem 1rem; cursor: pointer; text-decoration: none; display: inline-block;
 }
 .btn.secondary { background: none; color: var(--ink); border: 1px solid var(--line); }
@@ -151,8 +163,13 @@ footer a { color: var(--ink-soft); }
   .hero { padding: 2.2rem 0 1.6rem; }
 }
 
-.term { min-height: 18rem; max-height: 26rem; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
-.term .in { color: var(--accent); font-weight: 600; }
+.term {
+  min-height: 18rem; max-height: 26rem; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+  background: #14181c; color: #e8eaec; border-color: #063c70;
+}
+.term .in { color: #4da3e0; font-weight: 600; }
+.term .ok-line { color: #62b300; }
+.term .fault-line { color: #ff4633; font-weight: 600; } /* lightened #ec1700 for AA on the dark terminal */
 .term-controls { display: flex; align-items: center; gap: .7rem; margin: 1rem 0 .7rem; flex-wrap: wrap; }
 #term-speed { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: .35rem; padding: .45rem .5rem; font-family: var(--label); font-size: .8rem; }
 .wrapcode { white-space: normal; word-break: break-all; display: inline-block; }
@@ -298,7 +315,11 @@ const COMMANDS = {"_meta":"Derived from I617-E-02 (see registry.json). Each entr
     const [kind, text] = SESSION[i];
     const div = document.createElement("div");
     if (kind === "in") { div.className = "in"; div.textContent = "> " + text; }
-    else { div.textContent = text; }
+    else {
+      if (/ Completed |successfully queued|ChargeState: Bulk/.test(text)) div.className = "ok-line";
+      else if (/CommandError|Fault_|^Fault:/.test(text)) div.className = "fault-line";
+      div.textContent = text;
+    }
     term.appendChild(div);
     term.scrollTop = term.scrollHeight;
     const speed = parseInt(document.getElementById("term-speed").value, 10);

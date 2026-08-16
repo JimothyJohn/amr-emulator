@@ -29,9 +29,12 @@
   --line: #e2e2e2;
   --card: #ffffff;
   --code-bg: #f4f4f4;
-  --vda: #f97316;
+  /* App accents: VDA green + Omron IA blue are the vendors' own primaries
+     (vda.de design tokens; industrial.omron.eu stylesheet). Light mode uses
+     the darker VDA variant for AA text contrast; dark mode overrides below. */
+  --vda: #00783e;
   --mir: #1a76bc;
-  --omron: #e1261c;
+  --omron: #005eb8;
   --green: #1d9e61;
 }
 :root[data-theme="dark"] {
@@ -43,6 +46,8 @@
   --line: #262626;
   --card: #141414;
   --code-bg: #1a1a1a;
+  --vda: #00a052;
+  --omron: #4da3e0; /* lightened #005eb8 for AA on dark */
 }
 * { box-sizing: border-box; }
 body {
