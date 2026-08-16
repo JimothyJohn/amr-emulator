@@ -106,7 +106,10 @@ def test_sixty_second_mixed_traffic_soak():
                     del master.visualizations[:]
             await asyncio.sleep(0.02)
 
-        # Health checks after the storm.
+        # Health checks after the storm. Only states published AFTER the
+        # fault-clear may be asserted clean: a fixed tail window reaches back
+        # into the storm and flakes under CI load (seen on 3.12).
+        post_clear_start = len(masters[0].states)
         for robot in robots:
             robot.inject(emergency_stop="NONE", field_violation=False, localized=True)
         for master in masters:
@@ -114,12 +117,18 @@ def test_sixty_second_mixed_traffic_soak():
             aid = await master.send_instant_action("stateRequest")
             await master.action_status(aid, statuses=("FINISHED",), timeout=5)
             assert time.monotonic() - probe_started < 1.5, "state probe too slow"
-        recent = masters[0].states[-20:]
-        assert recent, "no states collected"
+        await masters[0].next_state(
+            lambda s: not any(e["errorType"] == "LOCALIZATION_ERROR" for e in s["errors"]),
+            timeout=10,
+            past=False,
+        )
+        recent = masters[0].states[post_clear_start:]
+        assert recent, "no states collected after fault-clear"
         for doc in recent:
             assert not validation_errors("state", doc, tag="3.0.0")
+        for doc in masters[0].states[-3:]:
             assert not any(e["errorType"] == "LOCALIZATION_ERROR" for e in doc["errors"]), (
-                "cleared condition error still reported"
+                "cleared condition error still reported after convergence"
             )
         assert baseline is not None
         growth = _rss_mb() - baseline
