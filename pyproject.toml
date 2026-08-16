@@ -22,6 +22,7 @@ testpaths = [
     "packages/mir-mcp/tests",
     "packages/mir-spec-scraper/tests",
     "packages/mir-client/tests",
+    "packages/vda5050-emulator/tests",
 ]
 markers = [
     "integration: tests that boot a real emulator server over TCP",

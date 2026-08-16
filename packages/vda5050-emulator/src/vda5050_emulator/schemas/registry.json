@@ -1,0 +1,128 @@
+{
+ "tags": {
+  "2.0.0": {
+   "commit": "a8974b1f8bc412f72cca237f14c5578fe1b01224",
+   "commit_date": "2021-11-25T16:23:43Z",
+   "files": {
+    "connection.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "80e65293bc3efa16593da425163909a063d8079b04050b2b9441cffbc7f9417e",
+     "vendored_sha256": "80e65293bc3efa16593da425163909a063d8079b04050b2b9441cffbc7f9417e"
+    },
+    "factsheet.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "9286a507eceb0d8784183d44878678742b0a33ec0c3a7ad5cefed2536d7f16d1",
+     "vendored_sha256": "9286a507eceb0d8784183d44878678742b0a33ec0c3a7ad5cefed2536d7f16d1"
+    },
+    "instantActions.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "08170d872dd73c50e2f1a050667a710080cae0f508d6e3da5790e180e9bd766a",
+     "vendored_sha256": "08170d872dd73c50e2f1a050667a710080cae0f508d6e3da5790e180e9bd766a"
+    },
+    "order.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "4cf263a1320e72f940ca5fdab4f4d17e8dc781a68519bf4b6d11c3cc554a3e83",
+     "vendored_sha256": "4cf263a1320e72f940ca5fdab4f4d17e8dc781a68519bf4b6d11c3cc554a3e83"
+    },
+    "state.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "37c4b740c8808f961d4202749bc382308f862385b5487cf9408b81d064400850",
+     "vendored_sha256": "37c4b740c8808f961d4202749bc382308f862385b5487cf9408b81d064400850"
+    },
+    "visualization.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "fcf497ca73a2e286c9ea6beaf0bf1aaacb298f2223996815eabf2969246f9f39",
+     "vendored_sha256": "fcf497ca73a2e286c9ea6beaf0bf1aaacb298f2223996815eabf2969246f9f39"
+    }
+   },
+   "tag": "2.0.0",
+   "upstream": "https://github.com/VDA5050/VDA5050"
+  },
+  "2.1.0": {
+   "commit": "511d01d71587e8a3dc5e71d4f41dc52466f4284c",
+   "commit_date": "2024-08-19T16:09:39Z",
+   "files": {
+    "connection.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "aa991bc8c5a15115a3cb46cbbc2a87bef208cef436268a06feed663a949c30f1",
+     "vendored_sha256": "aa991bc8c5a15115a3cb46cbbc2a87bef208cef436268a06feed663a949c30f1"
+    },
+    "factsheet.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "386e3f20be0fa29132e8b3bc1e90991e7e5cf496aae7f3fb744cb072174a8bfc",
+     "vendored_sha256": "386e3f20be0fa29132e8b3bc1e90991e7e5cf496aae7f3fb744cb072174a8bfc"
+    },
+    "instantActions.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "79b9d71ce31f5bce167d470e0e12a83c28f28f20580148b4dae28cedeb78a355",
+     "vendored_sha256": "79b9d71ce31f5bce167d470e0e12a83c28f28f20580148b4dae28cedeb78a355"
+    },
+    "order.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "18fedf85ecf7bc22baf7da71b74d08d699d65b8c6a5f0ccde8bc8d84e1406796",
+     "vendored_sha256": "18fedf85ecf7bc22baf7da71b74d08d699d65b8c6a5f0ccde8bc8d84e1406796"
+    },
+    "state.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "26e41279414d7acfeac6ea9b6438b484b0930ee0e9059cf953168d141da8473b",
+     "vendored_sha256": "26e41279414d7acfeac6ea9b6438b484b0930ee0e9059cf953168d141da8473b"
+    },
+    "visualization.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "9930b0fca1743ab2e4b9e2a66dad0f366bd4d8b18550f896adce34db3357ebff",
+     "vendored_sha256": "9930b0fca1743ab2e4b9e2a66dad0f366bd4d8b18550f896adce34db3357ebff"
+    }
+   },
+   "tag": "2.1.0",
+   "upstream": "https://github.com/VDA5050/VDA5050"
+  },
+  "3.0.0": {
+   "commit": "e9ba560b0e2d3f66526550ad5d61b8a2ad936172",
+   "commit_date": "2026-03-18T19:06:30Z",
+   "files": {
+    "connection.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "083dffd157e1af2d365e24b73dfc18e404addb3e1e46dd4c7fbab63cd777cafb",
+     "vendored_sha256": "083dffd157e1af2d365e24b73dfc18e404addb3e1e46dd4c7fbab63cd777cafb"
+    },
+    "factsheet.schema.json": {
+     "trailing_commas_removed": 4,
+     "upstream_sha256": "d2fd651dc496c4cab34c35b43a3d1293629c3cce954fae71ef6aebbda67991ec",
+     "vendored_sha256": "fef0a899f3cbfe662bacbaa303ff8edde337a0de57e7655080809ba49cde9986"
+    },
+    "instantActions.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "230bfcab4617fb9e8b93c1b9c18c99da43b1c80619e3a1ecc8daa926cd792450",
+     "vendored_sha256": "230bfcab4617fb9e8b93c1b9c18c99da43b1c80619e3a1ecc8daa926cd792450"
+    },
+    "order.schema.json": {
+     "trailing_commas_removed": 1,
+     "upstream_sha256": "f7e2d3b5c914e76d28d39e3e5a08b6997e56e9c4cbcceb634f13fe3573986d12",
+     "vendored_sha256": "33a8889b9d98871fcf90ea09240607fdd73f643ba732787503141d6204fb4a44"
+    },
+    "responses.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "da6297b06f278ddca3bfd3c0dec982e3e62d2cf635e0cdb2dea93d090504aad8",
+     "vendored_sha256": "da6297b06f278ddca3bfd3c0dec982e3e62d2cf635e0cdb2dea93d090504aad8"
+    },
+    "state.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "f00d6620e0d1d20efa99f8ce3bd1a25a578f0c01e96cc9b52548259f4847d307",
+     "vendored_sha256": "f00d6620e0d1d20efa99f8ce3bd1a25a578f0c01e96cc9b52548259f4847d307"
+    },
+    "visualization.schema.json": {
+     "trailing_commas_removed": 2,
+     "upstream_sha256": "858eeab4758a5891e1620a8df333e47f341f61dd8d683a41bb0293217ddafc92",
+     "vendored_sha256": "47a9523b435af03aa8d2c76f0eaab1286c2ec914943e849e8b5650c8e36d1150"
+    },
+    "zoneSet.schema.json": {
+     "trailing_commas_removed": 0,
+     "upstream_sha256": "d9a2d8a2f0d7300cc6d9158b1708b7f7d08fdefd5415b1991fbeebab08a9b402",
+     "vendored_sha256": "d9a2d8a2f0d7300cc6d9158b1708b7f7d08fdefd5415b1991fbeebab08a9b402"
+    }
+   },
+   "tag": "3.0.0",
+   "upstream": "https://github.com/VDA5050/VDA5050"
+  }
+ }
+}
