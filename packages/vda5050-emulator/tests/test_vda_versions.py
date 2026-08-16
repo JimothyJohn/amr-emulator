@@ -12,7 +12,7 @@ import asyncio
 import json
 
 import pytest
-from conftest import Stack, await_error, run
+from vda_harness import Stack, await_error, run
 from vda5050_emulator import MQTTClient, make_action, make_edge, make_node
 from vda5050_emulator.validation import validation_errors
 

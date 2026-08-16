@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime
 
-from conftest import Stack, await_error, run, straight_order
+from vda_harness import Stack, await_error, run, straight_order
 
 
 def rect_zone(zone_id: str, zone_type: str, x0: float, x1: float, **extra) -> dict:

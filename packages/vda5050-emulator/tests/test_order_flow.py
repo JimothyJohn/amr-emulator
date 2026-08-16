@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import asyncio
 
-from conftest import Stack, await_error, run, straight_order
+from vda_harness import Stack, await_error, run, straight_order
 from vda5050_emulator import make_action, make_edge, make_node
 
 

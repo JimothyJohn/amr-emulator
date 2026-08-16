@@ -8,7 +8,7 @@ import asyncio
 import json
 from typing import Any
 
-from conftest import Stack, await_error, run, straight_order
+from vda_harness import Stack, await_error, run, straight_order
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from vda5050_emulator import make_node

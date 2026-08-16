@@ -4,7 +4,7 @@ map/charging/log actions."""
 
 from __future__ import annotations
 
-from conftest import Stack, run, straight_order
+from vda_harness import Stack, run, straight_order
 from vda5050_emulator import make_action
 
 

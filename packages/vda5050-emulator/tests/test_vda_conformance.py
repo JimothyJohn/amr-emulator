@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 
 import pytest
-from conftest import Stack, run, straight_order
+from vda_harness import Stack, run, straight_order
 from vda5050_emulator import MQTTClient, make_action, make_node
 from vda5050_emulator.validation import validation_errors
 

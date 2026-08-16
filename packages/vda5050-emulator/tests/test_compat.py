@@ -11,7 +11,7 @@ known actionId as idempotent.
 
 from __future__ import annotations
 
-from conftest import Stack, await_error, run
+from vda_harness import Stack, await_error, run
 
 
 def _legacy_instant_actions(stack: Stack, action_id: str) -> dict:

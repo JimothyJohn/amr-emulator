@@ -20,7 +20,7 @@ import uuid
 
 import paho.mqtt.client as paho
 import pytest
-from conftest import Stack, run, straight_order
+from vda_harness import Stack, run, straight_order
 
 pytestmark = pytest.mark.integration
 
