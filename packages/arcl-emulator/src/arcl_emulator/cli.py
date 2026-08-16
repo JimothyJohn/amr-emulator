@@ -42,7 +42,7 @@ async def _run(args: argparse.Namespace) -> int:
     await server.start()
     print(f"arcl-emulator: ARCL server on {args.host}:{server.port} (robot {args.robot_name})")
     if args.password == DEFAULT_PASSWORD:
-        print(f"login password: {args.password} (factory default)")
+        print(f"login password: {DEFAULT_PASSWORD} (factory default)")
     else:
         print("login password: <set via --password>")
     print("\nfive-minute check:")
