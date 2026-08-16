@@ -295,7 +295,10 @@ class MiRVDA5050Adapter:
                     await self._on_order(doc)
                 elif name == "instantActions":
                     await self._on_instant_actions(doc)
-            except Exception:  # noqa: S112 — one bad message must never kill the adapter
+            except Exception as exc:  # one bad message must never kill the adapter,
+                # but a swallowed exception must still be observable: it
+                # surfaces as a WARNING in the state's errors array.
+                self._report("validation", {"topic": name}, f"internal error: {exc!r}")
                 continue
 
     def _situation(self) -> order_mod.Situation:
