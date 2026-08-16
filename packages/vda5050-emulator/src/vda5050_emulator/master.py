@@ -199,9 +199,15 @@ class MasterControl:
                     return state
             remaining = deadline - asyncio.get_running_loop().time()
             if remaining <= 0:
+                last = self.states[-1] if self.states else {}
+                digest = {
+                    k: last.get(k)
+                    for k in ("orderId", "lastNodeId", "driving", "errors")
+                    if k in last
+                }
                 raise TimeoutError(
                     f"no state matching predicate within {timeout}s "
-                    f"({len(self.states)} states seen)"
+                    f"({len(self.states)} states seen; last: {digest})"
                 )
             self._new_message.clear()
             try:

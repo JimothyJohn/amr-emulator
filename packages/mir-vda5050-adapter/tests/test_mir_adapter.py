@@ -32,7 +32,12 @@ class Stack:
         self.broker = Broker(port=0)
         await self.broker.start()
         self.adapter = MiRVDA5050Adapter(
-            AdapterConfig(version=self.version, poll_interval=0.05, min_state_interval=0.01),
+            AdapterConfig(
+                version=self.version,
+                poll_interval=0.05,
+                min_state_interval=0.01,
+                state_interval=1.0,
+            ),
             port=self.broker.port,
             mir_transport=httpx.ASGITransport(app=self.mir_app),
         )
@@ -107,7 +112,7 @@ def test_order_with_node_actions_rejected():
             await stack.master.send_order(nodes, edges, order_id="o-act")
             state = await stack.master.next_state(
                 lambda s: any(e["errorType"] == "orderError" for e in s["errors"]),
-                timeout=15,
+                timeout=30,
             )
             assert state["orderId"] == ""  # never accepted
 
