@@ -193,6 +193,6 @@ def test_fuzz_read_packet_never_crashes(data):
             packet = await codec.read_packet(read, max_packet_size=1024)
             assert isinstance(packet, codec.Packet)
         except (MQTTError, asyncio.IncompleteReadError):
-            pass
+            pass  # rejecting malformed input IS the property under test
 
     asyncio.run(run())
