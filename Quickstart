@@ -37,7 +37,8 @@ Options:
   -u, --unit-test         Lint + unit tests (fast, no network)
   -i, --integration-test  Boot real emulator servers and test over TCP
   -t, --test              Everything: lint, unit, integration
-  -s, --serve             Run the emulator (SERVE_ARGS to customize)
+  -s, --serve             Run the MiR emulator (SERVE_ARGS to customize)
+      --serve-vda5050     Run the VDA 5050 emulator: embedded MQTT broker + robot
       --scrape            Sync specs from the MiR portal (needs MIR_PORTAL_EMAIL/PASSWORD)
       --build             Build one mir-emulator wheel per tracked MiR version
 
@@ -45,6 +46,7 @@ Examples:
   ./Quickstart -t
   ./Quickstart -s                              # newest tracked version on :8080
   SERVE_ARGS="--mir-version 2.7.0" ./Quickstart -s
+  SERVE_ARGS="--spec 2.1.0 --robots 3" ./Quickstart --serve-vda5050
 
 EOF
 }
@@ -89,6 +91,9 @@ test_unit() {
     if ! uv run pytest -q -m "not integration and not live_portal" \
         --cov=packages/mir-emulator/src/mir_emulator \
         --cov=packages/mir-spec-scraper/src/mir_spec_scraper \
+        --cov=packages/vda5050-emulator/src/vda5050_emulator \
+        --cov=packages/mir-vda5050-adapter/src/mir_vda5050_adapter \
+        --cov=packages/arcl-emulator/src/arcl_emulator \
         --cov-report=term --cov-fail-under=82; then
         log "ERROR: unit tests failed"
         return 1
@@ -109,6 +114,11 @@ scrape() {
     log "Scraping MiR support portal for new REST API files..."
     uv run mir-spec-scraper sync
     log "Review changes with: git status && git diff"
+}
+
+serve_vda5050() {
+    # SERVE_ARGS example: "--spec 2.1.0 --robots 3 --time-scale 60"
+    uv run vda5050-emulator ${SERVE_ARGS:-}
 }
 
 serve() {
@@ -155,6 +165,11 @@ main() {
             -s|--serve)
                 validate_and_build || exit 1
                 serve
+                exit 0
+                ;;
+            --serve-vda5050)
+                validate_and_build || exit 1
+                serve_vda5050
                 exit 0
                 ;;
             --scrape)

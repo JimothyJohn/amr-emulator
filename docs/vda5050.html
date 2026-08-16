@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Theme before first paint: stored choice wins, else OS preference. */
+(function () {
+  var t;
+  try { t = localStorage.getItem("amr-theme"); } catch (e) {}
+  if (t !== "dark" && t !== "light") {
+    t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  document.documentElement.setAttribute("data-theme", t);
+})();
+</script>
+<title>VDA 5050 Emulator — drive a standard mobile robot fleet, no robots required · advin.io</title>
+<meta name="description" content="Spec-faithful VDA 5050 robot emulator (2.0.0/2.1.0/3.0.0) with an embedded MQTT broker, validated against NVIDIA Isaac Mission Dispatch and the InOrbit/OTTO connector. An advin.io project.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23f97316'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%23f97316'/><circle cx='66' cy='46' r='7' fill='%23f97316'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Chakra+Petch:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --paper: #fcfcfc;
+  --ink: #0d0d0d;
+  --ink-soft: #3d3d3d;
+  --faint: #8a8a8a;
+  --line: #e3e3e0;
+  --card: #ffffff;
+  --code-bg: #f4f4f1;
+  --accent: #f97316;
+  --accent-ink: #ffffff;
+  --good: #1d7a4f;
+  --bad: #c0392b;
+  --display: 'Big Shoulders Display', sans-serif;
+  --label: 'Chakra Petch', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0d0d0d;
+  --ink: #fcfcfc;
+  --ink-soft: #cfcfcb;
+  --faint: #8a8a8a;
+  --line: #262626;
+  --card: #151515;
+  --code-bg: #1a1a18;
+  --good: #4cc38a;
+  --bad: #ef6a5a;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.65 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+a { color: var(--ink); text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+
+.app-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  position: sticky; top: 0; z-index: 50;
+}
+.app-header .bar { display: flex; align-items: center; gap: 1rem; padding: .65rem 1.25rem; max-width: 68rem; margin: 0 auto; }
+.wordmark {
+  font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: .02em;
+  text-decoration: none; color: var(--ink);
+}
+.wordmark:hover { color: var(--accent); }
+.app-name {
+  font-family: var(--label); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--faint); text-decoration: none; border-left: 2px solid var(--accent); padding-left: .75rem;
+}
+.app-header nav { margin-left: auto; display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
+.app-header nav a {
+  font-family: var(--label); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
+  text-decoration: none; color: var(--ink-soft); padding: .25rem 0; border-bottom: 2px solid transparent;
+}
+.app-header nav a:hover, .app-header nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+#theme-toggle {
+  background: none; border: 1px solid var(--line); color: var(--ink); border-radius: .35rem;
+  width: 2rem; height: 2rem; cursor: pointer; font-size: .95rem; line-height: 1;
+}
+#theme-toggle:hover { border-color: var(--accent); }
+
+.hero { padding: 3.5rem 0 2.25rem; border-bottom: 1px solid var(--line); }
+.hero h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 1.02; margin: 0 0 .75rem; letter-spacing: .01em; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .sub { color: var(--ink-soft); max-width: 44rem; font-size: 1.06rem; }
+.kicker { font-family: var(--label); font-size: .78rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8rem; }
+
+section { padding: 2.4rem 0; border-bottom: 1px solid var(--line); }
+section h2 { font-family: var(--display); font-weight: 700; font-size: 1.9rem; margin: 0 0 .35rem; }
+section .lead { color: var(--ink-soft); max-width: 46rem; margin-top: 0; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); gap: 1rem; margin-top: 1.4rem; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: .5rem; padding: 1.1rem 1.2rem; }
+.card h3 { margin: 0 0 .4rem; font-family: var(--label); font-size: .95rem; letter-spacing: .04em; }
+.card .tag { display: inline-block; font-family: var(--label); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border-radius: .3rem; padding: .15rem .5rem; margin-bottom: .6rem; }
+.card p { margin: .3rem 0; color: var(--ink-soft); font-size: .92rem; }
+
+pre, .term {
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: .5rem;
+  padding: .9rem 1rem; overflow-x: auto; font-family: var(--mono); font-size: .8rem; line-height: 1.55;
+}
+code { font-family: var(--mono); font-size: .85em; background: var(--code-bg); border-radius: .25rem; padding: .08em .3em; }
+pre code { background: none; padding: 0; }
+.prompt { color: var(--accent); user-select: none; }
+.dim { color: var(--faint); }
+
+.tabs { display: flex; gap: .4rem; margin: 1.1rem 0 .6rem; flex-wrap: wrap; }
+.tabs button {
+  font-family: var(--label); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+  background: none; border: 1px solid var(--line); color: var(--ink-soft); border-radius: .35rem;
+  padding: .4rem .8rem; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tabpanel[hidden] { display: none; }
+
+table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-size: .88rem; }
+th, td { text-align: left; border-bottom: 1px solid var(--line); padding: .5rem .6rem; vertical-align: top; }
+th { font-family: var(--label); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+td code { white-space: nowrap; }
+
+.btn {
+  font-family: var(--label); letter-spacing: .06em; text-transform: uppercase; font-size: .8rem;
+  background: var(--accent); color: var(--accent-ink); border: none; border-radius: .4rem;
+  padding: .55rem 1rem; cursor: pointer; text-decoration: none; display: inline-block;
+}
+.btn.secondary { background: none; color: var(--ink); border: 1px solid var(--line); }
+.btn:hover { filter: brightness(1.08); }
+
+.note { font-size: .82rem; color: var(--faint); }
+.ok { color: var(--good); }
+.err { color: var(--bad); }
+
+footer { padding: 2rem 0 3rem; color: var(--faint); font-size: .85rem; }
+footer .fm { font-family: var(--label); letter-spacing: .05em; }
+footer a { color: var(--ink-soft); }
+
+@media (max-width: 640px) {
+  .app-header .bar { flex-wrap: wrap; gap: .5rem .9rem; padding: .6rem 1rem; }
+  .app-header nav { margin-left: 0; width: 100%; }
+  .hero { padding: 2.2rem 0 1.6rem; }
+}
+
+.validator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 1.2rem; }
+@media (max-width: 800px) { .validator-grid { grid-template-columns: 1fr; } }
+#order-input {
+  width: 100%; min-height: 22rem; resize: vertical;
+  background: var(--code-bg); color: var(--ink); border: 1px solid var(--line);
+  border-radius: .5rem; padding: .8rem; font-family: var(--mono); font-size: .78rem; line-height: 1.5;
+}
+.v-controls { display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem; flex-wrap: wrap; }
+#schema-pick {
+  background: var(--card); color: var(--ink); border: 1px solid var(--line);
+  border-radius: .35rem; padding: .45rem .5rem; font-family: var(--label); font-size: .8rem;
+}
+#findings { list-style: none; padding: 0; margin: 0 0 .8rem; font-family: var(--mono); font-size: .78rem; }
+#findings li { padding: .3rem .5rem; border-left: 3px solid var(--bad); margin-bottom: .3rem; background: var(--code-bg); }
+#findings li.ok { border-left-color: var(--good); }
+
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="bar">
+    <a class="wordmark" href="https://advin.io" rel="noopener">advin.io</a>
+    <a class="app-name" href="/">AMR Emulator</a>
+    <nav aria-label="Emulator apps">
+      <a href="/vda5050" aria-current="page">VDA 5050</a>
+      <a href="/console">MiR</a>
+      <a href="/omron">Omron ARCL</a>
+      <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">GitHub</a>
+      <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">◐</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="hero">
+  <p class="kicker">VDA 5050 · 2.0.0 / 2.1.0 / 3.0.0</p>
+  <h1>A standard mobile robot fleet, <em>no robots required</em></h1>
+  <p class="sub">Spec-faithful emulated VDA&nbsp;5050 robots over MQTT with an
+  <strong>embedded broker</strong> — point your master control at one address and
+  drive orders, instant actions, zones and faults. Every message in and out is
+  validated against the official JSON schemas, vendored with pinned provenance
+  from the VDA5050 repository.</p>
+</div>
+
+<section id="validated">
+  <h2>Externally validated, both directions</h2>
+  <p class="lead">Self-validation is circular. These transcripts are from live runs
+  against independent open-source implementations — robot side and master side.</p>
+  <div class="cards">
+    <div class="card">
+      <span class="tag">Robot side</span>
+      <h3>NVIDIA Isaac Mission Dispatch 4.3.0</h3>
+      <p>MD's own client connected to the emulator's broker, dispatched a two-node
+      route mission and tracked it to completion:</p>
+<pre>t+  0.05s [MD&gt;robot] order …-n0 (update 0): 3 nodes
+t+  5.15s [MD api ] mission RUNNING nodes={'goto_pickup': 'COMPLETED', …}
+t+  7.19s [MD api ] mission COMPLETED
+RESULT: mission COMPLETED</pre>
+      <p><a href="https://github.com/JimothyJohn/amr-emulator/blob/master/docs/validation/isaac-mission-dispatch.md" rel="noopener">Full transcript + repro assets</a></p>
+    </div>
+    <div class="card">
+      <span class="tag">Master side</span>
+      <h3>InOrbit / OTTO vda5050_connector</h3>
+      <p>Their ROS&nbsp;2 connector accepted an order built by our MasterControl
+      over our broker and executed it end to end:</p>
+<pre>t+  3.35s [robot&gt;us ] state: lastNodeId='wp0' … actions=[('detectObject', 'WAITING')]
+t+  5.54s [robot&gt;us ] state: lastNodeId='wp2' … nodeStates=0
+t+  8.30s [robot&gt;us ] state: … actions=[('detectObject', 'FINISHED')]
+RESULT: order COMPLETED by InOrbit vda5050_connector</pre>
+      <p><a href="https://github.com/JimothyJohn/amr-emulator/blob/master/docs/validation/inorbit-vda5050-connector.md" rel="noopener">Full transcript + repro assets</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="quickstart">
+  <h2>Five minutes to a moving robot</h2>
+  <div class="tabs" role="tablist" aria-label="Quickstart options">
+    <button role="tab" id="tab-zero" aria-selected="true" aria-controls="panel-zero">Zero config</button>
+    <button role="tab" id="tab-broker" aria-selected="false" aria-controls="panel-broker">Your broker</button>
+    <button role="tab" id="tab-docker" aria-selected="false" aria-controls="panel-docker">Docker</button>
+  </div>
+  <div id="panel-zero" class="tabpanel" role="tabpanel" aria-labelledby="tab-zero">
+<pre><span class="prompt">$</span> uv run vda5050-emulator
+vda5050-emulator: VDA 5050 3.0.0, embedded broker on mqtt://0.0.0.0:1883
+robot: vda5050/v3/amr-emulator/vagv-0001/{order,instantActions,state,connection,...}
+
+five-minute check with any MQTT client:
+  subscribe: vda5050/v3/+/+/state
+  publish an order to: vda5050/v3/amr-emulator/vagv-0001/order
+  fault injection (JSON): vda5050/v3/amr-emulator/vagv-0001/_emulator
+    e.g. {"emergencyStop": "MANUAL"} or {"battery": {"level": 7}}</pre>
+  </div>
+  <div id="panel-broker" class="tabpanel" role="tabpanel" aria-labelledby="tab-broker" hidden>
+<pre><span class="prompt">$</span> vda5050-emulator --broker 10.0.0.5 --spec 2.1.0 --robots 5 --time-scale 60
+<span class="dim"># joins YOUR existing MQTT broker — no infrastructure changes;
+# --spec switches the protocol generation (2.0.0 / 2.1.0 / 3.0.0);
+# --robots N puts a small fleet on the same broker;
+# --time-scale runs simulated time faster for soak tests.</span></pre>
+  </div>
+  <div id="panel-docker" class="tabpanel" role="tabpanel" aria-labelledby="tab-docker" hidden>
+<pre><span class="prompt">$</span> docker compose up vda5050          <span class="dim"># broker on :1883 + two robots</span>
+<span class="prompt">$</span> docker build -f Dockerfile.vda5050 -t vda5050-emulator .
+<span class="prompt">$</span> docker run --rm -p 1883:1883 vda5050-emulator --robots 2</pre>
+  </div>
+</section>
+
+<section id="validator">
+  <h2>The wire, live</h2>
+  <p class="lead">Paste an order message and check it against the <em>official</em>
+  VDA 5050 order schema — the same documents the emulator bundles (vendored from
+  <a href="https://github.com/VDA5050/VDA5050" rel="noopener">VDA5050/VDA5050</a>
+  with commit-pinned provenance).</p>
+  <div class="validator-grid">
+    <div>
+      <label class="note" for="order-input">Order message (JSON)</label>
+      <textarea id="order-input" spellcheck="false" aria-label="Order JSON to validate">{
+  "headerId": 0,
+  "timestamp": "2026-08-16T12:00:00.000Z",
+  "version": "3.0.0",
+  "manufacturer": "amr-emulator",
+  "serialNumber": "vagv-0001",
+  "orderId": "order-1",
+  "orderUpdateId": 0,
+  "nodes": [
+    {
+      "nodeId": "wp0",
+      "sequenceId": 0,
+      "released": true,
+      "actions": [],
+      "nodePosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "theta": 0.0,
+        "mapId": "map-0"
+      }
+    },
+    {
+      "nodeId": "wp1",
+      "sequenceId": 2,
+      "released": true,
+      "actions": [],
+      "nodePosition": {
+        "x": 2.0,
+        "y": 0.0,
+        "theta": 0.0,
+        "mapId": "map-0"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "edgeId": "e0",
+      "sequenceId": 1,
+      "released": true,
+      "actions": []
+    }
+  ]
+}</textarea>
+    </div>
+    <div>
+      <div class="v-controls">
+        <label class="note" for="schema-pick">Schema</label>
+        <select id="schema-pick" aria-label="Schema version">
+          <option value="3.0.0" selected>3.0.0 (official)</option>
+          <option value="2.0.0">2.0.0 (official)</option>
+        </select>
+        <button class="btn" id="validate-btn">Validate</button>
+      </div>
+      <ul id="findings" aria-live="polite"></ul>
+      <p class="note">In-browser subset validator (required / type / enum / items /
+      properties / local $ref) — the emulator itself validates with full
+      <code>jsonschema</code> on every message, both directions.</p>
+    </div>
+  </div>
+</section>
+
+<section id="adapter">
+  <h2>Your MiR robot is already a VDA 5050 robot</h2>
+  <p class="lead"><code>mir-vda5050-adapter</code> bridges the MiR REST API (3.8.1)
+  to VDA 5050 — orders become MiR missions, <code>GET /status</code> becomes spec-valid
+  state. Validated live: Isaac Mission Dispatch → adapter → MiR emulator,
+  <strong>mission COMPLETED in 11&nbsp;s</strong>.</p>
+<pre><span class="prompt">$</span> uv run mir-emulator &amp;                      <span class="dim"># or a real MiR on your network</span>
+<span class="prompt">$</span> uv run vda5050-emulator --robots 0 &amp;       <span class="dim"># broker-only mode</span>
+<span class="prompt">$</span> uv run mir-vda5050-adapter --mir-url http://127.0.0.1:8080 --broker 127.0.0.1:1883</pre>
+  <p><a class="btn secondary" href="/console">Open the MiR console app</a>
+     <a class="btn secondary" href="https://github.com/JimothyJohn/amr-emulator/blob/master/docs/validation/mir-adapter-mission-dispatch.md" rel="noopener">Adapter validation transcript</a></p>
+</section>
+
+<section id="capabilities">
+  <h2>What the robot does</h2>
+  <table>
+    <thead><tr><th>Surface</th><th>Coverage</th></tr></thead>
+    <tbody>
+      <tr><td>Protocol versions</td><td>2.0.0, 2.1.0, 3.0.0 — switchable per robot (<code>--spec</code>); topic roots <code>uagv/v2</code> and <code>vda5050/v3</code></td></tr>
+      <tr><td>Order lifecycle</td><td>Full Figure-8 acceptance flow: base/horizon with stitching updates, the complete predefined rejection-error catalogue, newBaseRequest, cancelOrder semantics, idle rules</td></tr>
+      <tr><td>Actions</td><td>Blocking types NONE/SOFT/SINGLE/HARD per Figure 11; the predefined action table incl. pause, charging, maps, hibernation, pick/drop, waitForTrigger/trigger, retry/skipRetry</td></tr>
+      <tr><td>Zones (3.0.0)</td><td>BLOCKED, RELEASE (request/response with lease expiry), SPEED_LIMIT, ACTION zones — geometric enforcement, honestly advertised in the factsheet</td></tr>
+      <tr><td>Connection</td><td>Retained ONLINE/OFFLINE, MQTT last-will CONNECTION_BROKEN, retained factsheet, hibernation (3.0.0)</td></tr>
+      <tr><td>Fault injection</td><td>Non-standard <code>…/_emulator</code> topic: emergency stop, field violation, localization loss, battery override, teleport, forced action failures, connection drops, time scaling</td></tr>
+      <tr><td>Compatibility</td><td>Proven against deployed masters: 1.x-style <code>instantActions</code> field executed (deviation still reported), idempotent instant-action redelivery</td></tr>
+    </tbody>
+  </table>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fm">Handcrafted systems for industrial intelligence — an
+      <a href="https://advin.io" rel="noopener">advin.io</a> project · Dallas, TX</div>
+    <div>Get help: <a href="mailto:nick@advin.io">nick@advin.io</a> ·
+      <a href="https://github.com/JimothyJohn/amr-emulator/issues" rel="noopener">GitHub issues</a></div>
+  </div>
+</footer>
+<script>
+(function () {
+  var btn = document.getElementById("theme-toggle");
+  function apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("amr-theme", t); } catch (e) {}
+  }
+  btn.addEventListener("click", function () {
+    apply(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+})();
+</script>
+
+<script>
+/* Official order schemas, vendored byte-for-byte from VDA5050/VDA5050
+   (see packages/vda5050-emulator/src/vda5050_emulator/schemas/). */
+const SCHEMAS = {
+  "3.0.0": {"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Order Message","description":"The message schema to communicate orders from fleet control to the mobile robot.","subtopic":"/order","type":"object","required":["headerId","timestamp","version","manufacturer","serialNumber","orderId","orderUpdateId","nodes","edges"],"properties":{"headerId":{"type":"integer","description":"headerId of the message. The headerId is defined per topic and incremented by 1 with each sent (but not necessarily received) message."},"timestamp":{"type":"string","format":"date-time","description":"Timestamp in ISO8601 format (YYYY-MM-DDTHH:mm:ss.fffZ).","examples":["1991-03-11T11:40:03.123Z"]},"version":{"type":"string","description":"Version of the protocol [Major].[Minor].[Patch]","examples":["1.3.2"]},"manufacturer":{"type":"string","description":"Manufacturer of the mobile robot"},"serialNumber":{"type":"string","description":"Serial number of the mobile robot."},"orderId":{"description":"Order Identification. This is to be used to identify multiple order messages that belong to the same order.","type":"string"},"orderUpdateId":{"description":"Order update identification. It is unique per orderId, starting at 0 for a new order. If an order update is rejected, this field shall be passed in the rejection message.","type":"integer","minimum":0},"orderDescription":{"description":"Additional human-readable information only for visualization purposes; this shall not be used for any logical processes.","type":"string"},"nodes":{"description":"Array of nodes objects to be traversed for fulfilling the order. One node is enough for a valid order. Leave edge list empty for that case.","type":"array","items":{"$ref":"#/definitions/node"}},"edges":{"type":"array","description":"Directional connection between two nodes. Array of edge objects to be traversed for fulfilling the order. One node is enough for a valid order. Leave edge list empty for that case.","items":{"$ref":"#/definitions/edge"}}},"definitions":{"node":{"type":"object","title":"node","required":["nodeId","sequenceId","released","actions"],"properties":{"nodeId":{"type":"string","description":"Identifier of the node. May not be unique among the nodes of the same order.","examples":["pumpenhaus_1","MONTAGE"]},"sequenceId":{"type":"integer","minimum":0,"description":"Number to track the sequence of nodes and edges in an order and to simplify order updates. The main purpose is to distinguish between a node which is passed more than once within one orderId. The sequenceId is shared between nodes and edges and defines the sequence of traversal."},"nodeDescriptor":{"type":"string","description":"Additional information on the node."},"released":{"type":"boolean","description":"True indicates that the node is part of the base. False indicates that the node is part of the horizon."},"nodePosition":{"description":"Defines the position on a map in a global project-specific world coordinate system. Each floor has its own map. All maps must use the same project specific global origin. Optional for mobile robot-types that do not require the node position (e.g., line-guided mobile robots).","type":"object","required":["x","y","mapId"],"properties":{"x":{"type":"number","description":"X-position on the map in reference to the map coordinate system. Precision is up to the specific implementation.","unit":"m"},"y":{"type":"number","description":"Y-position on the map in reference to the map coordinate system. Precision is up to the specific implementation.","unit":"m"},"theta":{"type":"number","description":"Absolute orientation of the mobile robot on the node. Optional: mobile robot can plan the path by itself. If defined, the mobile robot has to assume the theta angle on this node. If previous edge disallows rotation, the mobile robot must rotate on the node. If following edge has a differing orientation defined but disallows rotation, the mobile robot is to rotate on the node to the edges desired rotation before entering the edge.","unit":"m","minimum":-3.14159265359,"maximum":3.14159265359},"allowedDeviationXY":{"type":"object","description":"Indicates how precisely a mobile robot shall match the position of a node for it to be considered traversed. If a = b= 0.0: no deviation is allowed, which means the mobile robot shall reach or pass the node position with the mobile robot control point as precisely as is technically possible for the mobile robot. This applies also if allowedDeviationXY is smaller than what is technically viable for the mobile robot. If the mobile robot supports this attribute, but it is not defined for this node by fleet control the mobile robot shall assume the value of a and b as 0.0. The coordinates of the node defines the center of the ellipse.","required":["a","b","theta"],"properties":{"a":{"type":"number","description":"Length of the ellipse semi-major axis in meters","unit":"m","minimum":0},"b":{"type":"number","description":"Length of the ellipse semi-minor axis in meters","unit":"m","minimum":0},"theta":{"type":"number","description":"Rotation angle in radians","unit":"rad","minimum":-1.570796327,"maximum":1.570796327}}},"allowedDeviationTheta":{"type":"number","description":"Indicates how big the deviation of theta angle can be. The lowest acceptable angle is theta - allowedDeviationTheta and the highest acceptable angle is theta + allowedDeviationTheta.","unit":"rad","minimum":0,"maximum":3.141592654},"mapId":{"description":"Unique identification of the map in which the position is referenced.","type":"string"}}},"actions":{"description":"Array of actions to be executed on a node. Empty array, if no actions required.","type":"array","items":{"$ref":"#/definitions/action"}}}},"edge":{"type":"object","title":"edge","required":["edgeId","sequenceId","released","actions"],"properties":{"edgeId":{"type":"string","description":"Identifier of the edge. May not be unique among the edges of the same order."},"sequenceId":{"type":"integer","minimum":0,"description":"Number to track the sequence of nodes and edges in an order and to simplify order updates. The sequenceId is shared between nodes and edges and defines the sequence of traversal."},"edgeDescriptor":{"type":"string","description":"Additional information on the edge."},"released":{"type":"boolean","description":"True indicates that the edge is part of the base. False indicates that the edge is part of the horizon."},"maximumSpeed":{"type":"number","description":"Permitted maximum speed on the edge in m/s. Speed is defined by the fastest measurement of the mobile robot.","unit":"m/s"},"maximumMobileRobotHeight":{"type":"number","description":"Permitted maximum height of the mobile robot, including the load, on edge in meters.","unit":"m"},"minimumLoadHandlingDeviceHeight":{"type":"number","description":"Permitted minimal height of the load handling device on the edge in meters","unit":"m"},"orientation":{"type":"number","description":"Orientation of the mobile robot on the edge. The value orientationType defines if it has to be interpreted relative to the global project specific map coordinate system or tangential to the edge. In case of interpreted tangential to the edge 0.0 = forwards and PI = backwards. Example: orientation Pi/2 rad will lead to a rotation of 90 degrees. If mobile robot starts in different orientation, rotate the mobile robot on the edge to the desired orientation if rotationAllowed is set to True. If rotationAllowed is False, rotate before entering the edge. If that is not possible, reject the order. If no trajectory is defined, apply the rotation to the direct path between the two connecting nodes of the edge. If a trajectory is defined for the edge, apply the orientation to the trajectory.","unit":"rad","minimum":-3.14159265359,"maximum":3.14159265359},"orientationType":{"type":"string","description":"Enum {GLOBAL, TANGENTIAL}: GLOBAL: relative to the global project specific map coordinate system; TANGENTIAL: tangential to the edge. If not defined, the default value is TANGENTIAL."},"direction":{"type":"string","description":"Sets direction at junctions for line-guided or wire-guided mobile robots, to be defined initially (mobile robot-individual)."},"reachOrientationBeforeEntering":{"type":"boolean","description":"True: Desired edge orientation shall be reached before entering the edge. False: Mobile robot can rotate into the desired orientation on the edge. Default: False."},"maxRotationSpeed":{"type":"number","description":"Maximum rotation speed in rad/s. Optional: No limit, if not set.","unit":"rad/s"},"trajectory":{"description":"Trajectory JSON-object for this edge as a NURBS. Defines the curve, on which the mobile robot should move between the start node and the end node. Optional: Can be omitted, if mobile robot cannot process trajectories or if mobile robot plans its own trajectory.","$ref":"#/definitions/trajectory"},"length":{"type":"number","description":"Distance of the path from the start node to the end node in meters. Optional: This value is used by line-guided mobile robots to decrease their speed before reaching a stop position.","unit":"m"},"corridor":{"$ref":"#/definitions/corridor"},"actions":{"description":"Array of action objects with detailed information.","type":"array","items":{"$ref":"#/definitions/action"}}}},"trajectory":{"type":"object","required":["controlPoints"],"properties":{"degree":{"type":"integer","description":"Degree of the NURBS curve defining the trajectory. If not defined, the default value is 1.","minimum":1},"knotVector":{"type":"array","description":"Sequence of parameter values that determines where and how the control points affect the NURBS curve.","items":{"type":"number","minimum":0.0,"maximum":1.0}},"controlPoints":{"type":"array","description":"List of JSON controlPoint objects defining the control points of the NURBS, which includes the beginning and end point.","items":{"type":"object","title":"controlPoint","required":["x","y"],"properties":{"x":{"type":"number","description":"X coordinate described in the world coordinate system.","unit":"m"},"y":{"type":"number","description":"Y coordinate described in the world coordinate system.","unit":"m"},"weight":{"type":"number","description":"The weight, with which this control point pulls on the curve. When not defined, the default will be 1.0."}}}}}},"action":{"type":"object","description":"Describes an action that the mobile robot can perform.","required":["actionId","actionType","blockingType"],"properties":{"actionType":{"type":"string","description":"Name of the action. Identifies the function of the action."},"actionId":{"type":"string","description":"Unique ID to identify the action and map them to the actionState in the state. Suggestion: Use UUIDs."},"actionDescriptor":{"type":"string","description":"Additional information on the action."},"blockingType":{"type":"string","description":"Regulates if the action is allowed to be executed during movement and/or parallel to other actions. NONE: allows driving and other actions; SINGLE: allows driving but no other actions; SOFT: allows other actions but not driving; HARD: is the only allowed action at that time.","enum":["NONE","SOFT","SINGLE","HARD"]},"actionParameters":{"type":"array","description":"Action parameters for the indicated action, e.g., deviceId, loadId, external Triggers.","items":{"title":"actionParameter","type":"object","required":["key","value"],"properties":{"key":{"type":"string","description":"The key of the action parameter.","examples":["duration","direction","signal"]},"value":{"type":["array","boolean","number","integer","string","object"],"description":"The value of the action parameter","examples":[103.2,"left",true,["arrays","are","also","valid"],{"objects":"as","well":true}]}}}},"retriable":{"type":"boolean","description":"True: action can enter RETRIABLE state if it fails. False: action enters FAILED state directly after it fails. Default: false."}}},"corridor":{"description":"Definition of boundaries in which a mobile robot can deviate from its trajectory, e. g. to avoid obstacles.","type":"object","required":["leftWidth","rightWidth"],"properties":{"leftWidth":{"type":"number","description":"Defines the width of the corridor in meters to the left related to the trajectory of the mobile robot.","unit":"m","minimum":0.0},"rightWidth":{"type":"number","description":"Defines the width of the corridor in meters to the right related to the trajectory of the mobile robot.","unit":"m","minimum":0.0},"corridorReferencePoint":{"type":"string","description":"Defines whether the boundaries are valid for the kinematic center or the contour of the mobile robot.","enum":["KINEMATIC_CENTER","CONTOUR"]},"releaseRequired":{"type":"boolean","description":"Optional flag that indicates if the robot must request approval from the fleet control. If not defined, no release is required."},"releaseLossBehavior":{"type":"string","description":"Defines how the robot shall behave in case its release of a corridor expires or gets revoked by the fleet control. Default: STOP","enum":["STOP","RETURN"]}}}}},
+  "2.0.0": {"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Order Message","description":"The message schema to communicate orders from master control to the AGV.","subtopic":"/order","type":"object","required":["headerId","timestamp","version","manufacturer","serialNumber","orderId","orderUpdateId","nodes","edges"],"properties":{"headerId":{"type":"integer","description":"headerId of the message. The headerId is defined per topic and incremented by 1 with each sent (but not necessarily received) message."},"timestamp":{"type":"string","format":"date-time","description":"Timestamp in ISO8601 format.","examples":["1991-03-11T11:40:03.12Z"]},"version":{"type":"string","description":"Version of the protocol [Major].[Minor].[Patch]","examples":["1.3.2"]},"manufacturer":{"type":"string","description":"Manufacturer of the AGV"},"serialNumber":{"type":"string","description":"Serial number of the AGV."},"orderId":{"description":"Unique order Identification.","type":"string"},"orderUpdateId":{"description":"orderUpdate identification. Is unique per orderId. If an order update is rejected, this field is to be passed in the rejection message.","type":"integer","minimum":0},"zoneSetId":{"description":"Unique identifier of the zone set that the AGV has to use for navigation or that was used by MC for planning.\nOptional: Some MC systems do not use zones. Some AGVs do not understand zones. Do not add to message if no zones are used.","type":"string"},"nodes":{"description":"This list holds the base and the horizon nodes of the order graph.","type":"array","items":{"type":"object","title":"node","required":["nodeId","sequenceId","released","actions"],"properties":{"nodeId":{"type":"string","description":"Unique node identification","examples":["pumpenhaus_1","MONTAGE"]},"sequenceId":{"type":"integer","minimum":0,"description":"Id to track the sequence of nodes and edges in an order and to simplify order updates.\nThe main purpose is to distinguish between a node which is passed more than once within one orderId. The variable sequenceId can run across all nodes and edges of the same order and is reset when a new orderId is issued."},"nodeDescription":{"type":"string","description":"Verbose Node Description."},"released":{"type":"boolean","description":"If true, the node is part of the base plan. If false, the node is part of the horizon plan."},"nodePosition":{"description":"Defines the position on a map in world coordinates. Each floor has its own map. Precision is up to the specific implementation","type":"object","required":["x","y","mapId"],"properties":{"x":{"type":"number"},"y":{"type":"number"},"theta":{"description":"Orientation of the AGV on the node.\nOptional: vehicle can plan the path by itself.\nIf defined, the AGV has to assume the theta angle on this node.\nIf previous edge disallows rotation, the AGV is to rotate on the node.\nIf following edge has a differing orientation defined but disallows rotation, the AGV is to rotate on the node to the edges desired rotation before entering the edge.","type":"number","minimum":-3.14159265359,"maximum":3.14159265359},"allowedDeviationXy":{"type":"number","description":"Indicates how exact an AGV has to drive over a node in order for it to count as traversed.\nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed.","minimum":0},"allowedDeviationTheta":{"type":"number","minimum":-3.141592654,"maximum":3.141592654,"description":"Indicates how exact an AGV has to align its orientation with the nodes theta. The value is interpreted as theta+-deviation.nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer)."},"mapId":{"description":"Unique identification of the map in which the position is referenced.\nEach map has the same origin of coordinates. When an AGV uses an elevator, e. g. leading from a departure floor to a target floor, it will disappear off the map of the departure floor and spawn in the related lift node on the map of the target floor.","type":"string"},"mapDescription":{"description":"Verbose description of the Map","type":"string"}}},"actions":{"description":"Array of actions that are to be executed on the node. Their sequence in the list governs their sequence of execution.","type":"array","items":{"$ref":"#/definitions/action"}}}}},"edges":{"type":"array","description":"Base and Horizon Edges of the Order Graph.","items":{"type":"object","title":"edge","required":["edgeId","sequenceId","released","startNodeId","endNodeId","actions"],"properties":{"edgeId":{"type":"string","description":"Unique edge identification"},"sequenceId":{"type":"integer","minimum":0,"description":"Id to track the sequence of nodes and edges in an order and to simplify order updates. The variable sequenceId runs across all nodes and edges of the same order and is reset when a new orderId is issued."},"edgeDescription":{"type":"string","description":"Verbose description of the edge."},"released":{"type":"boolean","description":"If true, the edge is part of the base plan. If false, the edge is part of the horizon plan."},"startNodeId":{"type":"string","description":"The nodeId of the start node."},"endNodeId":{"type":"string","description":"The nodeId of the end node."},"maxSpeed":{"type":"number","description":"permitted maximum speed of the agv on the edge in m/s. Speed is defined by the fastest point of the vehicle."},"maxHeight":{"type":"number","description":"Permitted maximum height of the vehicle, including the load, on edge. In meters."},"minHeight":{"type":"number","description":"Permitted minimal height of the edge measured at the bottom of the load. In meters."},"orientation":{"type":"number","description":"Orientation of the AGV on the edge, tangential to the edge (0.0 = forwards, PI = backwards) (for holonomic vehicles with more than one driving direction). Example: orientation Pi/2 rad will lead to a rotation of 90 degrees. If AGV starts in different orientation, rotate the vehicle on the edge to the desired orientation if rotationAllowed is set to \u201ctrue\u201d. If rotationAllowed is \u201cfalse\u201d, rotate before entering the edge. If that is not possible, reject the order. If no trajectory is defined, apply the rotation to the direct path between the two connecting nodes of the edge. If a trajectory is defined for the edge, apply the orientation tangentially to the trajectory.","minimum":-3.14159265359,"maximum":3.14159265359},"direction":{"type":"string","description":"Sets direction at junctions for line-guided vehicles, to be defined initially (vehicle-individual). Can be descriptive (left, right, middle) or a frequency.","examples":["left","right","straight","433MHz"]},"rotationAllowed":{"type":"boolean","description":"If true, rotation is allowed on the edge."},"maxRotationSpeed":{"type":"number","description":"Maximum rotation speed in rad/s"},"length":{"type":"number","description":"Distance of the path from startNode to endNode in meters. This value is used by line-guided AGVs to decrease their speed before reaching a stop position."},"trajectory":{"type":"object","description":"Trajectory that an AGV has to follow on this edge. The trajectory is to be defined as a NURBS.","required":["degree","knotVector","controlPoints"],"properties":{"degree":{"type":"integer","description":"The degree of the NURBS."},"knotVector":{"type":"array","description":"Sequence of parameter values that determine where and how the control points affect the NURBS curve. knotVector has size of number of control points + degree + 1","items":{"type":"number","maximum":1,"minimum":0}},"controlPoints":{"type":"array","description":"List of JSON controlPoint objects defining the control points of the NURBS. This includes the start and end point.","items":{"type":"object","title":"controlPoint","properties":{"x":{"type":"number"},"y":{"type":"number"},"weight":{"type":"number","description":"The weight with which this control point pulls no the curve.\nWhen not defined, the default will be 1.0."}},"required":["x","y"]}}}},"actions":{"description":"Array of action objects with detailed information.","type":"array","items":{"$ref":"#/definitions/action"}}}}}},"definitions":{"action":{"type":"object","description":"Describes an action that the AGV must perform.","required":["actionId","actionType","blockingType"],"properties":{"actionType":{"type":"string","description":"Enum of actions as described in the first column of \"Actions and Parameters\"\nIdentifies the function of the action."},"actionId":{"type":"string","description":"ID to distinguish between multiple actions with the same type on the same node."},"actionDescription":{"type":"string"},"blockingType":{"type":"string","description":"Regulates if the action is allowed to be executed during movement and/or parallel to other actions.\nnone: action can happen in parallel with others, including movement.\nsoft: action can happen simultaneously with others, but not while moving.\nhard: no other actions can be performed while this action is running.","enum":["NONE","SOFT","HARD"]},"actionParameters":{"type":"array","description":"Array of actionParameter-objects for the indicated action e. g. deviceId, loadId, external Triggers.","items":{"title":"actionParameter","type":"object","required":["key","value"],"properties":{"key":{"type":"string","description":"The key of the action parameter.","examples":["duration","direction","signal"]},"value":{"type":["array","boolean","number","string"],"description":"The value of the action parameter","examples":[103.2,"left",true,["arrays","are","also","valid"]]}}}}}}}}
+};
+
+/* Minimal JSON-Schema subset checker: required, type, enum, properties,
+   items, local $ref (#/definitions/x). Honest label in the UI. */
+function check(schema, root, value, path, out, depth) {
+  if (depth > 40 || out.length > 60) return;
+  if (schema && schema.$ref) {
+    const m = schema.$ref.match(/^#\/definitions\/(.+)$/);
+    if (m && root.definitions && root.definitions[m[1]]) {
+      schema = root.definitions[m[1]];
+    } else { return; }
+  }
+  if (!schema || typeof schema !== "object") return;
+  if (schema.type) {
+    const t = Array.isArray(schema.type) ? schema.type : [schema.type];
+    const ok = t.some(function (want) {
+      if (want === "number") return typeof value === "number";
+      if (want === "integer") return typeof value === "number" && Number.isInteger(value);
+      if (want === "string") return typeof value === "string";
+      if (want === "boolean") return typeof value === "boolean";
+      if (want === "array") return Array.isArray(value);
+      if (want === "object") return value !== null && typeof value === "object" && !Array.isArray(value);
+      if (want === "null") return value === null;
+      return true;
+    });
+    if (!ok) { out.push(path + ": expected " + t.join("|") + ", got " + (Array.isArray(value) ? "array" : typeof value)); return; }
+  }
+  if (schema.enum && schema.enum.indexOf(value) === -1) {
+    out.push(path + ": " + JSON.stringify(value) + " not in " + JSON.stringify(schema.enum));
+  }
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    (schema.required || []).forEach(function (k) {
+      if (!(k in value)) out.push(path + ": missing required property '" + k + "'");
+    });
+    const props = schema.properties || {};
+    Object.keys(props).forEach(function (k) {
+      if (k in value) check(props[k], root, value[k], path + "." + k, out, depth + 1);
+    });
+  }
+  if (Array.isArray(value) && schema.items) {
+    value.forEach(function (v, i) { check(schema.items, root, v, path + "[" + i + "]", out, depth + 1); });
+  }
+}
+
+(function () {
+  const btn = document.getElementById("validate-btn");
+  const list = document.getElementById("findings");
+  btn.addEventListener("click", function () {
+    list.innerHTML = "";
+    let doc;
+    try {
+      doc = JSON.parse(document.getElementById("order-input").value);
+    } catch (e) {
+      const li = document.createElement("li");
+      li.textContent = "not JSON: " + e.message;
+      list.appendChild(li);
+      return;
+    }
+    const version = document.getElementById("schema-pick").value;
+    const out = [];
+    check(SCHEMAS[version], SCHEMAS[version], doc, "$", out, 0);
+    if (!out.length) {
+      const li = document.createElement("li");
+      li.className = "ok";
+      li.textContent = "valid against the official " + version + " order schema (subset check)";
+      list.appendChild(li);
+      return;
+    }
+    out.slice(0, 25).forEach(function (msg) {
+      const li = document.createElement("li");
+      li.textContent = msg;
+      list.appendChild(li);
+    });
+  });
+
+  /* tabs */
+  const tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (other) {
+        other.setAttribute("aria-selected", other === tab ? "true" : "false");
+        document.getElementById(other.getAttribute("aria-controls")).hidden = other !== tab;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

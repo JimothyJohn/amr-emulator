@@ -1,0 +1,37 @@
+# NVIDIA Isaac Mission Dispatch, wired to the vda5050-emulator's embedded MQTT
+# broker running on the host (port 1884). Bridge networking instead of the
+# upstream host-network compose so it works on macOS.
+services:
+  postgres:
+    image: postgres:14.5
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mission
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 3s
+      timeout: 10s
+      retries: 5
+
+  mission-database:
+    image: nvcr.io/nvidia/isaac/mission-database:4.3.0-arm64
+    command: ["--address", "0.0.0.0", "--port", "5000", "--controller_port", "5001",
+              "--db_host", "postgres", "--db_port", "5432", "--db_name", "mission",
+              "--db_username", "postgres", "--db_password", "postgres"]
+    ports:
+      - "5050:5000"  # host 5000 is taken by macOS AirPlay
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  mission-dispatch:
+    image: nvcr.io/nvidia/isaac/mission-dispatch:4.3.0-arm64
+    command: ["--mqtt_host", "host.docker.internal", "--mqtt_port", "1884",
+              "--mqtt_transport", "tcp",
+              "--database_url", "http://mission-database:5001"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mission-database

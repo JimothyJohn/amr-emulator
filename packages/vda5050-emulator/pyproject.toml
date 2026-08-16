@@ -1,0 +1,24 @@
+[project]
+name = "vda5050-emulator"
+dynamic = ["version"]
+description = "Spec-faithful emulator of a VDA 5050 3.0.0 mobile robot (MQTT + JSON), with an embedded MQTT broker"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "jsonschema>=4.20",
+]
+
+[project.scripts]
+vda5050-emulator = "vda5050_emulator.cli:main"
+
+[tool.hatch.version]
+path = "src/vda5050_emulator/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vda5050_emulator"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

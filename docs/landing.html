@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function () {
+  var t;
+  try { t = localStorage.getItem("amr-theme"); } catch (e) {}
+  if (t !== "dark" && t !== "light") {
+    t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  document.documentElement.setAttribute("data-theme", t);
+})();
+</script>
+<title>AMR Emulator — spec-faithful robot emulators for VDA 5050, MiR and Omron ARCL · advin.io</title>
+<meta name="description" content="Free, spec-faithful emulators of autonomous mobile robot interfaces: VDA 5050 (with embedded MQTT broker, validated against NVIDIA Isaac Mission Dispatch), the MiR REST API, and Omron ARCL. Handcrafted by advin.io.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230d0d0d'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='bold' fill='%23fcfcfc' text-anchor='middle'>a.</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Chakra+Petch:wght@400;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --paper: #fcfcfc;
+  --ink: #0d0d0d;
+  --ink-soft: #3d3d3d;
+  --faint: #8a8a8a;
+  --line: #e2e2e2;
+  --card: #ffffff;
+  --code-bg: #f4f4f4;
+  --vda: #f97316;
+  --mir: #1a76bc;
+  --omron: #e1261c;
+  --green: #1d9e61;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0d0d0d;
+  --ink: #fcfcfc;
+  --ink-soft: #c9c9c9;
+  --faint: #7c7c7c;
+  --line: #262626;
+  --card: #141414;
+  --code-bg: #1a1a1a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  line-height: 1.55;
+}
+a { color: inherit; }
+code, pre { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: .86em; }
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: .35rem;
+  padding: .9rem 1rem;
+  overflow-x: auto;
+}
+.wrap { max-width: 1060px; margin: 0 auto; padding: 0 1.25rem; }
+
+.app-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .9rem 1.25rem; border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: var(--paper); z-index: 5;
+}
+.brand { display: flex; align-items: baseline; gap: .8rem; text-decoration: none; }
+.wordmark {
+  font-family: 'Big Shoulders Display', sans-serif; font-weight: 800;
+  font-size: 1.5rem; letter-spacing: .02em; text-decoration: none; color: var(--ink);
+}
+.brand small { color: var(--faint); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
+.app-header nav { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
+.app-header nav a { text-decoration: none; font-size: .9rem; color: var(--ink-soft); }
+.app-header nav a:hover { color: var(--ink); }
+.app-header nav a.vda:hover { color: var(--vda); }
+.app-header nav a.mir:hover { color: var(--mir); }
+.app-header nav a.omr:hover { color: var(--omron); }
+#theme-toggle {
+  background: none; border: 1px solid var(--line); border-radius: .35rem;
+  color: var(--ink-soft); cursor: pointer; padding: .25rem .55rem; font-size: .95rem;
+}
+
+.hero { padding: 4.2rem 0 2.4rem; }
+.hero .kicker {
+  color: var(--vda); font-size: .85rem; letter-spacing: .18em; text-transform: uppercase;
+  font-weight: 600;
+}
+h1 {
+  font-family: 'Big Shoulders Display', sans-serif; font-weight: 800;
+  font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1.02; margin: .5rem 0 1rem;
+}
+.hero p.lede { max-width: 46rem; color: var(--ink-soft); font-size: 1.06rem; }
+.hero .proof { display: flex; gap: .6rem 1.4rem; flex-wrap: wrap; margin-top: 1.1rem; }
+.hero .proof span { color: var(--faint); font-size: .85rem; }
+.hero .proof b { color: var(--green); font-weight: 600; }
+.cta-row { display: flex; gap: .8rem; flex-wrap: wrap; margin: 1.6rem 0 0; }
+.cta {
+  display: inline-block; text-decoration: none; border-radius: .35rem;
+  padding: .65rem 1.15rem; font-weight: 600; font-size: .95rem;
+  border: 1px solid var(--ink);
+}
+.cta.primary { background: var(--ink); color: var(--paper); }
+.cta.primary:hover { background: var(--vda); border-color: var(--vda); color: #fff; }
+.cta.ghost:hover { border-color: var(--vda); color: var(--vda); }
+
+.apps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.1rem; padding: 1.8rem 0 1rem; }
+.app-card {
+  border: 1px solid var(--line); border-top: 3px solid var(--accent, var(--ink));
+  border-radius: .45rem; background: var(--card); padding: 1.25rem 1.25rem 1.1rem;
+  text-decoration: none; display: flex; flex-direction: column; gap: .55rem;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.app-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,0,0,.08); }
+.app-card .tag { font-size: .74rem; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.app-card h2 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 700; font-size: 1.7rem; margin: 0; }
+.app-card p { margin: 0; color: var(--ink-soft); font-size: .93rem; }
+.app-card .go { margin-top: auto; padding-top: .6rem; font-size: .88rem; font-weight: 600; color: var(--accent); }
+.app-card ul { margin: .2rem 0 0; padding-left: 1.1rem; color: var(--ink-soft); font-size: .87rem; }
+.app-card li { margin: .15rem 0; }
+
+section.strip { border-top: 1px solid var(--line); padding: 2.2rem 0; }
+section.strip h3 {
+  font-family: 'Big Shoulders Display', sans-serif; font-weight: 700; font-size: 1.6rem; margin: 0 0 .8rem;
+}
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; }
+.cols p { color: var(--ink-soft); font-size: .93rem; margin: .3rem 0; }
+
+footer {
+  border-top: 1px solid var(--line); margin-top: 2.5rem; padding: 1.6rem 0 2.2rem;
+  color: var(--faint); font-size: .87rem;
+}
+footer .wordmark { font-size: 1.2rem; }
+footer a { color: var(--ink-soft); }
+@media (max-width: 640px) { .app-header nav { gap: .7rem; } }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <a class="brand" href="https://advin.io" rel="noopener">
+    <span class="wordmark">advin.io</span><small>AMR Emulator</small>
+  </a>
+  <nav aria-label="Emulator apps">
+    <a class="vda" href="/vda5050">VDA 5050</a>
+    <a class="mir" href="/console">MiR</a>
+    <a class="omr" href="/omron">Omron ARCL</a>
+    <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">GitHub</a>
+    <button id="theme-toggle" aria-label="Toggle color theme">◐</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker">VDA 5050 · the vendor-neutral AMR standard</div>
+    <h1>Spec-faithful robot emulators.<br>No robots required.</h1>
+    <p class="lede">
+      Develop and test your fleet integration against emulated mobile robots that
+      follow the published specifications to the letter — starting with
+      <strong>VDA&nbsp;5050</strong> (versions 2.0.0, 2.1.0 and 3.0.0, embedded MQTT
+      broker included), plus the MiR REST API and Omron ARCL. Point your master
+      control at an emulator today; point the same code at steel tomorrow.
+    </p>
+    <div class="proof">
+      <span><b>✓</b> Validated live against NVIDIA Isaac Mission Dispatch</span>
+      <span><b>✓</b> Validated against the InOrbit/OTTO VDA 5050 connector</span>
+      <span><b>✓</b> Official schemas &amp; manuals as the only oracle</span>
+    </div>
+    <div class="cta-row">
+      <a class="cta primary" href="/vda5050">Explore the VDA 5050 emulator</a>
+      <a class="cta ghost" href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">Source on GitHub</a>
+    </div>
+  </section>
+
+  <section class="apps" aria-label="The three emulator apps">
+    <a class="app-card" href="/vda5050" style="--accent: var(--vda)">
+      <span class="tag">Featured · MQTT + JSON</span>
+      <h2>VDA 5050</h2>
+      <p>Emulated mobile robots speaking the standard — switchable 2.0.0 / 2.1.0 / 3.0.0,
+         embedded MQTT 3.1.1 broker, full order &amp; action semantics, zones, fault injection.</p>
+      <ul>
+        <li>Zero-infrastructure: one command starts broker + robots</li>
+        <li>Every message validated against the official JSON schemas</li>
+        <li>MiR adapter: drive a real MiR from any VDA 5050 master</li>
+      </ul>
+      <span class="go">Open the VDA 5050 app →</span>
+    </a>
+    <a class="app-card" href="/console" style="--accent: var(--mir)">
+      <span class="tag">REST · live hosted demo</span>
+      <h2>MiR</h2>
+      <p>The original: a self-updating emulator of the MiR robot REST API and MiR Fleet
+         Enterprise — private virtual robots at a public URL, spec-converted weekly from
+         MiR's official releases.</p>
+      <ul>
+        <li>Robot API 2.x &amp; 3.x, Fleet Integration API</li>
+        <li>Interactive console with fault injection</li>
+        <li><code>pip install mir-emulator==3.8.1</code></li>
+      </ul>
+      <span class="go">Open the MiR console →</span>
+    </a>
+    <a class="app-card" href="/omron" style="--accent: var(--omron)">
+      <span class="tag">New · line-based TCP</span>
+      <h2>Omron ARCL</h2>
+      <p>An emulated Omron LD/HD AMR speaking ARCL per the public I617-E-02 reference
+         manual — login, status, docking, faults and the full fleet queuing loop over
+         real TCP.</p>
+      <ul>
+        <li>queuePickup / queuePickupDropoff lifecycle with QueueUpdate</li>
+        <li>Every command cites its manual page</li>
+        <li>Interactive session player</li>
+      </ul>
+      <span class="go">Open the Omron ARCL app →</span>
+    </a>
+  </section>
+
+  <section class="strip">
+    <h3>Why teams use these emulators</h3>
+    <div class="cols">
+      <div>
+        <p><strong>Spec-faithful by construction.</strong> The only sources of truth are
+        official artifacts — VDA 5050's published JSON schemas (vendored with pinned
+        hashes, re-checked weekly), MiR's own API documents, Omron's public reference
+        manual. Where a spec and its prose disagree, the wire format wins, and the
+        divergence is documented.</p>
+      </div>
+      <div>
+        <p><strong>Externally validated.</strong> Passing your own tests proves consistency,
+        not correctness — so these emulators are run against independent implementations:
+        NVIDIA Isaac Mission Dispatch completed missions against the VDA 5050 robot and
+        broker; the InOrbit/OTTO connector executed orders from the master-control side.
+        Transcripts ship in the repo.</p>
+      </div>
+      <div>
+        <p><strong>Built to be broken.</strong> Fault injection is a first-class surface:
+        emergency stops, localization loss, battery collapse, connection drops, forced
+        action failures — so your integration's worst day happens on an emulator,
+        not on a warehouse floor.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="strip">
+    <h3>Sixty seconds to a running robot</h3>
+    <pre><code># VDA 5050: embedded broker on :1883 + one emulated robot
+uvx vda5050-emulator
+
+# your MiR robot as a VDA 5050 robot (any master control can drive it)
+uvx mir-vda5050-adapter --mir-url http://&lt;robot-ip&gt; --broker &lt;mqtt-host&gt;
+
+# an Omron LD/HD that answers on telnet
+uvx arcl-emulator</code></pre>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="wordmark">advin.io</span> — Handcrafted systems for industrial
+    intelligence · Dallas, TX<br>
+    An open-source <a href="https://advin.io" rel="noopener">advin.io</a> project ·
+    Get help: <a href="mailto:nick@advin.io">nick@advin.io</a> ·
+    <a href="https://github.com/JimothyJohn/amr-emulator/issues" rel="noopener">GitHub issues</a>
+  </div>
+</footer>
+
+<script>
+document.getElementById("theme-toggle").addEventListener("click", function () {
+  var root = document.documentElement;
+  var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("amr-theme", next); } catch (e) {}
+});
+</script>
+</body>
+</html>

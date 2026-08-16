@@ -1,13 +1,46 @@
 # AMR Emulator
 
 An [advin.io](https://advin.io) service — spec-faithful emulators of
-autonomous mobile robot (AMR) REST APIs, starting with Mobile Industrial
-Robots (MiR).
+autonomous mobile robot (AMR) interfaces: the vendor-neutral **VDA 5050**
+standard, and the Mobile Industrial Robots (MiR) REST APIs.
 
 [![GitHub](https://img.shields.io/badge/GitHub-JimothyJohn%2Famr--emulator-181717?logo=github)](https://github.com/JimothyJohn/amr-emulator)
 [![Live demo](https://img.shields.io/badge/Live_demo-amr--emulator.com-2ea44f)](https://amr-emulator.com/console)
 
-Self-updating emulator of the [Mobile Industrial Robots (MiR) robot REST API](https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/)
+## VDA 5050 — emulated mobile robots for your master control
+
+`packages/vda5050-emulator` emulates [VDA 5050](https://github.com/VDA5050/VDA5050)
+mobile robots (MQTT + JSON) — protocol versions **2.0.0, 2.1.0 and 3.0.0**,
+switchable — with an **embedded MQTT 3.1.1 broker** so evaluation needs zero
+infrastructure. Every message in and out is validated against the official
+JSON schemas, vendored with pinned provenance from the VDA5050 repository and
+re-checked against upstream weekly (`vda5050-sync.yml`).
+
+```sh
+uv run vda5050-emulator                  # embedded broker on :1883 + one 3.0.0 robot
+uv run vda5050-emulator --spec 2.1.0     # speak VDA 5050 2.1.0 instead
+uv run vda5050-emulator --broker 10.0.0.5  # join YOUR existing broker
+uv run vda5050-emulator --robots 5 --time-scale 60
+```
+
+Point any master control (or `mosquitto_sub`) at the printed broker address:
+the robot publishes retained `connection`/`factsheet`, event-driven `state`
+and `visualization`, and consumes `order`/`instantActions` (plus
+`zoneSet`/`responses` on 3.0.0) with the full acceptance flow of the
+recommendation — base/horizon stitching, the complete rejection-error
+catalogue, action blocking types, zones with the request/response mechanism,
+hibernation, and a last-will `CONNECTION_BROKEN`. Chaos goes through the
+non-standard `.../_emulator` topic: emergency stop, field violation,
+localization loss, battery override, teleport, forced action failures,
+connection drops, time scaling.
+
+```python
+from vda5050_emulator import AGVConfig, Broker, MasterControl, VirtualAGV
+```
+
+## MiR — self-updating REST API emulator
+
+Emulator of the [Mobile Industrial Robots (MiR) robot REST API](https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/)
 **and the [MiR Fleet Enterprise Integration API](https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/index.html?urls.primaryName=MiR+Fleet+Integration+API+v1)**.
 Develop and test MiR integrations against a local, spec-faithful `/api/v2.0.0`
 (robot) or `/api/v1` (fleet) without owning either — across the newest four
@@ -85,6 +118,7 @@ latest patch but is never dropped. Currently:
 
 | Family | Versions | Source |
 |---|---|---|
+| VDA 5050 | 3.0.0, 2.1.0, 2.0.0 | Official JSON schemas, vendored from [VDA5050/VDA5050](https://github.com/VDA5050/VDA5050) (provenance in `vda5050_emulator/schemas/registry.json`) |
 | Robot REST API 3.x | 3.8.1, 3.7.2, 3.6.7, 3.5.6 | Converted from the official MiR250 REST API PDFs |
 | Robot REST API 3.x | 3.5.4 (pinned) | Official `swagger.json` — the converter's oracle |
 | Robot REST API 2.x | 2.14.7, 2.13.5.4, 2.12.0.4, 2.10.5.8 | Converted from the official MiR250 REST API PDFs |
@@ -132,6 +166,15 @@ app = create_app("3.8.1")  # ASGI app: run under uvicorn, or hit with httpx/Test
 
 ## Layout
 
+- `packages/vda5050-emulator/` — VDA 5050 mobile-robot emulator (asyncio;
+  embedded MQTT 3.1.1 broker, virtual AGV core, fleet-control test client).
+  Bundles the official schemas for every tracked protocol version.
+- `packages/mir-vda5050-adapter/` — VDA 5050 robot-side adapter for MiR:
+  drive a MiR robot (real or emulated) from any VDA 5050 master control.
+  Validated live: Isaac Mission Dispatch → adapter → mir-emulator.
+- `packages/arcl-emulator/` — Omron ARCL (LD/HD AMR) emulator: line-based
+  TCP protocol per the public I617-E-02 reference manual, with the fleet
+  queuing loop, docking/charging and fault injection.
 - `packages/mir-emulator/` — the emulator library (Starlette; spec-driven
   routes + behavior overlays). Bundles all tracked spec files.
 - `packages/mir-spec-scraper/` — portal login, listing parser, selection

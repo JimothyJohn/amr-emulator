@@ -13,6 +13,8 @@ on:
       - deploy/template.yaml
       - docs/index.html
       - docs/landing.html
+      - docs/vda5050.html
+      - docs/omron.html
       - scripts/deploy_demo.sh
       - .github/workflows/deploy.yml
       - uv.lock

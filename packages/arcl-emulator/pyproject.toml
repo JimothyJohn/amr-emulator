@@ -1,0 +1,22 @@
+[project]
+name = "arcl-emulator"
+dynamic = ["version"]
+description = "Emulator of the Omron ARCL (Advanced Robotics Command Language) telnet interface for LD/HD mobile robots and Fleet Manager queuing"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[project.scripts]
+arcl-emulator = "arcl_emulator.cli:main"
+
+[tool.hatch.version]
+path = "src/arcl_emulator/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/arcl_emulator"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

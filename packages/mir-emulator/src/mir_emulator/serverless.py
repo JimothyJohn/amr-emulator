@@ -36,12 +36,17 @@ from mir_emulator.app import _SecurityHeadersMiddleware, create_app
 # before it is even handed to the app (API Gateway allows up to 10 MB).
 MAX_EVENT_BODY_BYTES = 4 * 1024 * 1024
 
-# docs/index.html, bundled next to this module by scripts/deploy_demo.sh.
-# Absent in normal installs, where /console simply 404s and / stays JSON.
-# The same document is the landing page (served at / to clients that prefer
-# HTML) and the console (served at /console) — full feature parity by
-# construction; curl and API clients keep the JSON index at /.
+# Site pages, bundled next to this module by scripts/deploy_demo.sh. Absent
+# in normal installs, where the HTML routes 404 and / stays JSON. The landing
+# page (docs/landing.html) is served at / to clients that prefer HTML; the
+# MiR console keeps /console (plus /mir), and the VDA 5050 and Omron ARCL
+# app pages get their own routes. curl and API clients keep the JSON index.
 CONSOLE_FILE = Path(__file__).with_name("console.html")
+LANDING_FILE = Path(__file__).with_name("landing.html")
+SITE_PAGES = {
+    "vda5050": Path(__file__).with_name("vda5050.html"),
+    "omron": Path(__file__).with_name("omron.html"),
+}
 
 # The console is a single inline-script page (hence 'unsafe-inline'); it
 # fetches Google Fonts and, via its ?api= override, talks to arbitrary
@@ -109,9 +114,10 @@ def build_app() -> Starlette:
     fleet_apps = {v: _LazyVersionApp(v, factory=create_fleet_app) for v in fleet_versions}
 
     async def index(request: Request) -> HTMLResponse | JSONResponse:
-        if "text/html" in request.headers.get("accept", "") and CONSOLE_FILE.is_file():
+        page = LANDING_FILE if LANDING_FILE.is_file() else CONSOLE_FILE
+        if "text/html" in request.headers.get("accept", "") and page.is_file():
             return HTMLResponse(
-                CONSOLE_FILE.read_text("utf-8"),
+                page.read_text("utf-8"),
                 headers={
                     "Content-Security-Policy": CONSOLE_CSP,
                     "Vary": "Accept",
@@ -207,6 +213,20 @@ def build_app() -> Starlette:
             headers={"Content-Security-Policy": CONSOLE_CSP},
         )
 
+    def _page_route(page_path: Path):
+        async def page(_request: Request) -> HTMLResponse | JSONResponse:
+            if not page_path.is_file():
+                return JSONResponse(
+                    {"error_code": "404", "error_human": "Page not bundled in this build"},
+                    status_code=404,
+                )
+            return HTMLResponse(
+                page_path.read_text("utf-8"),
+                headers={"Content-Security-Policy": CONSOLE_CSP},
+            )
+
+        return page
+
     async def not_found(_request: Request, _exc: Exception) -> JSONResponse:
         return JSONResponse(
             {
@@ -221,6 +241,8 @@ def build_app() -> Starlette:
         Route("/healthz", healthz),
         Route("/_emulator/diff", emulator_diff),
         Route("/console", console),
+        Route("/mir", console),
+        *[Route(f"/{name}", _page_route(path)) for name, path in SITE_PAGES.items()],
         Mount("/latest", app=version_apps[latest]),
         *[Mount(f"/fleet/{v}", app=app) for v, app in fleet_apps.items()],
         *([Mount("/fleet/latest", app=fleet_apps[fleet_versions[0]])] if fleet_versions else []),

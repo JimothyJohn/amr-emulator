@@ -1,0 +1,20 @@
+# VDA 5050 emulator — embedded MQTT broker + N virtual robots.
+#
+#   docker build -f Dockerfile.vda5050 -t vda5050-emulator .
+#   docker run --rm -p 1883:1883 vda5050-emulator --robots 2
+FROM python:3.12-slim AS build
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+WORKDIR /src
+COPY pyproject.toml uv.lock ./
+COPY packages/vda5050-emulator packages/vda5050-emulator
+RUN uv build --package vda5050-emulator --out-dir /dist
+
+FROM python:3.12-slim
+RUN useradd --create-home --uid 10001 emulator
+COPY --from=build /dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
+USER emulator
+EXPOSE 1883
+ENTRYPOINT ["vda5050-emulator", "--host", "0.0.0.0"]
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
+  CMD ["python", "-c", "import socket; socket.create_connection(('127.0.0.1', 1883), 2).close()"]
