@@ -8,13 +8,13 @@ import asyncio
 import json
 from typing import Any
 
-from vda_harness import Stack, await_error, run, straight_order
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from vda5050_emulator import make_node
 from vda5050_emulator.order import Situation, evaluate
 from vda5050_emulator.validation import validation_errors
 from vda5050_emulator.zones import point_in_polygon
+from vda_harness import Stack, await_error, run, straight_order
 
 GARBAGE = (
     b"",

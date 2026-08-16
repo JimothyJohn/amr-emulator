@@ -4,8 +4,8 @@ map/charging/log actions."""
 
 from __future__ import annotations
 
-from vda_harness import Stack, run, straight_order
 from vda5050_emulator import make_action
+from vda_harness import Stack, run, straight_order
 
 
 def _stamp(state: dict) -> str:

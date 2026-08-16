@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import asyncio
 
-from vda_harness import Stack, await_error, run, straight_order
 from vda5050_emulator import make_action, make_edge, make_node
+from vda_harness import Stack, await_error, run, straight_order
 
 
 def test_accept_and_complete_with_horizon_extension():

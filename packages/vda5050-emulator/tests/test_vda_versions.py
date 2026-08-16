@@ -12,9 +12,9 @@ import asyncio
 import json
 
 import pytest
-from vda_harness import Stack, await_error, run
 from vda5050_emulator import MQTTClient, make_action, make_edge, make_node
 from vda5050_emulator.validation import validation_errors
+from vda_harness import Stack, await_error, run
 
 ALL = ("2.0.0", "2.1.0", "3.0.0")
 V2 = ("2.0.0", "2.1.0")

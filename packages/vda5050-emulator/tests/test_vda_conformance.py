@@ -7,9 +7,9 @@ from __future__ import annotations
 import json
 
 import pytest
-from vda_harness import Stack, run, straight_order
 from vda5050_emulator import MQTTClient, make_action, make_node
 from vda5050_emulator.validation import validation_errors
+from vda_harness import Stack, run, straight_order
 
 VERSIONS = ("2.0.0", "2.1.0", "3.0.0")
 
