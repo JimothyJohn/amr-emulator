@@ -149,12 +149,15 @@ async def _run(args: argparse.Namespace) -> int:
         print(f"time scale: {args.time_scale}x (simulated seconds per wall second)")
     for robot in robots:
         print(f"robot: {robot.topics.prefix}/{{order,instantActions,state,connection,...}}")
-    example = robots[0].topics
-    print("\nfive-minute check with any MQTT client:")
-    print(f"  subscribe: {example.interface_name}/{example.major_version}/+/+/state")
-    print(f"  publish an order to: {example.topic('order')}")
-    print(f"  fault injection (JSON): {example.topic('_emulator')}")
-    print('    e.g. {"emergencyStop": "MANUAL"} or {"battery": {"level": 7}}')
+    if robots:
+        example = robots[0].topics
+        print("\nfive-minute check with any MQTT client:")
+        print(f"  subscribe: {example.interface_name}/{example.major_version}/+/+/state")
+        print(f"  publish an order to: {example.topic('order')}")
+        print(f"  fault injection (JSON): {example.topic('_emulator')}")
+        print('    e.g. {"emergencyStop": "MANUAL"} or {"battery": {"level": 7}}')
+    else:
+        print("broker-only mode (--robots 0): point adapters or robots at it")
 
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()

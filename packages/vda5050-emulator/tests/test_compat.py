@@ -74,6 +74,24 @@ def test_instant_action_redelivery_is_idempotent():
     run(body())
 
 
+def test_legacy_field_works_on_2_0_0_despite_vacuous_schema():
+    # The 2.0.0 instantActions schema has no required fields, so a 1.x-shaped
+    # message raises no schema problems — the compat path must key off the
+    # missing `actions` field, not the schema verdict (found live against
+    # Isaac Mission Dispatch driving the MiR adapter).
+    async def body():
+        async with Stack("2.0.0") as stack:
+            await stack.m.publish_raw(
+                "instantActions", _legacy_instant_actions(stack, "instantaction-n0")
+            )
+            entry = await stack.m.action_status(
+                "instantaction-n0", statuses=("FINISHED", "FAILED"), timeout=10
+            )
+            assert entry["actionStatus"] in ("FINISHED", "FAILED")
+
+    run(body())
+
+
 def test_spec_shaped_actions_field_still_works_untouched():
     async def body():
         async with Stack("2.1.0") as stack:

@@ -169,6 +169,12 @@ app = create_app("3.8.1")   # ASGI app: run under uvicorn, or hit with httpx/Tes
 - `packages/vda5050-emulator/` — VDA 5050 mobile-robot emulator (asyncio;
   embedded MQTT 3.1.1 broker, virtual AGV core, fleet-control test client).
   Bundles the official schemas for every tracked protocol version.
+- `packages/mir-vda5050-adapter/` — VDA 5050 robot-side adapter for MiR:
+  drive a MiR robot (real or emulated) from any VDA 5050 master control.
+  Validated live: Isaac Mission Dispatch → adapter → mir-emulator.
+- `packages/arcl-emulator/` — Omron ARCL (LD/HD AMR) emulator: line-based
+  TCP protocol per the public I617-E-02 reference manual, with the fleet
+  queuing loop, docking/charging and fault injection.
 - `packages/mir-emulator/` — the emulator library (Starlette; spec-driven
   routes + behavior overlays). Bundles all tracked spec files.
 - `packages/mir-spec-scraper/` — portal login, listing parser, selection

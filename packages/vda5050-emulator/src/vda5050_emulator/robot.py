@@ -635,11 +635,13 @@ class VirtualAGV:
             self.report_semantic_error(
                 "validation", {"topic": "instantActions"}, f"schema violations: {problems[:3]}"
             )
-            # Compatibility: some deployed masters (e.g. NVIDIA Isaac Mission
-            # Dispatch) still publish the VDA 5050 1.x message shape — the
-            # array is named `instantActions` instead of `actions`. The
-            # deviation stays reported above, but the actions are executed so
-            # off-spec masters remain usable against the emulator.
+        # Compatibility: some deployed masters (e.g. NVIDIA Isaac Mission
+        # Dispatch) still publish the VDA 5050 1.x message shape — the array
+        # is named `instantActions` instead of `actions`. Schema-flagged
+        # deviations stay reported above, but the actions are executed so
+        # off-spec masters remain usable. (The 2.0.0 schema has no required
+        # fields at all, so this cannot key off the schema verdict.)
+        if not isinstance(actions, list):
             actions = doc.get("instantActions")
             if not isinstance(actions, list):
                 return

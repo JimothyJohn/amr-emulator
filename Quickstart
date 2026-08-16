@@ -92,6 +92,8 @@ test_unit() {
         --cov=packages/mir-emulator/src/mir_emulator \
         --cov=packages/mir-spec-scraper/src/mir_spec_scraper \
         --cov=packages/vda5050-emulator/src/vda5050_emulator \
+        --cov=packages/mir-vda5050-adapter/src/mir_vda5050_adapter \
+        --cov=packages/arcl-emulator/src/arcl_emulator \
         --cov-report=term --cov-fail-under=82; then
         log "ERROR: unit tests failed"
         return 1

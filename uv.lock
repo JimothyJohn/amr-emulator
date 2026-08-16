@@ -10,10 +10,12 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "arcl-emulator",
     "mir-client",
     "mir-emulator",
     "mir-mcp",
     "mir-spec-scraper",
+    "mir-vda5050-adapter",
     "vda5050-emulator",
 ]
 
@@ -59,6 +61,10 @@ sdist = { url = "https://files.pythonhosted.org/packages/3b/72/5562aabb8dd7181e8
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b0/7b/90df4a0a816d98d6ea26f559d87836d494a2cf1fcf063be67df50a7bcc30/anyio-4.14.1-py3-none-any.whl", hash = "sha256:4e5533c5b8ff0a24f5d7a176cbe6877129cd183893f66b537f8f227d10527d72", size = 124875, upload-time = "2026-06-24T20:56:04.413Z" },
 ]
+
+[[package]]
+name = "arcl-emulator"
+source = { editable = "packages/arcl-emulator" }
 
 [[package]]
 name = "attrs"
@@ -759,6 +765,20 @@ dependencies = [
 requires-dist = [
     { name = "httpx", specifier = ">=0.27" },
     { name = "pdfplumber", specifier = ">=0.11" },
+]
+
+[[package]]
+name = "mir-vda5050-adapter"
+source = { editable = "packages/mir-vda5050-adapter" }
+dependencies = [
+    { name = "httpx" },
+    { name = "vda5050-emulator" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "vda5050-emulator", editable = "packages/vda5050-emulator" },
 ]
 
 [[package]]
