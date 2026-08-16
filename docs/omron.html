@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Theme before first paint: stored choice wins, else OS preference. */
+(function () {
+  var t;
+  try { t = localStorage.getItem("amr-theme"); } catch (e) {}
+  if (t !== "dark" && t !== "light") {
+    t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  document.documentElement.setAttribute("data-theme", t);
+})();
+</script>
+<title>Omron ARCL Emulator — an LD/HD AMR that speaks ARCL, no robot required · advin.io</title>
+<meta name="description" content="Faithful emulator of Omron's ARCL telnet interface (LD/HD AMRs + Fleet Manager queuing), implemented from the public I617-E-02 reference manual with per-command provenance. An advin.io project.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23e1261c'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%23e1261c'/><circle cx='66' cy='46' r='7' fill='%23e1261c'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Chakra+Petch:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --paper: #fcfcfc;
+  --ink: #0d0d0d;
+  --ink-soft: #3d3d3d;
+  --faint: #8a8a8a;
+  --line: #e3e3e0;
+  --card: #ffffff;
+  --code-bg: #f4f4f1;
+  --accent: #e1261c;
+  --accent-ink: #ffffff;
+  --good: #1d7a4f;
+  --bad: #c0392b;
+  --display: 'Big Shoulders Display', sans-serif;
+  --label: 'Chakra Petch', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0d0d0d;
+  --ink: #fcfcfc;
+  --ink-soft: #cfcfcb;
+  --faint: #8a8a8a;
+  --line: #262626;
+  --card: #151515;
+  --code-bg: #1a1a18;
+  --good: #4cc38a;
+  --bad: #ef6a5a;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.65 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+a { color: var(--ink); text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+
+.app-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  position: sticky; top: 0; z-index: 50;
+}
+.app-header .bar { display: flex; align-items: center; gap: 1rem; padding: .65rem 1.25rem; max-width: 68rem; margin: 0 auto; }
+.wordmark {
+  font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: .02em;
+  text-decoration: none; color: var(--ink);
+}
+.wordmark:hover { color: var(--accent); }
+.app-name {
+  font-family: var(--label); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--faint); text-decoration: none; border-left: 2px solid var(--accent); padding-left: .75rem;
+}
+.app-header nav { margin-left: auto; display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
+.app-header nav a {
+  font-family: var(--label); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
+  text-decoration: none; color: var(--ink-soft); padding: .25rem 0; border-bottom: 2px solid transparent;
+}
+.app-header nav a:hover, .app-header nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+#theme-toggle {
+  background: none; border: 1px solid var(--line); color: var(--ink); border-radius: .35rem;
+  width: 2rem; height: 2rem; cursor: pointer; font-size: .95rem; line-height: 1;
+}
+#theme-toggle:hover { border-color: var(--accent); }
+
+.hero { padding: 3.5rem 0 2.25rem; border-bottom: 1px solid var(--line); }
+.hero h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 1.02; margin: 0 0 .75rem; letter-spacing: .01em; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .sub { color: var(--ink-soft); max-width: 44rem; font-size: 1.06rem; }
+.kicker { font-family: var(--label); font-size: .78rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8rem; }
+
+section { padding: 2.4rem 0; border-bottom: 1px solid var(--line); }
+section h2 { font-family: var(--display); font-weight: 700; font-size: 1.9rem; margin: 0 0 .35rem; }
+section .lead { color: var(--ink-soft); max-width: 46rem; margin-top: 0; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); gap: 1rem; margin-top: 1.4rem; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: .5rem; padding: 1.1rem 1.2rem; }
+.card h3 { margin: 0 0 .4rem; font-family: var(--label); font-size: .95rem; letter-spacing: .04em; }
+.card .tag { display: inline-block; font-family: var(--label); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border-radius: .3rem; padding: .15rem .5rem; margin-bottom: .6rem; }
+.card p { margin: .3rem 0; color: var(--ink-soft); font-size: .92rem; }
+
+pre, .term {
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: .5rem;
+  padding: .9rem 1rem; overflow-x: auto; font-family: var(--mono); font-size: .8rem; line-height: 1.55;
+}
+code { font-family: var(--mono); font-size: .85em; background: var(--code-bg); border-radius: .25rem; padding: .08em .3em; }
+pre code { background: none; padding: 0; }
+.prompt { color: var(--accent); user-select: none; }
+.dim { color: var(--faint); }
+
+.tabs { display: flex; gap: .4rem; margin: 1.1rem 0 .6rem; flex-wrap: wrap; }
+.tabs button {
+  font-family: var(--label); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+  background: none; border: 1px solid var(--line); color: var(--ink-soft); border-radius: .35rem;
+  padding: .4rem .8rem; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tabpanel[hidden] { display: none; }
+
+table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-size: .88rem; }
+th, td { text-align: left; border-bottom: 1px solid var(--line); padding: .5rem .6rem; vertical-align: top; }
+th { font-family: var(--label); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+td code { white-space: nowrap; }
+
+.btn {
+  font-family: var(--label); letter-spacing: .06em; text-transform: uppercase; font-size: .8rem;
+  background: var(--accent); color: var(--accent-ink); border: none; border-radius: .4rem;
+  padding: .55rem 1rem; cursor: pointer; text-decoration: none; display: inline-block;
+}
+.btn.secondary { background: none; color: var(--ink); border: 1px solid var(--line); }
+.btn:hover { filter: brightness(1.08); }
+
+.note { font-size: .82rem; color: var(--faint); }
+.ok { color: var(--good); }
+.err { color: var(--bad); }
+
+footer { padding: 2rem 0 3rem; color: var(--faint); font-size: .85rem; }
+footer .fm { font-family: var(--label); letter-spacing: .05em; }
+footer a { color: var(--ink-soft); }
+
+@media (max-width: 640px) {
+  .app-header .bar { flex-wrap: wrap; gap: .5rem .9rem; padding: .6rem 1rem; }
+  .app-header nav { margin-left: 0; width: 100%; }
+  .hero { padding: 2.2rem 0 1.6rem; }
+}
+
+.term { min-height: 18rem; max-height: 26rem; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+.term .in { color: var(--accent); font-weight: 600; }
+.term-controls { display: flex; align-items: center; gap: .7rem; margin: 1rem 0 .7rem; flex-wrap: wrap; }
+#term-speed { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: .35rem; padding: .45rem .5rem; font-family: var(--label); font-size: .8rem; }
+.wrapcode { white-space: normal; word-break: break-all; display: inline-block; }
+#cmd-table td:nth-child(3) { white-space: nowrap; color: var(--faint); }
+
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="bar">
+    <a class="wordmark" href="https://advin.io" rel="noopener">advin.io</a>
+    <a class="app-name" href="/">AMR Emulator</a>
+    <nav aria-label="Emulator apps">
+      <a href="/vda5050">VDA 5050</a>
+      <a href="/console">MiR</a>
+      <a href="/omron" aria-current="page">Omron ARCL</a>
+      <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">GitHub</a>
+      <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">◐</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="hero">
+  <p class="kicker">Omron ARCL · LD / HD series</p>
+  <h1>An Omron AMR that speaks ARCL, <em>no robot required</em></h1>
+  <p class="sub">A faithful emulator of the <strong>Advanced Robotics Command
+  Language</strong> — the plaintext TCP interface Omron LD/HD robots and the
+  Fleet Manager expose to WMS/MES integrations. Implemented from Omron's
+  publicly published reference manual, with a virtual AMR that drives between
+  goals, docks, charges and broadcasts the real <code>QueueUpdate:</code> lifecycle.</p>
+</div>
+
+<section id="provenance">
+  <h2>Built from the official manual, provably</h2>
+  <p class="lead">Omron publishes ARCL as a PDF reference manual only. Every
+  implemented command in this emulator cites the manual page its syntax and
+  response format were transcribed from.</p>
+  <div class="cards">
+    <div class="card">
+      <span class="tag">Source</span>
+      <h3>I617-E-02 (18448-000 Rev B)</h3>
+      <p>"Advanced Robotics Command Language Mobile Robots Reference Guide",
+      Omron Robotics and Safety Technologies — 257 pages, retrieved 2026-08-16.</p>
+      <p><code class="wrapcode">sha256 5d06a0a9671972b82dc14bfe52e663e557520c6f3b8851d5a3aba4c891c27b3a</code></p>
+    </div>
+    <div class="card">
+      <span class="tag">Method</span>
+      <h3>Per-command provenance</h3>
+      <p>The derived command table (<code>specs/arcl_commands.json</code>) records a
+      manual page per command; the queue lifecycle follows pages 44&ndash;45 and
+      217&ndash;237. Deviations and image-only literals are flagged as derived.</p>
+    </div>
+  </div>
+</section>
+
+<section id="quickstart">
+  <h2>Telnet in, like the real thing</h2>
+<pre><span class="prompt">$</span> uv run arcl-emulator          <span class="dim"># ARCL server on :7171, password "adept"</span>
+<span class="prompt">$</span> telnet 127.0.0.1 7171
+Enter password:</pre>
+  <p class="lead">Then drive it exactly like a Fleet Manager integration would:
+  <code>queuepickup Goal1</code>, <code>status</code>, <code>queueShow</code>,
+  <code>dock</code> — with <code>--time-scale 60</code> the virtual AMR crosses the
+  plant in seconds.</p>
+</section>
+
+<section id="terminal">
+  <h2>A recorded session, replayed</h2>
+  <p class="lead">This transcript was recorded from the emulator (10&times; time
+  scale) — password login, a <code>queuePickup</code> with the full
+  <code>QueueUpdate:</code> lifecycle, and docking. Exact bytes, including ARCL's
+  command echo.</p>
+  <div class="term-controls">
+    <button class="btn" id="term-play">Replay session</button>
+    <label class="note" for="term-speed">speed</label>
+    <select id="term-speed" aria-label="Playback speed">
+      <option value="120">natural</option>
+      <option value="45" selected>fast</option>
+      <option value="8">instant-ish</option>
+    </select>
+  </div>
+  <div class="term" id="term" role="log" aria-label="Recorded ARCL session" aria-live="off"></div>
+</section>
+
+<section id="reference">
+  <h2>Command reference (implemented surface)</h2>
+  <p class="lead">Generated from the emulator's own provenance table — command,
+  what it does, and the I617-E-02 page it was transcribed from.</p>
+  <div id="cmd-table"></div>
+  <p class="note">Deliberately not implemented (documented in the package):
+  config import/export, data store, I/O banks, tasks/macros, custom commands,
+  localization scanning. The <code>emulator</code> command (battery, e-stop,
+  teleport, time scale) is a non-standard fault-injection side channel and is
+  labeled as such in the help banner.</p>
+</section>
+
+<section id="next">
+  <h2>Want this for your fleet manager?</h2>
+  <p class="lead">MiR REST, VDA&nbsp;5050, Omron ARCL — same pattern each time:
+  official spec as the oracle, provenance with hashes, adversarial tests, live
+  validation against independent implementations. If your integration needs an
+  emulator for another manufacturer, that pattern is repeatable.</p>
+  <p><a class="btn" href="mailto:nick@advin.io">Talk to advin.io</a>
+     <a class="btn secondary" href="/vda5050">See the VDA 5050 app</a></p>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fm">Handcrafted systems for industrial intelligence — an
+      <a href="https://advin.io" rel="noopener">advin.io</a> project · Dallas, TX</div>
+    <div>Get help: <a href="mailto:nick@advin.io">nick@advin.io</a> ·
+      <a href="https://github.com/JimothyJohn/amr-emulator/issues" rel="noopener">GitHub issues</a></div>
+  </div>
+</footer>
+<script>
+(function () {
+  var btn = document.getElementById("theme-toggle");
+  function apply(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("amr-theme", t); } catch (e) {}
+  }
+  btn.addEventListener("click", function () {
+    apply(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+})();
+</script>
+
+<script>
+/* Session recorded from arcl-emulator (exact bytes; command echo included). */
+const SESSION = [["out","Enter password:"],["in","adept"],["out","Welcome to the server."],["out","You are connected to an ARCL emulator (amr-emulator)."],["out","Commands:"],["out","applicationFaultClear       Clears an application fault [afc]"],["out","dock                        Sends the robot to the dock"],["out","getGoals                    gets a list of goals in the map (for use with goto)"],["out","oneLineStatus               gets the status of the robot on one line"],["out","queuePickup                 queues a pickup request [qp]"],["out","queuePickupDropoff          queues a pickup and dropoff request [qpd]"],["out","queueShow                   shows the queue [qs]"],["out","status                      gets the status of the robot"],["out","\u2026 (24 commands \u2014 full banner in the emulator)"],["out","End of commands"],["in","status"],["out","status"],["out","Status: Available"],["out","StateOfCharge: 100.0"],["out","Location: 0 0 0"],["out","LocalizationScore: 0.988000"],["out","Temperature: 34"],["in","queuepickup Goal1"],["out","queuepickup Goal1"],["out","QueueUpdate: PICKUP1 JOB1 10 Pending None Goal \"Goal1\" none 08/16/2026 21:40:10 None None 0"],["out","queuepickup goal \"Goal1\" with priority 10, id PICKUP1 and job_id JOB1 successfully queued"],["out","QueueUpdate: PICKUP1 JOB1 10 InProgress UnAllocated Goal \"Goal1\" \"Sim_LD90\" 08/16/2026 21:40:10 None None 0"],["out","QueueUpdate: PICKUP1 JOB1 10 InProgress Allocated Goal \"Goal1\" \"Sim_LD90\" 08/16/2026 21:40:10 None None 0"],["out","QueueUpdate: PICKUP1 JOB1 10 InProgress BeforePickup Goal \"Goal1\" \"Sim_LD90\" 08/16/2026 21:40:10 None None 0"],["out","QueueUpdate: PICKUP1 JOB1 10 InProgress Driving Goal \"Goal1\" \"Sim_LD90\" 08/16/2026 21:40:10 None None 0"],["out","QueueUpdate: PICKUP1 JOB1 10 InProgress AfterPickup Goal \"Goal1\" \"Sim_LD90\" 08/16/2026 21:40:10 None None 0"],["out","QueueUpdate: PICKUP1 JOB1 10 Completed None Goal \"Goal1\" \"Sim_LD90\" 08/16/2026 21:40:10 08/16/2026 21:40:17 0"],["in","status"],["out","status"],["out","Status: Arrived at Goal1"],["out","StateOfCharge: 100.0"],["out","Location: 5000 0 0"],["out","LocalizationScore: 0.988000"],["out","Temperature: 34"],["in","dock"],["out","dock"],["out","DockingState: Docking ForcedState: Unforced ChargeState: Not"],["out","DockingState: Docked ForcedState: Unforced ChargeState: Bulk"]];
+/* The emulator's own provenance table (specs/arcl_commands.json). */
+const COMMANDS = {"_meta":"Derived from I617-E-02 (see registry.json). Each entry cites the manual page its syntax/response format was transcribed from.","commands":{"help":{"page":131,"scope":"amr+fleet","responses":["Commands:","<name> <description> ...","End of commands"]},"echo":{"page":null,"scope":"amr+fleet","notes":"with no args gets echo, with args sets echo (help list, p.132)"},"quit":{"page":37,"scope":"amr+fleet","notes":"closes the connection"},"status":{"page":241,"scope":"amr","responses":["Status: <status>","StateOfCharge: <Percentage>","Location: <X> <Y> <Theta>","LocalizationScore: <score>","Temperature: <degrees>"]},"oneLineStatus":{"page":153,"scope":"amr","responses":["Status: <status> StateOfCharge: <percentage> Location: <X_mm> <Y_mm> <heading> Temperature: <degrees>"]},"getGoals":{"page":121,"scope":"amr","responses":["Goal: <name> ...","End of goals"]},"getRoutes":{"page":130,"scope":"amr","responses":["Routes","Route: <routeName> ...","End of routes"]},"getDateTime":{"page":120,"scope":"amr+fleet","responses":["DateTime: MM/DD/YYYY HH:MM:SS"]},"odometer":{"page":151,"scope":"amr","responses":["Odometer: <mm> mm <deg> deg <sec> sec"]},"odometerReset":{"page":152,"scope":"amr","responses":["Reset odometer"]},"dock":{"page":71,"scope":"amr","responses":["DockingState transitions Undocked->Docking->Docked, ChargeState per p.246 status examples"]},"undock":{"page":246,"scope":"amr","responses":["DockingState transitions Docked->Undocking->Undocked"]},"stop":{"page":243,"scope":"amr","responses":["Stopping"]},"say":{"page":239,"scope":"amr","notes":"text-to-speech; emulator acknowledges silently"},"arclSendText":{"page":61,"scope":"amr+fleet","notes":"sends the given message to all ARCL clients"},"faultsGet":{"page":102,"scope":"amr","responses":["Fault list, End of FaultsGet"]},"applicationFaultSet":{"page":59,"scope":"amr","responses":["ApplicationFaultSet set <name>","Fault: Fault_<drivingFault or criticalFault> <name> \"<short_desc>\""]},"applicationFaultClear":{"page":57,"scope":"amr","responses":["ApplicationFaultClear cleared <name>"]},"applicationFaultQuery":{"page":58,"scope":"amr","responses":["ApplicationFaultQuery: Fault_<...> <name>","End of ApplicationFaultQuery"]},"queuePickup":{"page":217,"scope":"fleet","shortcut":"qp","syntax":"queuePickup <goalName> [priority|\"default\"] [jobId]","responses":["queuepickup goal \"<goalName>\" with priority <priority>, id <id> and job_id <jobId> successfully queued","QueueUpdate: <id> <jobId> <priority> <status> <substatus> Goal \"<goalName>\" <robotName> <queuedDate> <queuedTime> <completedDate> <completedTime> <failedCount>"]},"queuePickupDropoff":{"page":220,"scope":"fleet","shortcut":"qpd","syntax":"queuePickupDropoff <pickupGoal> <dropoffGoal> [priority] [jobId]"},"queueQuery":{"page":225,"scope":"fleet","shortcut":"qq","syntax":"queueQuery <type> <value> [echoString]","responses":["QueueQuery: <id> <jobId> <priority> <status> <substatus> Goal \"<goalName>\" <robotName> <queued date> <queued time> <completed date> <completed time> <echostring> <failed count>","EndQueueQuery"]},"queueShow":{"page":231,"scope":"fleet","shortcut":"qs","responses":["QueueShow: ... rows for every queue item","EndQueueShow"]},"queueCancel":{"page":190,"scope":"fleet","shortcut":"qc","syntax":"queueCancel <type> <value> [echoString|\"default\"] [reason]"},"errors":{"page":42,"responses":["CommandError: <command> <args>","CommandErrorDescription: <detail>"],"example":"CommandError: queuePickup goal2 / CommandErrorDescription: No goal 'goal2'"},"job_status_conditions":{"page":44,"statuses":["Pending","Available","Interrupted","InProgress","Completed","Cancelling","Cancelled","UnAvailable","BeforeModify","InteruptedByModify","AfterModify"],"in_progress_substatuses":["UnAllocated","Allocated","BeforePickup","BeforeDropoff","BeforeEvery","Before","Buffering","Buffered","Driving","After","AfterEvery","AfterPickup","AfterDropoff"]},"_emulator":{"page":null,"scope":"emulator-only","notes":"NON-STANDARD side channel: 'emulator battery <pct>', 'emulator estop on|off', 'emulator teleport <x_mm> <y_mm> <heading_deg>', 'emulator timescale <n>'. Not part of ARCL."}}};
+
+(function () {
+  const term = document.getElementById("term");
+  const play = document.getElementById("term-play");
+  let timer = null;
+  function reset() { term.textContent = ""; if (timer) { clearTimeout(timer); timer = null; } }
+  function show(i) {
+    if (i >= SESSION.length) { play.disabled = false; return; }
+    const [kind, text] = SESSION[i];
+    const div = document.createElement("div");
+    if (kind === "in") { div.className = "in"; div.textContent = "> " + text; }
+    else { div.textContent = text; }
+    term.appendChild(div);
+    term.scrollTop = term.scrollHeight;
+    const speed = parseInt(document.getElementById("term-speed").value, 10);
+    timer = setTimeout(function () { show(i + 1); }, kind === "in" ? speed * 6 : speed);
+  }
+  play.addEventListener("click", function () { reset(); play.disabled = true; show(0); });
+
+  /* command reference table */
+  const skip = { "_meta": 1, "errors": 1, "job_status_conditions": 1 };
+  const rows = Object.keys(COMMANDS.commands).filter(function (k) { return !skip[k]; });
+  const table = document.createElement("table");
+  table.innerHTML = "<thead><tr><th>Command</th><th>Notes / response shape</th><th>Manual page</th></tr></thead>";
+  const tbody = document.createElement("tbody");
+  rows.forEach(function (name) {
+    const c = COMMANDS.commands[name];
+    const tr = document.createElement("tr");
+    const shortcut = c.shortcut ? " (" + c.shortcut + ")" : "";
+    const notes = c.syntax || c.notes || (c.responses ? c.responses[0] : "");
+    const page = c.page === null ? "—" : "p. " + c.page;
+    [name + shortcut, notes, name === "_emulator" ? "non-standard" : page].forEach(function (v, idx) {
+      const td = document.createElement("td");
+      if (idx === 0) { const code = document.createElement("code"); code.textContent = v; td.appendChild(code); }
+      else { td.textContent = v; }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  document.getElementById("cmd-table").appendChild(table);
+})();
+</script>
+
+</body>
+</html>
