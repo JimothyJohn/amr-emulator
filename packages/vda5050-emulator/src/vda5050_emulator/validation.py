@@ -39,7 +39,9 @@ def schema(message_type: str, tag: str = SCHEMA_TAG) -> dict:
 @cache
 def _validator(message_type: str, tag: str = SCHEMA_TAG) -> jsonschema.protocols.Validator:
     doc = schema(message_type, tag)
-    cls = jsonschema.validators.validator_for(doc)
+    # Some upstream schemas carry a $schema URI jsonschema cannot resolve
+    # (e.g. a draft 2020-12 variant spelling); they are all draft-2020-12.
+    cls = jsonschema.validators.validator_for(doc, default=jsonschema.Draft202012Validator)
     cls.check_schema(doc)
     return cls(doc)
 

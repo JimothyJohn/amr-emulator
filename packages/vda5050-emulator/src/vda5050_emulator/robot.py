@@ -533,7 +533,7 @@ class VirtualAGV:
         self.edge_states = []
         first = doc["nodes"][0]
         for node in doc["nodes"][1:]:
-            self.node_states.append(_node_state(node))
+            self.node_states.append(_node_state(node, self.profile.version))
         for edge in doc["edges"]:
             self.edge_states.append(_edge_state(edge))
         for element in (*doc["nodes"], *doc["edges"]):
@@ -585,7 +585,7 @@ class VirtualAGV:
                         self.engine.enqueue([run])
                 continue
             self._nodes[seq] = node
-            self.node_states.append(_node_state(node))
+            self.node_states.append(_node_state(node, self.profile.version))
             for action in node.get("actions", ()):
                 self._register_order_action(action, node)
         for edge in doc["edges"]:
@@ -640,7 +640,8 @@ class VirtualAGV:
             self._start_instant_action(action)
 
     def _start_instant_action(self, action: dict) -> None:
-        action_type = action.get("actionType", "")
+        # 2.0.0 names the field actionName in instant actions; 2.1+ actionType.
+        action_type = action.get("actionType") or action.get("actionName") or ""
         action_id = action.get("actionId") or f"instant-{uuid.uuid4()}"
         state = {"actionId": action_id, "actionStatus": "WAITING", "actionType": action_type}
         self.instant_action_states.append(state)
@@ -835,7 +836,19 @@ class VirtualAGV:
             status = self.zones.status(zone_set.zone_set_id, zone["zoneId"])
             if status == "GRANTED":
                 continue
-            if status is None:
+            inside = any(
+                z["zoneId"] == zone["zoneId"]
+                for _, z in self.zones.release_zones_at(self.x, self.y, self.map_id)
+            )
+            if inside and status in ("REVOKED", "EXPIRED"):
+                # 6.4.3: release lost while inside -> releaseLossBehavior.
+                behavior = zone.get("releaseLossBehavior", "STOP")
+                if behavior in ("CONTINUE", "EVACUATE"):
+                    continue  # keep moving (EVACUATE: leaving is continuing)
+                self.report_semantic_error(
+                    "release_lost", {"zoneId": zone["zoneId"]}, "release lost inside zone"
+                )
+            elif status is None:
                 self.zones.request_access(zone_set, zone)
                 self.touch("zone request")
             self._set_driving(False)
@@ -1275,14 +1288,18 @@ def _order_digest(doc: dict) -> str:
     return json.dumps(content, sort_keys=True)
 
 
-def _node_state(node: dict) -> dict:
+def _node_state(node: dict, version: str = "3.0.0") -> dict:
     state = {
         "nodeId": node["nodeId"],
         "sequenceId": node["sequenceId"],
         "released": bool(node["released"]),
     }
-    if isinstance(node.get("nodePosition"), dict):
-        state["nodePosition"] = node["nodePosition"]
+    position = node.get("nodePosition")
+    # nodePosition inside a nodeState is optional everywhere; the 2.0.0 schema
+    # additionally requires theta inside it, so an order position without
+    # theta cannot be echoed there.
+    if isinstance(position, dict) and (version != "2.0.0" or "theta" in position):
+        state["nodePosition"] = position
     return state
 
 

@@ -1,7 +1,15 @@
-# Drop-in MiR robots for an integration test stack:
+# Drop-in AMR emulators for an integration test stack:
 #   docker compose up -d
-#   curl http://localhost:8080/api/v2.0.0/status  (auth: distributor/sha256)
+#   curl http://localhost:8080/api/v2.0.0/status  (MiR; auth: distributor/sha256)
+#   mosquitto_sub -p 1883 -t 'vda5050/v3/+/+/state'  (VDA 5050)
 services:
+  vda5050:
+    build:
+      context: .
+      dockerfile: Dockerfile.vda5050
+    command: ["--robots", "2"]
+    ports:
+      - "1883:1883"
   mir-381:
     build: .
     command: ["--mir-version", "3.8.1"]

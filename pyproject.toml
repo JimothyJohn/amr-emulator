@@ -13,6 +13,10 @@ dev = [
     "ty>=0.0.61",
     "pytest-cov>=7.1.0",
     "openapi-python-client>=0.29.0",
+    # Interop oracle for the embedded VDA 5050 MQTT broker: proves the
+    # hand-rolled broker speaks MQTT 3.1.1 with the ecosystem's canonical
+    # client. Dev-only; zero required transitive dependencies (Eclipse, EPL-2.0).
+    "paho-mqtt>=2.1.0",
 ]
 
 [tool.pytest.ini_options]

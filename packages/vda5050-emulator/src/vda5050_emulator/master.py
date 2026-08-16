@@ -151,6 +151,10 @@ class MasterControl:
             "actionType": action_type,
             "blockingType": blocking_type,
         }
+        if self.profile.version == "2.0.0":
+            # The 2.0.0 instantActions schema names the type field actionName
+            # (and requires it); later versions use actionType everywhere.
+            action["actionName"] = action_type
         if parameters:
             action["actionParameters"] = [
                 {"key": key, "value": value} for key, value in parameters.items()
@@ -178,7 +182,13 @@ class MasterControl:
         timeout: float = 10.0,
         past: bool = True,
     ) -> dict:
-        """Wait for (or find) a state message matching ``predicate``."""
+        """Wait for (or find) a state message matching ``predicate``.
+
+        With no predicate this returns the robot's *latest* known state
+        (waiting for the first one if none arrived yet).
+        """
+        if predicate is None and self.states:
+            return self.states[-1]
         seen = 0 if past else len(self.states)
         deadline = asyncio.get_running_loop().time() + timeout
         while True:

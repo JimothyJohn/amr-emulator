@@ -1,0 +1,52 @@
+# Weekly watch on github.com/VDA5050/VDA5050: re-download every pinned tag and
+# fail if the vendored schemas drifted (a moved tag) or a newer protocol tag
+# was published. Drift files/updates a vda5050-attention issue instead of
+# silently rotting — the fix (vendor the new tag, add a profile) needs a human.
+
+name: VDA5050 schema sync
+
+on:
+  schedule:
+    - cron: "43 5 * * 2" # Tuesdays 05:43 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check vendored schemas against upstream
+        id: check
+        run: |
+          set +e
+          python3 scripts/sync_vda5050_schemas.py --check 2> problems.txt
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat problems.txt
+
+      - name: File an issue when upstream moved
+        if: steps.check.outputs.status != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          SUMMARY=$(head -c 1500 problems.txt)
+          existing=$(gh issue list --repo "$REPO" --label vda5050-attention --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "VDA5050 schema check failed: $SUMMARY"
+          else
+            gh issue create --repo "$REPO" \
+              --title "VDA5050 upstream schemas need attention" \
+              --label vda5050-attention \
+              --body "scripts/sync_vda5050_schemas.py --check reported: $SUMMARY
+
+          Run \`uv run python scripts/sync_vda5050_schemas.py\` (optionally with \`--tag <new>\`) to re-vendor, then add or update the matching profile in packages/vda5050-emulator/src/vda5050_emulator/profiles.py and let CI prove conformance."
+          fi
