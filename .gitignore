@@ -15,3 +15,10 @@ coverage.xml
 scrape-report.md
 *-report.html
 mir-report.html
+
+# Site pages staged next to the serverless module (deploy-time bundling and
+# local previews copy docs/*.html here; never commit the copies).
+packages/mir-emulator/src/mir_emulator/console.html
+packages/mir-emulator/src/mir_emulator/landing.html
+packages/mir-emulator/src/mir_emulator/vda5050.html
+packages/mir-emulator/src/mir_emulator/omron.html
