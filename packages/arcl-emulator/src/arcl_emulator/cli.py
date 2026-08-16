@@ -41,7 +41,10 @@ async def _run(args: argparse.Namespace) -> int:
     server = ArclServer(host=args.host, port=args.port, password=args.password, sim=sim)
     await server.start()
     print(f"arcl-emulator: ARCL server on {args.host}:{server.port} (robot {args.robot_name})")
-    print(f"login password: {args.password}")
+    if args.password == DEFAULT_PASSWORD:
+        print(f"login password: {args.password} (factory default)")
+    else:
+        print("login password: <set via --password>")
     print("\nfive-minute check:")
     print(f"  telnet {args.host} {server.port}   (or: nc {args.host} {server.port})")
     print("  <password>  ->  queuepickup Goal1  ->  watch QueueUpdate lines")

@@ -66,7 +66,7 @@ class ArclServer:
         try:
             await session.run()
         except (ConnectionError, asyncio.IncompleteReadError, asyncio.LimitOverrunError):
-            pass
+            pass  # normal client-side disconnects and oversized lines end the session quietly
         except Exception:  # noqa: S110 — one broken client must not kill the server
             pass
         finally:

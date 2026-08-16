@@ -55,7 +55,7 @@ def test_zone_set_stored_disabled_then_enabled():
             assert entry["zoneSetStatus"] == "DISABLED"
             assert entry["mapId"] == "map-0"
             await enable(stack, "zs-1")
-            state = await stack.m.next_state(
+            await stack.m.next_state(
                 lambda s: any(
                     z["zoneSetId"] == "zs-1" and z["zoneSetStatus"] == "ENABLED"
                     for z in s.get("zoneSets", [])
@@ -132,7 +132,7 @@ def test_release_zone_gates_until_granted_then_request_removed_after_exit():
             assert latest["lastNodeId"] == "n1"
             assert latest["driving"] is False
             await stack.m.respond(request["requestId"], "GRANTED")
-            state = await stack.m.next_state(
+            await stack.m.next_state(
                 lambda s: s["lastNodeId"] == "n3" and not s["nodeStates"], timeout=15
             )
             # Robot exited the zone on the way to n3 -> request dropped.
