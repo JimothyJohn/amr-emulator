@@ -24,10 +24,10 @@ def log(side: str, text: str) -> None:
 
 def api(path: str, body=None):
     data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(
+    req = urllib.request.Request(  # noqa: S310 — local Mission Dispatch API
         f"{API}{path}", data=data, headers={"Content-Type": "application/json"}
     )
-    with urllib.request.urlopen(req, timeout=10) as resp:
+    with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310
         return json.load(resp)
 
 
@@ -88,9 +88,12 @@ def main() -> None:
     logger.start()
 
     robot = api("/robot")[0]
-    log("MD api", f"robot carter01 online={robot['status']['online']} "
-                  f"battery={robot['status']['battery_level']:.1f}% "
-                  f"pose=({robot['status']['pose']['x']:.2f},{robot['status']['pose']['y']:.2f})")
+    log(
+        "MD api",
+        f"robot carter01 online={robot['status']['online']} "
+        f"battery={robot['status']['battery_level']:.1f}% "
+        f"pose=({robot['status']['pose']['x']:.2f},{robot['status']['pose']['y']:.2f})",
+    )
 
     mission = {
         "robot": "carter01",
@@ -127,19 +130,18 @@ def main() -> None:
         key = (status["state"], json.dumps(status["node_status"], sort_keys=True))
         if key not in seen_states:
             seen_states.add(key)
-            nodes = {
-                k: v["state"]
-                for k, v in status["node_status"].items()
-                if k != "root"
-            }
+            nodes = {k: v["state"] for k, v in status["node_status"].items() if k != "root"}
             log("MD api", f"mission {status['state']} nodes={nodes}")
         if status["state"] in ("COMPLETED", "FAILED"):
             break
         time.sleep(1)
 
     robot = api("/robot")[0]
-    log("MD api", f"final robot pose=({robot['status']['pose']['x']:.2f},"
-                  f"{robot['status']['pose']['y']:.2f}) state={robot['status']['state']}")
+    log(
+        "MD api",
+        f"final robot pose=({robot['status']['pose']['x']:.2f},"
+        f"{robot['status']['pose']['y']:.2f}) state={robot['status']['state']}",
+    )
     stop.set()
     client.loop_stop()
     client.disconnect()

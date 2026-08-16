@@ -14,7 +14,6 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-
 from vda5050_connector.action import NavigateThroughNodes, NavigateToNode, ProcessVDAAction
 from vda5050_connector.srv import GetState, SupportedActions
 from vda5050_msgs.msg import AGVPosition, BatteryState, CurrentAction, SafetyState, Velocity

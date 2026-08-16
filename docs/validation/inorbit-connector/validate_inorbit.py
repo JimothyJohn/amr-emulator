@@ -56,28 +56,25 @@ async def main() -> None:
     last = ""
     deadline = time.monotonic() + 90
     while time.monotonic() < deadline:
+
+        def digest(doc):
+            statuses = [a.get("actionStatus") for a in doc.get("actionStates", [])]
+            return f"{doc.get('lastNodeId')}|{len(doc.get('nodeStates', []))}|{statuses}"
+
         try:
             state = await master.next_state(
-                lambda s: (
-                    f"{s.get('lastNodeId')}|{len(s.get('nodeStates', []))}"
-                    f"|{[a.get('actionStatus') for a in s.get('actionStates', [])]}"
-                )
-                != last,
-                timeout=30,
-                past=False,
+                lambda s, seen=last: digest(s) != seen, timeout=30, past=False
             )
         except TimeoutError:
             break
-        last = (
-            f"{state.get('lastNodeId')}|{len(state.get('nodeStates', []))}"
-            f"|{[a.get('actionStatus') for a in s.get('actionStates', [])] if (s := state) else []}"
-        )
+        last = digest(state)
+        acts = state.get("actionStates", [])
         log(
             "robot>us",
             f"state: lastNodeId={state.get('lastNodeId')!r} "
             f"seq={state.get('lastNodeSequenceId')} "
             f"nodeStates={len(state.get('nodeStates', []))} "
-            f"actions={[(a.get('actionType'), a.get('actionStatus')) for a in state.get('actionStates', [])]} "
+            f"actions={[(a.get('actionType'), a.get('actionStatus')) for a in acts]} "
             f"errors={[e.get('errorType') for e in state.get('errors', [])]}",
         )
         if state.get("lastNodeId") == "wp2" and not state.get("nodeStates"):
