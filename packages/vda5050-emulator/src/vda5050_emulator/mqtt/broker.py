@@ -147,6 +147,7 @@ class Broker:
         client_id = packet.client_id or f"auto-{next(self._auto_ids)}"
         previous = self._sessions.get(client_id)
         if previous is not None:
+            log.debug("takeover of client %r", client_id)
             await self._abort(previous)  # session takeover: old will fires
         session = _Session(client_id, reader, writer)
         if packet.will_topic is not None:
@@ -158,6 +159,7 @@ class Broker:
             )
         session.keepalive = packet.keepalive
         self._sessions[client_id] = session
+        log.debug("client %r connected (keepalive=%s)", client_id, packet.keepalive)
         await session.send(codec.ConnAck(codec.CONNACK_ACCEPTED))
         return session
 
@@ -206,6 +208,7 @@ class Broker:
             qos = min(requested_qos, 1)
             session.subscriptions[topic_filter] = qos
             granted.append(qos)
+            log.debug("client %r subscribed %r", session.client_id, topic_filter)
         await session.send(codec.SubAck(packet_id=packet.packet_id, return_codes=tuple(granted)))
         for topic_filter, _requested in packet.topics:
             for topic, retained in list(self._retained.items()):
@@ -218,9 +221,12 @@ class Broker:
                 self._retained[message.topic] = message
             else:
                 self._retained.pop(message.topic, None)
+        matched = 0
         for session in list(self._sessions.values()):
             if any(codec.topic_matches(f, message.topic) for f in session.subscriptions):
+                matched += 1
                 await self._deliver(session, message, retain=False)
+        log.debug("routed %r to %d subscriber(s)", message.topic, matched)
 
     async def _deliver(self, session: _Session, message: Message, *, retain: bool) -> None:
         qos = min(
@@ -243,11 +249,13 @@ class Broker:
         )
         try:
             await session.send(publish)
-        except (ConnectionError, RuntimeError):
+        except (ConnectionError, RuntimeError) as exc:
+            log.debug("delivery to %r failed (%r); aborting it", session.client_id, exc)
             await self._abort(session)
 
     async def _abort(self, session: _Session) -> None:
         """Abnormal termination: fire the last will, then drop the connection."""
+        log.debug("aborting client %r (will=%s)", session.client_id, session.will is not None)
         if self._sessions.get(session.client_id) is session:
             del self._sessions[session.client_id]
         will, session.will = session.will, None

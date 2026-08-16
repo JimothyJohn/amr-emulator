@@ -201,3 +201,29 @@ def test_other_profiles_publish_valid_state(version):
                 assert not validation_errors("state", doc, tag=version)
 
     run(body())
+
+
+def test_rejection_error_survives_status_polling():
+    """Regression: on 2.x five semantic errors share the wire name
+    "orderError"; the poll loop's MiR-unreachable retraction used to clear
+    them all by type, racing rejection errors away before a state publish
+    could capture them (intermittent CI failure)."""
+
+    async def body():
+        async with Stack() as stack:
+            nodes, edges = stack.order(order_id="o-persist")
+            nodes[1]["actions"] = [make_action("pick")]
+            await stack.master.send_order(nodes, edges, order_id="o-persist")
+            await stack.master.next_state(
+                lambda s: any(e["errorType"] == "orderError" for e in s["errors"]),
+                timeout=30,
+            )
+            # Dozens of successful /status polls later the error must remain
+            # (Table 9: until a new order is accepted).
+            await asyncio.sleep(1.0)
+            state = await stack.master.next_state(timeout=5)
+            assert any(e["errorType"] == "orderError" for e in state["errors"]), (
+                "rejection error was cleared by the poll loop"
+            )
+
+    run(body())

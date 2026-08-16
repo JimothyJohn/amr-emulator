@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+import logging
 import math
 import uuid
 from dataclasses import dataclass
@@ -37,6 +38,8 @@ from vda5050_emulator.topics import TopicBase
 from vda5050_emulator.validation import validation_errors
 
 from .mir import MiRClient
+
+log = logging.getLogger(__name__)
 
 _V2_LEVEL = {"WARNING": "WARNING", "URGENT": "WARNING", "CRITICAL": "FATAL", "FATAL": "FATAL"}
 
@@ -214,9 +217,18 @@ class MiRVDA5050Adapter:
             try:
                 status = await self.mir.status()
             except (httpx.HTTPError, OSError):
-                self._report("not_available", {}, "MiR REST API unreachable")
+                self._report(
+                    "not_available",
+                    {},
+                    "MiR REST API unreachable",
+                    condition_key="mir-unreachable",
+                )
                 continue
-            self.errors.clear_condition(self.profile.error_type("not_available"))
+            # Clear ONLY the unreachable error. On 2.x several semantic errors
+            # share the wire name "orderError", so clearing by type alone here
+            # raced order-rejection reports away before a state publish could
+            # capture them (the source of the intermittent CI failure).
+            self.errors.clear_condition(self.profile.error_type("not_available"), "mir-unreachable")
             self._ingest_status(status)
             self._advance_traversal()
             await self._check_completion()
@@ -285,6 +297,7 @@ class MiRVDA5050Adapter:
         while True:
             message = await self.client.messages.get()
             name = message.topic.rsplit("/", 1)[1]
+            log.debug("adapter dispatching inbound %r", name)
             try:
                 doc = json.loads(message.payload.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError):
@@ -332,6 +345,7 @@ class MiRVDA5050Adapter:
 
     async def _on_order(self, doc: dict) -> None:
         problems = validation_errors("order", doc, tag=self.profile.version)
+        log.debug("order schema problems: %d", len(problems))
         if problems:
             self._report(
                 "validation",
@@ -340,6 +354,13 @@ class MiRVDA5050Adapter:
             )
             return
         decision = order_mod.evaluate(doc, self._situation())
+        log.debug(
+            "order %r verdict=%s key=%s detail=%r",
+            doc.get("orderId"),
+            decision.verdict,
+            decision.error_key,
+            decision.detail,
+        )
         if decision.verdict == "ignore":
             if _digest(doc) != self._last_order_digest:
                 self._report(
@@ -567,7 +588,9 @@ class MiRVDA5050Adapter:
         ]
         await self._publish("factsheet", body, retain=True)
 
-    def _report(self, key: str, references: dict, detail: str = "") -> None:
+    def _report(
+        self, key: str, references: dict, detail: str = "", *, condition_key: str = ""
+    ) -> None:
         if key not in self.profile.error_names:
             return
         level, clear = PREDEFINED.get(SEMANTIC_V3[key], ("WARNING", Clear.NEW_ORDER))
@@ -578,6 +601,7 @@ class MiRVDA5050Adapter:
                 description=detail,
                 level=level,
                 clear=clear,
+                condition_key=condition_key,
             )
         )
         self.touch()

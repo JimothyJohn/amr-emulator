@@ -10,10 +10,13 @@ from __future__ import annotations
 
 import asyncio
 import itertools
+import logging
 from contextlib import suppress
 
 from vda5050_emulator.mqtt import codec
 from vda5050_emulator.mqtt.codec import Message, MQTTError
+
+log = logging.getLogger(__name__)
 
 _ACK_TIMEOUT_S = 10.0
 
@@ -155,6 +158,7 @@ class MQTTClient:
                 packet = await codec.read_packet(self._reader.readexactly, self._max_packet_size)
                 match packet:
                     case codec.Publish():
+                        log.debug("client %r received PUBLISH %r", self.client_id, packet.topic)
                         if packet.qos and packet.packet_id is not None:
                             await self._send(codec.PubAck(packet_id=packet.packet_id))
                         await self.messages.put(
@@ -175,8 +179,13 @@ class MQTTClient:
                         pass
                     case _:
                         raise MQTTError(f"unexpected {type(packet).__name__} from broker")
-        except (MQTTError, asyncio.IncompleteReadError, ConnectionError):
+        except (MQTTError, asyncio.IncompleteReadError, ConnectionError) as exc:
+            log.debug("client %r read loop ended: %r", self.client_id, exc)
             self._teardown()
+        except Exception:
+            log.exception("client %r read loop died unexpectedly", self.client_id)
+            self._teardown()
+            raise
 
     async def _ping_loop(self) -> None:
         interval = max(1.0, self._keepalive / 2)
