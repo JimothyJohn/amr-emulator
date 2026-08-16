@@ -15,6 +15,12 @@ from typing import Any
 # is rejected as unsupported when it arrives in a zone set.
 SUPPORTED_ZONES = ("BLOCKED", "RELEASE", "SPEED_LIMIT", "ACTION")
 
+# Advertised protocolLimits are enforced limits: orders beyond them are
+# rejected with INSUFFICIENT_MEMORY (spec 7.1.2), so the factsheet can never
+# promise more than the robot accepts.
+MAX_ORDER_NODES = 1000
+MAX_ORDER_EDGES = 999
+
 # Optional order/instantAction parameters the emulator acts on. Optional
 # fields not listed here are rejected with UNSUPPORTED_PARAMETER (7.1.1).
 SUPPORTED_OPTIONAL_PARAMETERS = (
@@ -223,8 +229,8 @@ def build_factsheet(config, profile) -> dict:
                 "maximumLoadIdLength": 255,
             },
             "maximumArrayLengths": {
-                "order.nodes": 1000,
-                "order.edges": 999,
+                "order.nodes": MAX_ORDER_NODES,
+                "order.edges": MAX_ORDER_EDGES,
             },
             "timing": {
                 "minimumOrderInterval": 0.1,
@@ -347,7 +353,7 @@ def _build_factsheet_v2(config, profile) -> dict:
         },
         "protocolLimits": {
             "maxStringLens": {"idLen": 255, "idNumericalOnly": False, "loadIdLen": 255},
-            "maxArrayLens": {"order.nodes": 1000, "order.edges": 999},
+            "maxArrayLens": {"order.nodes": MAX_ORDER_NODES, "order.edges": MAX_ORDER_EDGES},
             "timing": {
                 "minOrderInterval": 0.1,
                 "minStateInterval": config.min_state_interval,

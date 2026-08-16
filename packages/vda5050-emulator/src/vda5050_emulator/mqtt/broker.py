@@ -26,6 +26,13 @@ log = logging.getLogger(__name__)
 
 _CONNECT_TIMEOUT_S = 10.0
 
+# A subscriber that stops reading its socket fills its TCP buffer and would
+# otherwise block the *publisher's* routing coroutine in drain() forever
+# (head-of-line blocking across clients). Delivery is bounded: a session that
+# cannot absorb a message within this window is aborted (its will fires) so
+# every healthy client keeps its traffic.
+_DELIVERY_TIMEOUT_S = 1.0
+
 
 class _Session:
     def __init__(
@@ -79,10 +86,12 @@ class Broker:
         self._server = await asyncio.start_server(self._handle_connection, self._host, self._port)
 
     async def stop(self) -> None:
+        # Close client transports BEFORE awaiting wait_closed(): since
+        # Python 3.12 Server.wait_closed() also waits for in-flight
+        # connection handlers, so awaiting it first deadlocks whenever any
+        # client is still connected (found by the broker-death torture test).
         if self._server is not None:
             self._server.close()
-            await self._server.wait_closed()
-            self._server = None
         # Broker shutdown is not a client failure: close without firing wills.
         for session in list(self._sessions.values()):
             session.will = None
@@ -92,6 +101,9 @@ class Broker:
             with suppress(asyncio.CancelledError):
                 await task
         self._sessions.clear()
+        if self._server is not None:
+            await self._server.wait_closed()
+            self._server = None
 
     async def disconnect_client(self, client_id: str) -> bool:
         """Abruptly sever a client's connection (no DISCONNECT) so its will fires."""
@@ -248,8 +260,9 @@ class Broker:
             packet_id=next(self._packet_ids) if qos else None,
         )
         try:
-            await session.send(publish)
-        except (ConnectionError, RuntimeError) as exc:
+            async with asyncio.timeout(_DELIVERY_TIMEOUT_S):
+                await session.send(publish)
+        except (TimeoutError, ConnectionError, RuntimeError) as exc:
             log.debug("delivery to %r failed (%r); aborting it", session.client_id, exc)
             await self._abort(session)
 
@@ -266,6 +279,12 @@ class Broker:
     def _close_transport(self, session: _Session) -> None:
         if not session.closed.is_set():
             session.closed.set()
+            # abort(), not close(): close() flushes buffered writes first, and
+            # a backpressured (stuck-consumer) transport never flushes — its
+            # connection_lost would never fire and the handler task would
+            # linger forever in read. Aborting drops the buffer immediately.
+            with suppress(ConnectionError, RuntimeError):
+                session.writer.transport.abort()
             self._close_writer(session.writer)
 
     def _close_writer(self, writer: asyncio.StreamWriter) -> None:

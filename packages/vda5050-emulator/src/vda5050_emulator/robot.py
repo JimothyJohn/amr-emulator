@@ -487,6 +487,17 @@ class VirtualAGV:
                 f"schema violations: {problems[:3]}",
             )
             return
+        if (
+            len(doc["nodes"]) > factsheet_mod.MAX_ORDER_NODES
+            or len(doc["edges"]) > factsheet_mod.MAX_ORDER_EDGES
+        ):
+            # 7.1.2: reject orders beyond the factsheet's advertised limits.
+            self.report_semantic_error(
+                "insufficient_memory",
+                {"topic": "order", "orderId": str(doc.get("orderId", ""))},
+                f"order exceeds advertised limits ({len(doc['nodes'])} nodes)",
+            )
+            return
         decision = order_mod.evaluate(doc, self._situation())
         if decision.verdict == "ignore":
             digest = _order_digest(doc)
@@ -699,6 +710,21 @@ class VirtualAGV:
                 "validation",
                 {"topic": "zoneSet", "zoneSetId": zone_set["zoneSetId"]},
                 f"unsupported zone types: {sorted(unsupported)}",
+            )
+            return
+        from .zones import is_simple_polygon
+
+        bad_polygons = [
+            zone["zoneId"]
+            for zone in zone_set.get("zones", ())
+            if not is_simple_polygon(zone.get("vertices", []))
+        ]
+        if bad_polygons:
+            # 7.6: fewer than three vertices is invalid; only simple polygons.
+            self.report_semantic_error(
+                "validation",
+                {"topic": "zoneSet", "zoneSetId": zone_set["zoneSetId"]},
+                f"non-simple or degenerate zone polygons: {bad_polygons[:3]}",
             )
             return
         if not self.zones.add(zone_set):
@@ -1120,6 +1146,15 @@ class VirtualAGV:
 
     def _clear_order_execution(self) -> None:
         """6.6.7: node/edge states empty, ids kept, requests removed."""
+        # Actions on nodes the robot never reached are still WAITING and were
+        # never handed to the engine, so the engine's cancel pass cannot see
+        # them. Without failing them here the robot is never idle again and
+        # rejects every future order with OTHER_ORDER_ACTIVE (found by the
+        # hibernation-mid-drive torture test).
+        for pending_run in self._runs.values():
+            if pending_run.origin != "instant" and pending_run.status == "WAITING":
+                self.set_action_status(pending_run, "FAILED", result="order cleared")
+                pending_run.finished_event.set()
         self.node_states = []
         self.edge_states = []
         self._edges = {}

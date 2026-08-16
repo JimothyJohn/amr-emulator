@@ -21,6 +21,38 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
+def is_simple_polygon(vertices: list[dict]) -> bool:
+    """True when the closed polygon has >= 3 vertices and no two
+    non-adjacent edges properly cross (spec 7.6: "Only simple polygons
+    ... shall be used"; fewer than three vertices is invalid). Collinear
+    points and slivers are allowed — only genuine self-intersection and
+    degenerate vertex counts are rejected."""
+    n = len(vertices)
+    if n < 3:
+        return False
+    points = [(float(v["x"]), float(v["y"])) for v in vertices]
+
+    def orient(a, b, c):
+        val = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+        if abs(val) < 1e-12:
+            return 0
+        return 1 if val > 0 else -1
+
+    def crosses(p1, p2, p3, p4):
+        o1, o2 = orient(p1, p2, p3), orient(p1, p2, p4)
+        o3, o4 = orient(p3, p4, p1), orient(p3, p4, p2)
+        return o1 != o2 and o3 != o4 and 0 not in (o1, o2, o3, o4)
+
+    segments = [(points[i], points[(i + 1) % n]) for i in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            if j == i or (j == i + 1) or (i == 0 and j == n - 1):
+                continue  # adjacent segments share an endpoint by construction
+            if crosses(*segments[i], *segments[j]):
+                return False
+    return True
+
+
 def point_in_polygon(x: float, y: float, vertices: list[dict]) -> bool:
     """Ray-casting test; polygon is closed implicitly (spec 7.6)."""
     inside = False

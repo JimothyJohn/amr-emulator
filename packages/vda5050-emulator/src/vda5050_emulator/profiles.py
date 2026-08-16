@@ -31,6 +31,7 @@ _ERRORS_V3 = {
     "other_order_active": "OTHER_ORDER_ACTIVE",
     "start_node_out_of_range": "START_NODE_OUT_OF_RANGE",
     "no_route_to_target": "NO_ROUTE_TO_TARGET",
+    "insufficient_memory": "INSUFFICIENT_MEMORY",
     "not_available": "MOBILE_ROBOT_NOT_AVAILABLE",
     "unknown_map": "UNKNOWN_MAP_ID",
     "no_order_to_cancel": "NO_ORDER_TO_CANCEL",
@@ -62,6 +63,7 @@ _ERRORS_V2 = {
     "no_order_to_cancel": "noOrderToCancel",
     "duplicate_map": "mapError",
     "localization": "localizationError",
+    "insufficient_memory": "orderError",
 }
 
 _ACTIONS_V2_0 = {

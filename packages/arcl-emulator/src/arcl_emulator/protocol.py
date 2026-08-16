@@ -20,6 +20,10 @@ from .server import DEFAULT_PASSWORD, DEFAULT_PORT, HELP_LINES, SHORTCUTS, Job, 
 
 MAX_LINE = 4096
 
+# A connection that never completes login must not hold a session slot
+# forever (half-open TCP connections are routine on factory networks).
+LOGIN_TIMEOUT_S = 30.0
+
 
 class ArclServer:
     def __init__(
@@ -29,10 +33,12 @@ class ArclServer:
         port: int = DEFAULT_PORT,
         password: str = DEFAULT_PASSWORD,
         sim: Sim | None = None,
+        login_timeout: float = LOGIN_TIMEOUT_S,
     ) -> None:
         self.host = host
         self.port = port
         self.password = password
+        self.login_timeout = login_timeout
         self.sim = sim or Sim()
         self.sim.broadcast = self.broadcast
         self._server: asyncio.Server | None = None
@@ -109,7 +115,11 @@ class Session:
     async def run(self) -> None:
         self.send("Enter password:")
         await self.writer.drain()
-        password = await self._read_line()
+        try:
+            async with asyncio.timeout(self.server.login_timeout):
+                password = await self._read_line()
+        except TimeoutError:
+            return  # half-open connection: reclaim the session slot
         if password is None:
             return
         if password != self.server.password:
