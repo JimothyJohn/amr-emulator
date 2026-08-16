@@ -39,7 +39,13 @@ def _generate(spec_path: Path, package: str, out_dir: Path, extra_config: str = 
         # into the repo picks up our config and into /tmp does not, and the
         # drift check can never pass.
         config.write("post_hooks:\n")
-        config.write('  - "ruff check . --fix --isolated --line-length 100"\n')
+        # --select pins the exact rule set: ruff's --isolated defaults have
+        # changed across minor versions (0.16 started flagging generated
+        # docstrings), and the drift check needs generator output to be
+        # stable under ruff upgrades.
+        config.write(
+            '  - "ruff check . --fix --isolated --select E4,E7,E9,F,I --line-length 100"\n'
+        )
         config.write('  - "ruff format . --isolated --line-length 100"\n')
         config.write(extra_config)
         config_path = config.name

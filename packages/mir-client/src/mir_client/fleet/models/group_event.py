@@ -1,14 +1,12 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
-
-from typing import cast
-import datetime
 
 if TYPE_CHECKING:
     from ..models.group_1 import Group1

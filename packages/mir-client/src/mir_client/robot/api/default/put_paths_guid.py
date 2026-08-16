@@ -4,13 +4,12 @@ from urllib.parse import quote
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_path import GetPath
 from ...models.put_path import PutPath
+from ...types import Response
 
 
 def _get_kwargs(

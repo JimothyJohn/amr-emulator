@@ -3,13 +3,12 @@ from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_setup_laser_serials import GetSetupLaserSerials
 from ...models.put_setup_laser_serials import PutSetupLaserSerials
+from ...types import Response
 
 
 def _get_kwargs(

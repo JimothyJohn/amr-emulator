@@ -1,17 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-
-from ..types import UNSET, Unset
 
 from ..models.brake_state import BrakeState
 from ..models.gripper_state import GripperState
 from ..models.height_state import HeightState
-from typing import cast
-
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="HookData")
 

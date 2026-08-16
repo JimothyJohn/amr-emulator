@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-
-from ..types import UNSET, Unset
 
 from ..models.lock_zone_state import LockZoneState
 from ..models.shape_type import ShapeType
 from ..models.zone_type import ZoneType
-from typing import cast
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.directional_zone import DirectionalZone

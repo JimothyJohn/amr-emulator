@@ -1,16 +1,14 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 
-from ..types import UNSET, Unset
-
 from ..models.serial_order_priority import SerialOrderPriority
-from typing import cast
-from uuid import UUID
-import datetime
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.phase import Phase

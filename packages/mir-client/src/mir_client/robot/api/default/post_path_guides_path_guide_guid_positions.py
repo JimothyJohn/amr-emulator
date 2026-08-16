@@ -4,13 +4,12 @@ from urllib.parse import quote
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_path_guide_positions import GetPathGuidePositions
 from ...models.post_path_guide_positions import PostPathGuidePositions
+from ...types import Response
 
 
 def _get_kwargs(
