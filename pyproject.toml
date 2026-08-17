@@ -55,9 +55,15 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S105", "S106", "S310"] # hardcoded test creds / test URLs are intentional
+# Interop harnesses deliberately shell out to docker with fixed argv and bind
+# 0.0.0.0 so the container can reach the host-side broker.
+"interop/**" = ["S104", "S603", "S607"]
 
 [tool.ty.src]
 exclude = [
     "packages/mir-client/src/mir_client/robot",
     "packages/mir-client/src/mir_client/fleet",
+    # ROS 2 code that only runs inside the interop container (rclpy et al.
+    # are not installable on the host).
+    "interop/otto-vda5050/mock_adapter",
 ]
