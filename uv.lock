@@ -17,6 +17,7 @@ members = [
     "mir-spec-scraper",
     "mir-vda5050-adapter",
     "vda5050-emulator",
+    "vda5050-master",
 ]
 
 [manifest.dependency-groups]
@@ -1626,6 +1627,16 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "jsonschema", specifier = ">=4.20" }]
+
+[[package]]
+name = "vda5050-master"
+source = { editable = "packages/vda5050-master" }
+dependencies = [
+    { name = "vda5050-emulator" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "vda5050-emulator", editable = "packages/vda5050-emulator" }]
 
 [[package]]
 name = "websockets"
