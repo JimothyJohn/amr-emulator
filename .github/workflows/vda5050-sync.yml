@@ -1,7 +1,10 @@
 # Weekly watch on github.com/VDA5050/VDA5050: re-download every pinned tag and
-# fail if the vendored schemas drifted (a moved tag) or a newer protocol tag
-# was published. Drift files/updates a vda5050-attention issue instead of
-# silently rotting — the fix (vendor the new tag, add a profile) needs a human.
+# detect drift (a moved tag) or a newer protocol tag. Like the MiR scrape, the
+# mechanical half self-updates: the sync script re-vendors the schemas (pinned
+# tags plus any new upstream tag), the test suite judges the result, and a
+# green re-vendor lands as a PR whose body carries what changed. Only what a
+# machine cannot do — adding a version profile for a new protocol tag, or
+# judging a rewritten upstream tag — falls back to a vda5050-attention issue.
 
 name: VDA5050 schema sync
 
@@ -12,17 +15,20 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: vda5050-sync
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
       issues: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
 
       - name: Check vendored schemas against upstream
         id: check
@@ -32,21 +38,89 @@ jobs:
           echo "status=$?" >> "$GITHUB_OUTPUT"
           cat problems.txt
 
-      - name: File an issue when upstream moved
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         if: steps.check.outputs.status != '0'
+        with:
+          python-version: "3.12"
+
+      - name: Re-vendor pinned tags plus any new upstream tag
+        id: sync
+        if: steps.check.outputs.status != '0'
+        run: |
+          set +e
+          TAG_ARGS=""
+          new_tags=$(grep -o 'new upstream tags available: .*' problems.txt | head -1 | cut -d: -f2- | tr -d ' ')
+          for tag in ${new_tags//,/ }; do
+            TAG_ARGS="$TAG_ARGS --tag $tag"
+          done
+          echo "new_tags=$new_tags" >> "$GITHUB_OUTPUT"
+          # shellcheck disable=SC2086
+          python3 scripts/sync_vda5050_schemas.py $TAG_ARGS 2> sync-problems.txt
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat sync-problems.txt
+
+      - name: Test the emulator against the re-vendored schemas
+        id: test
+        if: steps.check.outputs.status != '0' && steps.sync.outputs.status == '0'
+        run: |
+          uv sync --locked --all-packages
+          set +e
+          uv run pytest -q packages/vda5050-emulator -m "not integration" 2>&1 | tail -20 > test-tail.txt
+          echo "status=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          cat test-tail.txt
+
+      - name: Compose the PR body
+        if: steps.test.outputs.status == '0'
+        env:
+          NEW_TAGS: ${{ steps.sync.outputs.new_tags }}
+        run: |
+          {
+            echo "Weekly VDA5050 sync detected upstream changes; the schemas were re-vendored by \`scripts/sync_vda5050_schemas.py\` and the emulator suite passed against them."
+            echo
+            echo "\`--check\` reported:"
+            echo '```'
+            head -c 1500 problems.txt
+            echo '```'
+            if [ -n "$NEW_TAGS" ]; then
+              echo
+              echo "**New protocol tag(s) vendored: $NEW_TAGS** — the emulator does not serve a version until it has a profile: add one in \`packages/vda5050-emulator/src/vda5050_emulator/profiles.py\` (a follow-up commit on this branch is fine) and let the conformance suite prove it."
+            fi
+            echo
+            echo "If \`--check\` reported a *pinned* tag differing, upstream moved or rewrote an existing tag — read the diff with suspicion before merging."
+          } > sync-report.md
+
+      - name: Open PR with the re-vendored schemas
+        if: steps.test.outputs.status == '0'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          branch: vda5050-sync/update-schemas
+          add-paths: packages/vda5050-emulator/src/vda5050_emulator/schemas
+          commit-message: "feat(specs): re-vendor VDA5050 schemas from upstream"
+          title: "Track VDA5050 upstream schema changes"
+          body-path: sync-report.md
+          labels: specs, automated
+
+      - name: File an issue when self-update was not possible
+        if: >
+          steps.check.outputs.status != '0' &&
+          (steps.sync.outputs.status != '0' || steps.test.outputs.status != '0')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          SUMMARY=$(head -c 1500 problems.txt)
+          SUMMARY=$(head -c 1200 problems.txt)
+          DETAIL=$(cat sync-problems.txt test-tail.txt 2>/dev/null | head -c 1200)
+          BODY="scripts/sync_vda5050_schemas.py --check reported: $SUMMARY
+
+          Automatic re-vendoring did not produce a green suite: $DETAIL
+
+          Run \`uv run python scripts/sync_vda5050_schemas.py\` (optionally with \`--tag <new>\`) locally, fix what the suite flags, and add or update the matching profile in packages/vda5050-emulator/src/vda5050_emulator/profiles.py."
           existing=$(gh issue list --repo "$REPO" --label vda5050-attention --state open --json number --jq '.[0].number')
           if [ -n "$existing" ]; then
-            gh issue comment "$existing" --repo "$REPO" --body "VDA5050 schema check failed: $SUMMARY"
+            gh issue comment "$existing" --repo "$REPO" --body "VDA5050 sync needs attention: $SUMMARY"
           else
             gh issue create --repo "$REPO" \
               --title "VDA5050 upstream schemas need attention" \
               --label vda5050-attention \
-              --body "scripts/sync_vda5050_schemas.py --check reported: $SUMMARY
-
-          Run \`uv run python scripts/sync_vda5050_schemas.py\` (optionally with \`--tag <new>\`) to re-vendor, then add or update the matching profile in packages/vda5050-emulator/src/vda5050_emulator/profiles.py and let CI prove conformance."
+              --body "$BODY"
           fi
