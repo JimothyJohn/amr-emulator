@@ -25,8 +25,34 @@ configured to match the target.
 Robot: `mir_robot_status`, `mir_set_robot_state` (ready/pause/manual),
 `mir_clear_error`, `mir_list_missions`, `mir_queue_mission` (by name or
 guid, optional wait-for-completion), `mir_mission_queue`,
-`mir_cancel_missions`, `mir_read_register`, `mir_write_register`,
+`mir_cancel_missions`, `mir_wait_for` (server-side wait on a condition —
+queue idle, state, errors cleared, battery threshold — with progress
+notifications), `mir_read_register`, `mir_write_register`,
 `mir_manage_faults` (emulator-only fault injection).
+
+## MCP 2.0 agent interface
+
+Built on MCP SDK 2.0 (`MCPServer`), the server is more than a bag of
+tools:
+
+- **Structured output.** Every tool advertises an output schema and
+  returns structured content — agents read fields, not prose. Failures
+  use the `isError` channel (`ToolError`) with the fix spelled out in the
+  message.
+- **Elicitation** (when the client supports it): clearing the whole
+  mission queue asks for confirmation first, and an ambiguous mission
+  name asks which mission was meant (an enum of the matching guids)
+  instead of erroring. Clients without elicitation keep the plain
+  behavior.
+- **Server-side waits.** `mir_wait_for` replaces agent-side polling
+  loops: one call that polls the robot, streams progress notifications,
+  and returns the observed state transitions plus the final status.
+- **Live status resource.** `mir://robot/status` serves the trimmed
+  status document; `mir_wait_for` announces resource updates on every
+  observed state change.
+- **Instructions & caching.** The server ships initialize-time
+  instructions (workflow, guardrails) and marks its static tool/resource
+  lists cacheable.
 
 Fleet: `mir_fleet_robots`, `mir_fleet_dispatch` (serial orders by mission
 name), `mir_fleet_order_status` (check/abort).
