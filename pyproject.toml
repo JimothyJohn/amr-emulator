@@ -30,6 +30,7 @@ testpaths = [
     "packages/mir-vda5050-adapter/tests",
     "packages/arcl-emulator/tests",
     "packages/vda5050-master/tests",
+    "packages/massrobotics-emulator/tests",
 ]
 markers = [
     "integration: tests that boot a real emulator server over TCP",
