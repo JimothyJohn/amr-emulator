@@ -8,9 +8,9 @@ members = ["packages/*"]
 dev = [
     "pytest>=8.0",
     "httpx>=0.27",
-    "hypothesis>=6.165.2",
-    "ruff>=0.16.1",
-    "ty>=0.0.69",
+    "hypothesis>=6.165.5",
+    "ruff>=0.16.3",
+    "ty>=0.0.71",
     "pytest-cov>=7.1.0",
     "openapi-python-client>=0.29.0",
     # Interop oracle for the embedded VDA 5050 MQTT broker: proves the
