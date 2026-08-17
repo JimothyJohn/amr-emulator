@@ -84,13 +84,17 @@ class WebSocket:
         await self._send_frame(OP_PING, payload)
 
     async def close(self, code: int = 1000, reason: str = "") -> None:
-        if self.closed:
-            return
-        self.closed = True
-        self.close_code = code
-        payload = code.to_bytes(2, "big") + reason.encode()[:123]
-        with contextlib.suppress(ConnectionError, RuntimeError):
-            await self._send_frame(OP_CLOSE, payload, even_if_closed=True)
+        # `closed` may already be set by the dropped-connection path in
+        # _read_frame; the transport still must be released below — a
+        # leaked server-side transport keeps the connection attached and
+        # Server.wait_closed() (which waits on active connections since
+        # Python 3.12) hangs forever.
+        if not self.closed:
+            self.closed = True
+            self.close_code = code
+            payload = code.to_bytes(2, "big") + reason.encode()[:123]
+            with contextlib.suppress(ConnectionError, RuntimeError):
+                await self._send_frame(OP_CLOSE, payload, even_if_closed=True)
         try:
             self._writer.close()
             await self._writer.wait_closed()

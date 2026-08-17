@@ -209,6 +209,9 @@ def test_client_rejects_bad_accept_header():
                 b"Connection: Upgrade\r\nSec-WebSocket-Accept: bogus\r\n\r\n"
             )
             await writer.drain()
+            # leaving the transport open would hang Server.wait_closed()
+            # on Python 3.12+, which waits for active connections
+            writer.close()
 
         server = await asyncio.start_server(imposter, "127.0.0.1", 0)
         port = server.sockets[0].getsockname()[1]
