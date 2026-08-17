@@ -61,6 +61,50 @@ intro and mirroring the live console request.)
       a report over a multi-day emulator run charts each day separately
       and groups timeline entries by mission kind.
 
+## Continuous improvement
+
+Standing quality debt from the 2026-08 hardening campaign. The campaign
+fixed 10 production bugs and left 39 torture tests behind, but everything
+below is what separates "passes its own suite" from production-worthy.
+
+- [ ] **Close the conformance loop externally (VDA 5050).** Passing our
+      own torture suite proves consistency, not correctness — the emulator,
+      the adapter, and their tests share assumptions, and the one live
+      validation so far (master control → adapter → mir-emulator) was
+      in-house on both ends. Research independent open-source
+      master-control implementations, pick one, and run it against
+      `vda5050-emulator` for each supported spec version. Acceptance: an
+      external implementation drives a full order lifecycle (dispatch →
+      running → finished, plus a cancel) against the emulator with zero
+      validation failures on either side, reproducible via a documented
+      script or CI job.
+
+- [ ] **File the upstream schema defects at VDA5050/VDA5050.** We carry
+      documented normalizations for the defects recorded in
+      `packages/vda5050-emulator/src/vda5050_emulator/schemas/registry.json`
+      (3.0.0 factsheet trailing commas, `mobileRobotKinematic(s)`
+      required/property mismatch, string-typed pause/cancel booleans,
+      2.1.0 unsatisfiable `blockingTypes` enum, vacuous 2.0.0 factsheet
+      schema). Acceptance: one upstream issue per defect, its URL recorded
+      next to the corresponding normalization in the registry, so the
+      weekly sync tells us when a normalization can be retired.
+
+- [ ] **Performance baseline before performance work.** "Performant" is
+      currently untested — no numbers on the hand-rolled asyncio MQTT
+      broker, concurrent-robot fan-out, or memory over a long soak.
+      Add a repeatable bench script (fixed seed, pinned message mix)
+      before optimizing anything. Acceptance: one command reports p50/p99
+      publish→receive latency and messages/sec at N concurrent robots,
+      plus flat memory over a multi-hour soak, with the numbers committed
+      as the baseline to regress against.
+
+- [ ] **Mutation-test the torture suite.** Coverage says the 39 hardening
+      tests execute the code; mutation catch-rate says whether they would
+      notice a regression. Run `mutmut` over the modules the campaign
+      touched (fault handling, error lifecycle, order evaluator).
+      Acceptance: catch rate recorded, surviving mutants triaged into
+      "test added" or "mutant equivalent, noted" — no silent survivors.
+
 ## Later
 
 - [ ] **ROS-bridge protocol emulation.** Faithful rosbridge
