@@ -97,6 +97,10 @@ below is what separates "passes its own suite" from production-worthy.
       publish→receive latency and messages/sec at N concurrent robots,
       plus flat memory over a multi-hour soak, with the numbers committed
       as the baseline to regress against.
+      *Progress 2026-08-16: `scripts/bench_vda5050.py` is the one command;
+      baselines committed under `docs/bench/` (10 and 50 robots, plus an
+      8-minute soak). Remaining for the checkbox: a dedicated multi-hour
+      soak run (`--duration 7200`) on a quiet machine.*
 
 - [ ] **Mutation-test the torture suite.** Coverage says the 39 hardening
       tests execute the code; mutation catch-rate says whether they would
