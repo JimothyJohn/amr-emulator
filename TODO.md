@@ -78,6 +78,25 @@ below is what separates "passes its own suite" from production-worthy.
       running → finished, plus a cancel) against the emulator with zero
       validation failures on either side, reproducible via a documented
       script or CI job.
+      *Progress 2026-08-16: the MASTER direction is closed —
+      `interop/otto-vda5050/` runs `vda5050-master` against the unmodified
+      OTTO/InOrbit/Ekumen connector (robot side) with full lifecycle +
+      stitched updates and zero validation failures (three upstream
+      connector bugs documented in its README, issue-ready for
+      inorbit-ai/ros_amr_interop). The emulator direction still needs an
+      external MASTER; best candidate found: NVIDIA
+      `isaac_mission_dispatch` (VDA5050-compatible dispatch service).
+      MassRobotics is closed both ways day-one: `interop/massrobotics/`
+      validates the new `massrobotics-emulator` fleet against the official
+      Ajv reference receiver.*
+
+- [ ] **File the OTTO connector bugs at inorbit-ai/ros_amr_interop.**
+      Three found by `interop/otto-vda5050/` (details in its README):
+      required-in-practice `nodePosition.theta`; ONLINE before the
+      controller can receive orders; MQTT thread death on any schema-valid
+      2.0.0 instant action (`actionName` kwarg). Acceptance: one issue per
+      bug, URLs recorded in the interop README; the cancelOrder
+      expected-divergence probe already fails loudly when the fix lands.
 
 - [ ] **File the upstream schema defects at VDA5050/VDA5050.** We carry
       documented normalizations for the defects recorded in
@@ -116,3 +135,16 @@ below is what separates "passes its own suite" from production-worthy.
       Stripe-style reference in favor of linking MiR's official docs. If
       MiR ever unpublishes the Fleet Swagger UI or the portal's REST API
       files, resurrect ours from the scraped registry.
+
+## Open questions for Nick
+
+- 2026-08-16 — **FOX Robotics emulator is blocked on a spec.** You asked
+  for a FOX Robotics emulator alongside Vecna, but FOX publishes no API
+  artifact at all — no developer docs, no swagger, no interop-standard
+  membership (searched foxrobotics.com, press, VDA5050/MassRobotics
+  ecosystems; "FoxAPIs" is an unrelated company). Per the don't-fabricate
+  rule I built the Vecna emulator (MassRobotics interop, their certified
+  standard) and stopped on FOX. If you have FoxBot partner/integration
+  docs, drop them in and the emulator follows the arcl-emulator pattern
+  (provenance registry + derived spec); otherwise say the word and I'll
+  emulate the closest public stand-in instead.
