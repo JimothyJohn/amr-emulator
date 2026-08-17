@@ -52,5 +52,7 @@ validation against the official 2.0.0 schemas.
   harness's phase 3 sends a schema-valid cancelOrder and PASSES only while
   this failure reproduces; when upstream fixes it, the probe fails loudly
   so the note (and the probe) get retired and the CANCELED assertion
-  restored. Both quirks are candidates for issues at
-  inorbit-ai/ros_amr_interop.
+  restored.
+
+Ready-to-file issue bodies for all three: `UPSTREAM_ISSUES.md` in this
+directory. Record the issue URLs here once filed.
