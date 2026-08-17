@@ -13,12 +13,12 @@ import json
 from typing import Any, Literal
 
 import httpx
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from mcp.types import ToolAnnotations
 
 from mir_mcp import client
 
-mcp = FastMCP("mir_mcp")
+mcp = MCPServer("mir_mcp")
 
 STATE_IDS = {"ready": 3, "pause": 4, "manual_control": 11}
 
@@ -122,10 +122,10 @@ async def _target_summary(base: str, resolver) -> dict[str, Any]:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Identify the connected MiR target",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_server_info() -> str:
@@ -157,10 +157,10 @@ async def mir_server_info() -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Discover MiR robots on the network",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_discover_robots(hosts: list[str] | None = None) -> str:
@@ -202,10 +202,10 @@ async def mir_discover_robots(hosts: list[str] | None = None) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Get robot status",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_robot_status() -> str:
@@ -225,10 +225,10 @@ async def mir_robot_status() -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Set robot state (ready / pause / manual)",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_set_robot_state(state: Literal["ready", "pause", "manual_control"]) -> str:
@@ -246,10 +246,10 @@ async def mir_set_robot_state(state: Literal["ready", "pause", "manual_control"]
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Clear robot error state",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_clear_error() -> str:
@@ -267,10 +267,10 @@ async def mir_clear_error() -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="List mission definitions",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_list_missions() -> str:
@@ -289,10 +289,10 @@ async def mir_list_missions() -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Queue a mission",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=False,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
     )
 )
 async def mir_queue_mission(mission: str, wait_seconds: int = 0) -> str:
@@ -325,10 +325,10 @@ async def mir_queue_mission(mission: str, wait_seconds: int = 0) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Show the mission queue",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_mission_queue(queue_id: int | None = None) -> str:
@@ -345,10 +345,10 @@ async def mir_mission_queue(queue_id: int | None = None) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Cancel queued missions",
-        readOnlyHint=False,
-        destructiveHint=True,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_cancel_missions(queue_id: int | None = None) -> str:
@@ -369,10 +369,10 @@ async def mir_cancel_missions(queue_id: int | None = None) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Read a PLC register",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_read_register(register_id: int) -> str:
@@ -386,10 +386,10 @@ async def mir_read_register(register_id: int) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Write a PLC register",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_write_register(register_id: int, value: float) -> str:
@@ -403,10 +403,10 @@ async def mir_write_register(register_id: int, value: float) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Inject or clear emulator faults",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_manage_faults(
@@ -452,10 +452,10 @@ async def mir_manage_faults(
 @mcp.tool(
     annotations=ToolAnnotations(
         title="List the fleet's robots",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_fleet_robots(robot_id: str | None = None) -> str:
@@ -470,10 +470,10 @@ async def mir_fleet_robots(robot_id: str | None = None) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Dispatch a fleet order",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=False,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
     )
 )
 async def mir_fleet_dispatch(missions: list[str], robot_id: str | None = None) -> str:
@@ -512,10 +512,10 @@ async def mir_fleet_dispatch(missions: list[str], robot_id: str | None = None) -
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Check or abort a fleet order",
-        readOnlyHint=False,
-        destructiveHint=True,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_fleet_order_status(serial_order_id: str, abort: bool = False) -> str:
@@ -534,10 +534,10 @@ async def mir_fleet_order_status(serial_order_id: str, abort: bool = False) -> s
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Generate an HTML status report",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_generate_report(
