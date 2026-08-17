@@ -3,11 +3,10 @@ from typing import Any, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
+from ...types import Response
 
 
 def _get_kwargs() -> dict[str, Any]:

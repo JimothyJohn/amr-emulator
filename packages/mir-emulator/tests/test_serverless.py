@@ -46,6 +46,21 @@ def event(
     }
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _pristine_site_pages(tmp_path_factory):
+    """Local previews stage real site pages next to the module (gitignored);
+    these tests assert both bundled and unbundled behavior, so pin the page
+    paths to a private empty directory regardless of workstation state.
+    Function-scoped monkeypatches in individual tests still override this."""
+    mp = pytest.MonkeyPatch()
+    empty = tmp_path_factory.mktemp("no-pages")
+    mp.setattr(serverless, "CONSOLE_FILE", empty / "console.html")
+    mp.setattr(serverless, "LANDING_FILE", empty / "landing.html")
+    mp.setattr(serverless, "SITE_PAGES", {k: empty / f"{k}.html" for k in serverless.SITE_PAGES})
+    yield
+    mp.undo()
+
+
 @pytest.fixture(scope="module")
 def call():
     """One warm 'container' for the module: same cached app across calls."""

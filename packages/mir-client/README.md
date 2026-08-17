@@ -12,7 +12,7 @@ registry. Never hand-edit them.
 from mir_client import robot_client, fleet_client
 from mir_client.robot.api.default import get_status
 
-client = robot_client("http://192.168.12.20")   # or the emulator
+client = robot_client("http://192.168.12.20")  # or the emulator
 status = get_status.sync(client=client)
 print(status.state_text, status.battery_percentage)
 ```
@@ -34,11 +34,11 @@ $ mir-discover --json              # machine-readable
 ```python
 from mir_client import scan_network, connect
 
-for target in scan_network():                 # local /24, ports 80 + 8080
+for target in scan_network():  # local /24, ports 80 + 8080
     print(target.url, target.info.kind, target.info.version)
 
 first = scan_network(["192.168.12.0/24"])[0]  # or a CIDR / host list
-client = connect(first.url)                    # drive the one it found
+client = connect(first.url)  # drive the one it found
 ```
 
 Each candidate gets a cheap TCP connect, then the identification handshake
@@ -56,12 +56,12 @@ MiR software version it reports — and returns the right client:
 ```python
 from mir_client import connect, detect_server
 
-client = connect("http://127.0.0.1:8080")        # robot, fleet, or the
-client = connect("https://demo.example.com")     # multi-version dispatcher
+client = connect("http://127.0.0.1:8080")  # robot, fleet, or the
+client = connect("https://demo.example.com")  # multi-version dispatcher
 client = connect("https://demo.example.com", version="2.14.7")  # pin a mount
 
-info = detect_server("http://127.0.0.1:8080")    # just ask, don't build
-print(info.kind, info.version)                   # e.g. "robot 3.8.1"
+info = detect_server("http://127.0.0.1:8080")  # just ask, don't build
+print(info.kind, info.version)  # e.g. "robot 3.8.1"
 ```
 
 The handshake probes, in order: `/healthz` (dispatcher manifest), `/` (the

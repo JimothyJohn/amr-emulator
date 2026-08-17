@@ -1,0 +1,31 @@
+# Parameters for the unmodified vda5050_connector nodes plus the mock
+# adapter. @MQTT_HOST@ / @MQTT_PORT@ are substituted by entrypoint.sh from
+# the container environment so the connector dials the broker embedded in
+# this repo's interop driver running on the Docker host.
+/vda5050/mqtt_bridge:
+  ros__parameters:
+    mqtt_address: "@MQTT_HOST@"
+    mqtt_port: @MQTT_PORT@
+    mqtt_username: ""
+    mqtt_password: ""
+    vda5050_protocol_version: "2.0.0"
+    interface_name: "uagv"
+    manufacturer_name: "inorbit"
+    serial_number: "OTTO_1"
+
+/vda5050/controller:
+  ros__parameters:
+    robot_name: "OTTO_1"
+    manufacturer_name: "inorbit"
+    serial_number: "OTTO_1"
+    protocol_version: "2.0.0"
+    interface_name: "uagv"
+    # Defaults are 5s/15s; tightened so the interop run reflects order
+    # progress promptly (config only — the connector code is unmodified).
+    state_pub_period: 0.5
+    connection_pub_period: 2.0
+
+/vda5050/mock_adapter:
+  ros__parameters:
+    robot_name: "OTTO_1"
+    manufacturer_name: "inorbit"

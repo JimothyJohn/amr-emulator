@@ -1,0 +1,52 @@
+# Weekly watch on Omron's ARCL reference manual (I617-E-02). The emulator's
+# command set is a human transcription of that PDF, so nothing can be
+# auto-vendored: on drift (a new edition at the "latest" URL) this files or
+# updates an arcl-attention issue asking for a re-verification pass.
+
+name: ARCL manual sync
+
+on:
+  schedule:
+    - cron: "29 5 * * 3" # Wednesdays 05:29 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the vendored transcription's manual against upstream
+        id: check
+        run: |
+          set +e
+          python3 scripts/sync_arcl_manual.py --check 2> problems.txt
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat problems.txt
+
+      - name: File an issue when the manual changed
+        if: steps.check.outputs.status != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          SUMMARY=$(head -c 1500 problems.txt)
+          existing=$(gh issue list --repo "$REPO" --label arcl-attention --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "ARCL manual check failed: $SUMMARY"
+          else
+            gh issue create --repo "$REPO" \
+              --title "Omron ARCL manual needs attention" \
+              --label arcl-attention \
+              --body "scripts/sync_arcl_manual.py --check reported: $SUMMARY
+
+          Re-verify packages/arcl-emulator arcl_commands.json against the new manual edition (page citations included), then update source in specs/registry.json in the same commit."
+          fi

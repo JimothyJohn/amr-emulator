@@ -3,13 +3,12 @@ from typing import Any
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.get_guided_move import GetGuidedMove
 from ...models.put_guided_move import PutGuidedMove
+from ...types import Response
 
 
 def _get_kwargs(

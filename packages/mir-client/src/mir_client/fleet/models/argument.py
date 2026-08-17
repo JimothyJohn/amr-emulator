@@ -5,10 +5,8 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
-from ..types import UNSET, Unset
-
 from ..models.parameter_type import ParameterType
-
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="Argument")
 

@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
-from ..types import UNSET, Unset
-
 from ..models.obstacle_history_clearing import ObstacleHistoryClearing
-from typing import cast
-
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PlannerZone")
 

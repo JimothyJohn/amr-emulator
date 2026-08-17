@@ -908,6 +908,9 @@ def create_fleet_app(
     async def not_found(_request: Request, _exc: Exception) -> JSONResponse:
         return JSONResponse(_error_body(404, "Not found"), status_code=404)
 
+    async def method_not_allowed(_request: Request, _exc: Exception) -> JSONResponse:
+        return JSONResponse(_error_body(405, "Method not allowed"), status_code=405)
+
     middleware = [Middleware(_SecurityHeadersMiddleware)]
     if cors:
         middleware.append(
@@ -935,7 +938,7 @@ def create_fleet_app(
             ),
             *routes,
         ],
-        exception_handlers={404: not_found},
+        exception_handlers={404: not_found, 405: method_not_allowed},
         middleware=middleware,
     )
     app.state.emulator = emulator

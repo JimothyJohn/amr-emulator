@@ -48,10 +48,13 @@ uv pip install \
 
 find "$BUILD_DIR/site" -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
 
-# The console page ships inside the bundle; the same document is served at
-# /console and — to clients that prefer HTML — at / (landing and console are
-# one page, so the two stay in feature parity by construction).
+# Site pages ship inside the bundle: the advin.io landing at /, the MiR
+# console at /console (+ /mir), and the VDA 5050 / Omron ARCL app pages at
+# their own routes.
 cp "$REPO_ROOT/docs/index.html" "$BUILD_DIR/site/mir_emulator/console.html"
+cp "$REPO_ROOT/docs/landing.html" "$BUILD_DIR/site/mir_emulator/landing.html"
+cp "$REPO_ROOT/docs/vda5050.html" "$BUILD_DIR/site/mir_emulator/vda5050.html"
+cp "$REPO_ROOT/docs/omron.html" "$BUILD_DIR/site/mir_emulator/omron.html"
 
 log "Zipping bundle"
 (cd "$BUILD_DIR/site" && zip -qr "$BUILD_DIR/code.zip" .)
@@ -159,6 +162,8 @@ check() { # check <expected_status> <url> [curl args...]
 check 200 "${API_URL}/healthz"
 check 200 "${API_URL}/"
 check 200 "${API_URL}/console"
+check 200 "${API_URL}/vda5050"
+check 200 "${API_URL}/omron"
 check 401 "${API_URL}/latest/api/v2.0.0/status"
 check 401 "${API_URL}/fleet/latest/api/v1/system/version"
 for v in $(curl -s "${API_URL}/healthz" | python3 -c 'import json,sys; print(" ".join(json.load(sys.stdin)["versions"]))'); do

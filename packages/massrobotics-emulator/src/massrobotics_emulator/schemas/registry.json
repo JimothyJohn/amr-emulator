@@ -1,0 +1,20 @@
+{
+  "source": {
+    "repository": "https://github.com/MassRobotics-AMR/AMR_Interop_Standard",
+    "file": "AMR_Interop_Standard.json",
+    "commit": "f9357a423ecabc3f7112e6d10025a5231943ec50",
+    "commit_date": "2021-10-08T09:20:35-04:00",
+    "retrieved": "2026-08-16",
+    "upstream_sha256": "816c8f78e1d280d10983a1bcea69a3c8e6572e5bb6f777a0863e6a5b2c3fc288",
+    "vendored_sha256": "816c8f78e1d280d10983a1bcea69a3c8e6572e5bb6f777a0863e6a5b2c3fc288",
+    "normalizations": []
+  },
+  "notes": [
+    "The schema is vendored byte-for-byte (no normalization needed; it parses and compiles as JSON Schema draft-07, which the reference receiver's Ajv also assumes — the file itself declares no $schema).",
+    "Upstream defect: both example messages in the repo's examples/ directory FAIL the schema — they use uppercase UUIDs while every uuid pattern in the schema requires lowercase hex ('^[0-9a-f]{8}-...'). This emulator always emits lowercase UUIDs.",
+    "Upstream quirk: identityReport.cargoMaxWeight is typed string despite its description saying 'Max weight of cargo in kg'. Emitted as a string here, schema-faithfully.",
+    "Upstream quirk: the current location object names its map reference 'planarDatum' while predictedLocation (path/destinations) names it 'planarDatumUUID'. Both spellings are intentional per the schema and used as-is on the wire.",
+    "statusReport.location requires 'angle' (a quaternion) and 'planarDatum' — stricter than the PDF prose suggests; the reference receiver enforces the schema, so this emulator always sends both.",
+    "path and destinations declare uniqueItems, so consecutive identical predicted locations would be invalid; the movement model guarantees distinct entries."
+  ]
+}

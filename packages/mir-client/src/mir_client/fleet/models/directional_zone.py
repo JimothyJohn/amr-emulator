@@ -5,10 +5,8 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
-from ..types import UNSET, Unset
-
 from ..models.directional_zone_direction import DirectionalZoneDirection
-
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="DirectionalZone")
 

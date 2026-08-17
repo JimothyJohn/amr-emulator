@@ -8,7 +8,7 @@
    OS preference. The main script wires the toggle and syncs the glyph. */
 (function () {
   var t;
-  try { t = localStorage.getItem("mir-console-theme"); } catch (e) {}
+  try { t = localStorage.getItem("amr-theme") || localStorage.getItem("mir-console-theme"); } catch (e) {}
   if (t !== "dark" && t !== "light") {
     t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
@@ -20,7 +20,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%2300bfff'/><rect x='18' y='30' width='64' height='32' rx='6' fill='white'/><circle cx='34' cy='46' r='7' fill='%2300bfff'/><circle cx='66' cy='46' r='7' fill='%2300bfff'/><circle cx='36' cy='70' r='7' fill='white'/><circle cx='64' cy='70' r='7' fill='white'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Open+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 /* MiR brand system — palette and type lifted from mobile-industrial-robots.com:
    cyan #00bfff accent, blue #1a76bc/#105aa8 actions, ink #0c0931, pale cyan
@@ -430,9 +430,31 @@ table.plain td:last-child { color: var(--ink-dim); }
 /* Two rules use --ink as a *fill* (not text); it inverts under the dark
    theme, so re-ground them on stable dark surfaces. */
 :root[data-theme="dark"] footer a { color: var(--brand); }
+.advin-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .45rem 1.25rem; background: var(--ink); color: #b9bdd1;
+  font-size: .84rem;
+}
+.advin-bar .advin-brand { display: flex; align-items: baseline; gap: .55rem; text-decoration: none; color: #fff; }
+/* advin.io's brand face is Comfortaa — wordmarks match the mothership. */
+.advin-bar .advin-brand span, .advin-wordmark { font-family: 'Comfortaa', sans-serif; font-weight: 700; letter-spacing: .03em; }
+.advin-bar .advin-brand small { color: #8a8fa5; text-transform: uppercase; letter-spacing: .08em; font-size: .7rem; }
+.advin-bar nav { display: flex; gap: 1rem; }
+.advin-bar nav a { color: #b9bdd1; text-decoration: none; }
+.advin-bar nav a:hover, .advin-bar nav a[aria-current] { color: #fff; }
 </style>
 </head>
 <body>
+
+<div class="advin-bar">
+  <a class="advin-brand" href="https://advin.io" rel="noopener"><span>advin.io</span><small>AMR Emulator</small></a>
+  <nav aria-label="Emulator apps">
+    <a href="/">Home</a>
+    <a href="/vda5050">VDA 5050</a>
+    <a href="/console" aria-current="page"><strong>MiR</strong></a>
+    <a href="/omron">Omron ARCL</a>
+  </nav>
+</div>
 
 <header>
   <div class="brandbar"></div>
@@ -681,8 +703,11 @@ table.plain td:last-child { color: var(--ink-dim); }
 
   <footer>
     <div>
-      An open-source project by <a href="https://advin.io" rel="noopener">Advin</a> &middot;
-      <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">github.com/JimothyJohn/amr-emulator</a>
+      <strong class="advin-wordmark">advin.io</strong> — Handcrafted systems for industrial intelligence &middot; Dallas, TX<br>
+      An open-source <a href="https://advin.io" rel="noopener">advin.io</a> project &middot;
+      Get help: <a href="mailto:nick@advin.io">nick@advin.io</a> &middot;
+      <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">github.com/JimothyJohn/amr-emulator</a> &middot;
+      Sibling apps: <a href="/vda5050">VDA 5050</a> / <a href="/omron">Omron ARCL</a>
     </div>
   </footer>
 </div>
@@ -715,7 +740,7 @@ syncThemeButton();
 $("theme-toggle").addEventListener("click", () => {
   const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", next);
-  try { localStorage.setItem("mir-console-theme", next); } catch (e) {}
+  try { localStorage.setItem("amr-theme", next); } catch (e) {}
   syncThemeButton();
 });
 

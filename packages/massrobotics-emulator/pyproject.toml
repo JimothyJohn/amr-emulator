@@ -1,0 +1,31 @@
+[project]
+name = "massrobotics-emulator"
+dynamic = ["version"]
+description = "MassRobotics AMR Interoperability Standard emulator — Vecna-class robot fleet (sender) and validating receiver over stdlib WebSockets"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "jsonschema>=4.20",
+    # Shared simulated-time utilities (SimClock/ManualClock) live in the
+    # VDA 5050 package; candidate for extraction into a tiny shared package
+    # if a third emulator needs them.
+    "vda5050-emulator",
+]
+
+[project.scripts]
+massrobotics-emulator = "massrobotics_emulator.cli:main"
+
+[tool.hatch.version]
+path = "src/massrobotics_emulator/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/massrobotics_emulator"]
+
+[tool.uv.sources]
+vda5050-emulator = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

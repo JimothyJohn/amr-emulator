@@ -1,0 +1,17 @@
+{
+  "source": {
+    "document": "Advanced Robotics Command Language Mobile Robots Reference Guide",
+    "document_id": "I617-E-02 (18448-000 Rev B)",
+    "publisher": "Omron Robotics and Safety Technologies, Inc.",
+    "url": "https://assets.omron.eu/downloads/latest/manual/en/i617_advanced_robotics_command_language_(arcl)_reference_manual_en.pdf?v=14",
+    "sha256": "5d06a0a9671972b82dc14bfe52e663e557520c6f3b8851d5a3aba4c891c27b3a",
+    "retrieved": "2026-08-16",
+    "pages": 257
+  },
+  "notes": [
+    "Omron publishes ARCL as a PDF reference manual only (no machine-readable spec).",
+    "arcl_commands.json is DERIVED from the manual by transcribing each implemented command's syntax and response formats; every entry cites its manual page.",
+    "The post-login banner (password prompt, command list, 'End of commands') follows the flow described on manual pages 36-37; the exact banner text appears only in Figure 3-2 (an image), so those literals are marked derived_from_figure.",
+    "Enterprise Manager (Fleet) queuing responses additionally documented in I618-E-01 (ARCL Enterprise Manager), edata.omron.com.au/eData/Robotics/I618-E-01.pdf; the queue lifecycle implemented here follows I617-E-02 pages 44-45 and 217-237."
+  ]
+}

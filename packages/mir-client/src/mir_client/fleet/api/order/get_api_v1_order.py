@@ -1,16 +1,14 @@
+import datetime
 from http import HTTPStatus
 from typing import Any, cast
 
 import httpx
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response, UNSET
 from ... import errors
-
+from ...client import AuthenticatedClient, Client
 from ...models.order_status_1 import OrderStatus1
 from ...models.problem_details import ProblemDetails
-from ...types import Unset
-import datetime
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(

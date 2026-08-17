@@ -1,0 +1,32 @@
+{
+  "_meta": "Derived from I617-E-02 (see registry.json). Each entry cites the manual page its syntax/response format was transcribed from.",
+  "commands": {
+    "help": {"page": 131, "scope": "amr+fleet", "responses": ["Commands:", "<name> <description> ...", "End of commands"]},
+    "echo": {"page": null, "scope": "amr+fleet", "notes": "with no args gets echo, with args sets echo (help list, p.132)"},
+    "quit": {"page": 37, "scope": "amr+fleet", "notes": "closes the connection"},
+    "status": {"page": 241, "scope": "amr", "responses": ["Status: <status>", "StateOfCharge: <Percentage>", "Location: <X> <Y> <Theta>", "LocalizationScore: <score>", "Temperature: <degrees>"]},
+    "oneLineStatus": {"page": 153, "scope": "amr", "responses": ["Status: <status> StateOfCharge: <percentage> Location: <X_mm> <Y_mm> <heading> Temperature: <degrees>"]},
+    "getGoals": {"page": 121, "scope": "amr", "responses": ["Goal: <name> ...", "End of goals"]},
+    "getRoutes": {"page": 130, "scope": "amr", "responses": ["Routes", "Route: <routeName> ...", "End of routes"]},
+    "getDateTime": {"page": 120, "scope": "amr+fleet", "responses": ["DateTime: MM/DD/YYYY HH:MM:SS"]},
+    "odometer": {"page": 151, "scope": "amr", "responses": ["Odometer: <mm> mm <deg> deg <sec> sec"]},
+    "odometerReset": {"page": 152, "scope": "amr", "responses": ["Reset odometer"]},
+    "dock": {"page": 71, "scope": "amr", "responses": ["DockingState transitions Undocked->Docking->Docked, ChargeState per p.246 status examples"]},
+    "undock": {"page": 246, "scope": "amr", "responses": ["DockingState transitions Docked->Undocking->Undocked"]},
+    "stop": {"page": 243, "scope": "amr", "responses": ["Stopping"]},
+    "say": {"page": 239, "scope": "amr", "notes": "text-to-speech; emulator acknowledges silently"},
+    "arclSendText": {"page": 61, "scope": "amr+fleet", "notes": "sends the given message to all ARCL clients"},
+    "faultsGet": {"page": 102, "scope": "amr", "responses": ["Fault list, End of FaultsGet"]},
+    "applicationFaultSet": {"page": 59, "scope": "amr", "responses": ["ApplicationFaultSet set <name>", "Fault: Fault_<drivingFault or criticalFault> <name> \"<short_desc>\""]},
+    "applicationFaultClear": {"page": 57, "scope": "amr", "responses": ["ApplicationFaultClear cleared <name>"]},
+    "applicationFaultQuery": {"page": 58, "scope": "amr", "responses": ["ApplicationFaultQuery: Fault_<...> <name>", "End of ApplicationFaultQuery"]},
+    "queuePickup": {"page": 217, "scope": "fleet", "shortcut": "qp", "syntax": "queuePickup <goalName> [priority|\"default\"] [jobId]", "responses": ["queuepickup goal \"<goalName>\" with priority <priority>, id <id> and job_id <jobId> successfully queued", "QueueUpdate: <id> <jobId> <priority> <status> <substatus> Goal \"<goalName>\" <robotName> <queuedDate> <queuedTime> <completedDate> <completedTime> <failedCount>"]},
+    "queuePickupDropoff": {"page": 220, "scope": "fleet", "shortcut": "qpd", "syntax": "queuePickupDropoff <pickupGoal> <dropoffGoal> [priority] [jobId]"},
+    "queueQuery": {"page": 225, "scope": "fleet", "shortcut": "qq", "syntax": "queueQuery <type> <value> [echoString]", "responses": ["QueueQuery: <id> <jobId> <priority> <status> <substatus> Goal \"<goalName>\" <robotName> <queued date> <queued time> <completed date> <completed time> <echostring> <failed count>", "EndQueueQuery"]},
+    "queueShow": {"page": 231, "scope": "fleet", "shortcut": "qs", "responses": ["QueueShow: ... rows for every queue item", "EndQueueShow"]},
+    "queueCancel": {"page": 190, "scope": "fleet", "shortcut": "qc", "syntax": "queueCancel <type> <value> [echoString|\"default\"] [reason]"},
+    "errors": {"page": 42, "responses": ["CommandError: <command> <args>", "CommandErrorDescription: <detail>"], "example": "CommandError: queuePickup goal2 / CommandErrorDescription: No goal 'goal2'"},
+    "job_status_conditions": {"page": 44, "statuses": ["Pending", "Available", "Interrupted", "InProgress", "Completed", "Cancelling", "Cancelled", "UnAvailable", "BeforeModify", "InteruptedByModify", "AfterModify"], "in_progress_substatuses": ["UnAllocated", "Allocated", "BeforePickup", "BeforeDropoff", "BeforeEvery", "Before", "Buffering", "Buffered", "Driving", "After", "AfterEvery", "AfterPickup", "AfterDropoff"]},
+    "_emulator": {"page": null, "scope": "emulator-only", "notes": "NON-STANDARD side channel: 'emulator battery <pct>', 'emulator estop on|off', 'emulator teleport <x_mm> <y_mm> <heading_deg>', 'emulator timescale <n>'. Not part of ARCL."}
+  }
+}

@@ -2,23 +2,74 @@
 
 Every tool wraps the documented MiR REST API (robot ``/api/v2.0.0``, fleet
 ``/api/v1``) plus the emulator-only test surfaces under ``/_emulator/*``.
-Tool results are JSON strings; errors are ``"Error: ..."`` strings with the
-fix spelled out, so the calling agent can recover without guessing.
+
+Agent interface (MCP 2.0 native):
+
+- Tools return **structured content** (typed dicts with advertised output
+  schemas), so agents consume fields, not prose.
+- Failures raise :class:`ToolError` — the ``isError`` channel — with the fix
+  spelled out in the message, so agents can branch on failure without
+  parsing happy-path text for "Error:" prefixes.
+- Where the connected client supports **elicitation**, destructive or
+  ambiguous calls ask instead of guessing: clearing the whole mission queue
+  asks for confirmation, and an ambiguous mission name asks which one was
+  meant. Clients without elicitation keep the 1.x behavior.
+- ``mir_wait_for`` turns agent-side status polling into one server-side
+  wait with **progress notifications** and a transition log.
+- The live status is also a **resource** (``mir://robot/status``);
+  ``mir_wait_for`` emits ``notifications/resources/updated`` whenever the
+  observed state changes, so subscribed clients ride the push channel.
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 import httpx
-from mcp.server.fastmcp import FastMCP
+from mcp.server.caching import CacheHint
+from mcp.server.mcpserver import (
+    Context,
+    Elicit,
+    ElicitationResult,
+    MCPServer,
+    Resolve,
+)
+from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
+from pydantic import BaseModel, Field, create_model
 
 from mir_mcp import client
 
-mcp = FastMCP("mir_mcp")
+STATUS_RESOURCE_URI = "mir://robot/status"
+
+INSTRUCTIONS = """\
+Control MiR robots and fleets through their documented REST APIs. Works
+identically against the mir-emulator and real hardware — assume writes move
+a physical vehicle unless mir_server_info says otherwise.
+
+Workflow: call mir_server_info first to learn what MIR_ROBOT_URL /
+MIR_FLEET_URL point at (robot, fleet, or multi-version dispatcher) and the
+software version; if there is no configured target, mir_discover_robots
+scans the network. Mission guids come from mir_list_missions — never invent
+one. To follow long-running work, prefer one mir_wait_for call (server-side
+wait with progress) over polling mir_robot_status in a loop; the live
+status is also readable as the mir://robot/status resource. Tools raise
+errors whose messages state the fix (wrong credentials, unreachable host,
+unknown mission) — read them before retrying. mir_manage_faults exists only
+on the emulator and returns an error on real hardware.
+"""
+
+mcp = MCPServer(
+    "mir_mcp",
+    instructions=INSTRUCTIONS,
+    # The tool and resource sets are static for a server's lifetime.
+    cache_hints={
+        "tools/list": CacheHint(ttl_ms=3_600_000),
+        "resources/list": CacheHint(ttl_ms=3_600_000),
+    },
+)
 
 STATE_IDS = {"ready": 3, "pause": 4, "manual_control": 11}
 
@@ -36,9 +87,13 @@ STATUS_FIELDS = (
     "uptime",
 )
 
-
-def _dump(payload: Any) -> str:
-    return json.dumps(payload, indent=1, sort_keys=True)
+WAIT_CONDITIONS = {
+    "mission_queue_idle": "no mission queue entry is Pending or Executing",
+    "state_ready": "state_id == 3 (Ready)",
+    "state_executing": "state_id == 5 (Executing)",
+    "error_cleared": "the errors array is empty",
+    "battery_above": "battery_percentage > threshold",
+}
 
 
 def _as_list(value: Any) -> list:
@@ -54,46 +109,106 @@ def _trim_status(doc: dict[str, Any]) -> dict[str, Any]:
     return {k: doc[k] for k in STATUS_FIELDS if k in doc}
 
 
-async def _robot(method: str, path: str, *, json_body: Any = None, api: bool = True) -> str | Any:
-    """Run one robot call; return the body, or an 'Error: ...' string."""
+async def _robot(method: str, path: str, *, json_body: Any = None, api: bool = True) -> Any:
+    """Run one robot call; the body on success, ToolError with the fix on failure."""
     try:
         status, body = await client.robot_request(method, path, json=json_body, api=api)
     except client.TargetResolutionError as exc:
-        return str(exc)
+        raise ToolError(str(exc)) from exc
     except httpx.HTTPError as exc:
-        return client.describe_connection_error(exc, client.robot_base_url())
+        raise ToolError(client.describe_connection_error(exc, client.robot_base_url())) from exc
     if status >= 400:
-        return client.describe_http_error(status, body, "robot")
+        raise ToolError(client.describe_http_error(status, body, "robot"))
     return body
 
 
-async def _fleet(method: str, path: str, *, json_body: Any = None) -> str | Any:
+async def _fleet(method: str, path: str, *, json_body: Any = None) -> Any:
     try:
         status, body = await client.fleet_request(method, path, json=json_body)
     except client.TargetResolutionError as exc:
-        return str(exc)
+        raise ToolError(str(exc)) from exc
     except httpx.HTTPError as exc:
-        return client.describe_connection_error(exc, client.fleet_base_url())
+        raise ToolError(client.describe_connection_error(exc, client.fleet_base_url())) from exc
     if status >= 400:
-        return client.describe_http_error(status, body, "fleet")
+        raise ToolError(client.describe_http_error(status, body, "fleet"))
     return body
 
 
-async def _resolve_mission(name_or_guid: str) -> str | dict[str, Any]:
-    """Match a user-facing mission name (case-insensitive) or exact guid."""
-    missions = await _robot("GET", "/missions")
-    if isinstance(missions, str):
-        return missions
-    entries = _as_list(missions)
+def _can_elicit(ctx: Context | None) -> bool:
+    caps = ctx.client_capabilities if ctx is not None else None
+    return caps is not None and caps.elicitation is not None
+
+
+class _ConfirmClear(BaseModel):
+    confirm: bool = Field(description="Clear the entire mission queue?")
+
+
+async def _lookup_mission(name_or_guid: str) -> tuple[list[dict[str, Any]], str]:
+    """(matching missions, formatted list of everything that exists)."""
+    entries = _as_list(await _robot("GET", "/missions"))
     exact = [m for m in entries if m.get("guid") == name_or_guid]
     named = [m for m in entries if str(m.get("name", "")).lower() == name_or_guid.lower()]
-    matches = exact or named
+    available = ", ".join(f"{m.get('name')} ({m.get('guid')})" for m in entries) or "none"
+    return (exact or named), available
+
+
+async def _mission_or_error(name_or_guid: str) -> dict[str, Any]:
+    """Non-interactive resolution: exactly one match or a ToolError."""
+    matches, available = await _lookup_mission(name_or_guid)
     if len(matches) == 1:
         return matches[0]
-    available = ", ".join(f"{m.get('name')} ({m.get('guid')})" for m in entries) or "none"
     if not matches:
-        return f"Error: no mission named or with guid '{name_or_guid}'. Available: {available}"
-    return f"Error: '{name_or_guid}' is ambiguous. Matches: {available}"
+        raise ToolError(
+            f"Error: no mission named or with guid '{name_or_guid}'. Available: {available}"
+        )
+    raise ToolError(f"Error: '{name_or_guid}' is ambiguous. Matches: {available}")
+
+
+async def _mission_choice(mission: str, ctx: Context) -> Any:
+    """Resolver for mir_queue_mission's target.
+
+    Unambiguous -> the mission document. Unknown -> ToolError naming what
+    exists. Ambiguous -> ask which guid was meant (Elicit); clients without
+    elicitation get the listing error instead. The framework replays the
+    elicited answer across input_required rounds, so the question is asked
+    once.
+    """
+    matches, available = await _lookup_mission(mission)
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise ToolError(f"Error: no mission named or with guid '{mission}'. Available: {available}")
+    if not _can_elicit(ctx):
+        raise ToolError(f"Error: '{mission}' is ambiguous. Matches: {available}")
+    guids = tuple(str(m.get("guid")) for m in matches)
+    labels = "; ".join(f"{m.get('guid')}: {m.get('name')}" for m in matches)
+    choose = create_model(
+        "ChooseMission",
+        guid=(Literal[guids], Field(description=f"Which mission did you mean? {labels}")),  # ty: ignore[invalid-type-form]
+    )
+    return Elicit(f"'{mission}' matches {len(matches)} missions. Which one should run?", choose)
+
+
+async def _confirm_queue_clear(queue_id: int | None, ctx: Context) -> Any:
+    """Resolver: confirmation for clearing the whole mission queue.
+
+    Single-entry cancels and clients without elicitation skip the question
+    (auto-confirm — the pre-elicitation contract, guarded by the tool's
+    destructive_hint).
+    """
+    if queue_id is not None or not _can_elicit(ctx):
+        # A plain return is wrapped as an accepted outcome for the consumer.
+        return _ConfirmClear(confirm=True)
+    pending = [
+        e
+        for e in _as_list(await _robot("GET", "/mission_queue"))
+        if e.get("state") in ("Pending", "Executing")
+    ]
+    return Elicit(
+        f"Clear the entire mission queue ({len(pending)} entries still "
+        "pending or executing)? This cannot be undone.",
+        _ConfirmClear,
+    )
 
 
 async def _target_summary(base: str, resolver) -> dict[str, Any]:
@@ -119,16 +234,32 @@ async def _target_summary(base: str, resolver) -> dict[str, Any]:
     return summary
 
 
+@mcp.resource(
+    STATUS_RESOURCE_URI,
+    name="robot-status",
+    title="Live MiR robot status",
+    description=(
+        "The connected robot's live status (state, battery, position, mission, "
+        "errors) as JSON. mir_wait_for announces updates to this resource "
+        "whenever it observes the state change."
+    ),
+    mime_type="application/json",
+)
+async def robot_status_resource() -> str:
+    status = _trim_status(await _robot("GET", "/status"))
+    return json.dumps(status, indent=1, sort_keys=True)
+
+
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Identify the connected MiR target",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_server_info() -> str:
+async def mir_server_info() -> dict[str, Any]:
     """Identify what the configured endpoints actually are and which MiR
     software version they run — call this first on a new connection.
 
@@ -151,19 +282,19 @@ async def mir_server_info() -> str:
         doc["fleet_target"] = await _target_summary(
             client.fleet_base_url(), client.resolved_fleet_base
         )
-    return _dump(doc)
+    return doc
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Discover MiR robots on the network",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_discover_robots(hosts: list[str] | None = None) -> str:
+async def mir_discover_robots(hosts: list[str] | None = None) -> dict[str, Any]:
     """Find MiR robots, fleets, and emulators on the network by IP — use
     this when you don't know a robot's address.
 
@@ -178,22 +309,21 @@ async def mir_discover_robots(hosts: list[str] | None = None) -> str:
     try:
         found = await client.scan_for_targets(hosts)
     except ValueError as exc:
-        return f"Error: {exc}"
+        raise ToolError(f"Error: {exc}") from exc
     except OSError as exc:
-        return f"Error: network scan failed ({type(exc).__name__}: {exc})."
+        raise ToolError(f"Error: network scan failed ({type(exc).__name__}: {exc}).") from exc
     if not found:
         where = ", ".join(hosts) if hosts else "the local /24"
-        return _dump(
-            {
-                "found": [],
-                "scanned": where,
-                "hint": (
-                    "No MiR robots or fleets answered. Check you are on the robot's "
-                    "network, or start an emulator with `uv run mir-emulator`."
-                ),
-            }
-        )
-    return _dump({"found": found, "count": len(found)})
+        return {
+            "found": [],
+            "count": 0,
+            "scanned": where,
+            "hint": (
+                "No MiR robots or fleets answered. Check you are on the robot's "
+                "network, or start an emulator with `uv run mir-emulator`."
+            ),
+        }
+    return {"found": found, "count": len(found)}
 
 
 # ---------------------------------------------------------------- robot tools
@@ -202,36 +332,36 @@ async def mir_discover_robots(hosts: list[str] | None = None) -> str:
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Get robot status",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_robot_status() -> str:
+async def mir_robot_status() -> dict[str, Any]:
     """Read the robot's live status: state, battery, position, current
     mission, and any errors.
 
-    Returns a JSON object with robot_name, state_id/state_text (3 Ready,
-    4 Pause, 5 Executing, 10 Emergency stop, 11 Manual control, 12 Error),
-    battery_percentage, position {x, y, orientation}, mission_text,
-    mission_queue_id and errors[]. Call this first to verify connectivity,
-    and after any state change to confirm it took effect.
+    Returns robot_name, state_id/state_text (3 Ready, 4 Pause, 5 Executing,
+    10 Emergency stop, 11 Manual control, 12 Error), battery_percentage,
+    position {x, y, orientation}, mission_text, mission_queue_id and
+    errors[]. Call this first to verify connectivity, and after any state
+    change to confirm it took effect. To wait on a state, prefer
+    mir_wait_for over polling this tool.
     """
-    body = await _robot("GET", "/status")
-    return body if isinstance(body, str) else _dump(_trim_status(body))
+    return _trim_status(await _robot("GET", "/status"))
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Set robot state (ready / pause / manual)",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_set_robot_state(state: Literal["ready", "pause", "manual_control"]) -> str:
+async def mir_set_robot_state(state: Literal["ready", "pause", "manual_control"]) -> dict[str, Any]:
     """Pause the robot, resume it, or hand it to manual control.
 
     'pause' freezes mission execution in place; 'ready' resumes exactly
@@ -239,20 +369,19 @@ async def mir_set_robot_state(state: Literal["ready", "pause", "manual_control"]
     the joystick. Maps to the documented PUT /status state_id (3/4/11).
     Returns the resulting status so the caller sees the observed state.
     """
-    body = await _robot("PUT", "/status", json_body={"state_id": STATE_IDS[state]})
-    return body if isinstance(body, str) else _dump(_trim_status(body))
+    return _trim_status(await _robot("PUT", "/status", json_body={"state_id": STATE_IDS[state]}))
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Clear robot error state",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_clear_error() -> str:
+async def mir_clear_error() -> dict[str, Any]:
     """Acknowledge and clear the robot's error state (PUT /status
     {"clear_error": true}), the documented recovery for resettable errors.
 
@@ -260,153 +389,252 @@ async def mir_clear_error() -> str:
     physical button must be released; on the emulator use mir_manage_faults.
     Returns the resulting status.
     """
-    body = await _robot("PUT", "/status", json_body={"clear_error": True})
-    return body if isinstance(body, str) else _dump(_trim_status(body))
+    return _trim_status(await _robot("PUT", "/status", json_body={"clear_error": True}))
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="List mission definitions",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_list_missions() -> str:
-    """List the missions defined on the robot as [{guid, name}, ...].
+async def mir_list_missions() -> dict[str, Any]:
+    """List the missions defined on the robot as {missions: [{guid, name}]}.
 
     Mission guids come from here — never guess one. Use the guid (or the
     unique name) with mir_queue_mission.
     """
-    body = await _robot("GET", "/missions")
-    if isinstance(body, str):
-        return body
-    entries = _as_list(body)
-    return _dump([{"guid": m.get("guid"), "name": m.get("name")} for m in entries])
+    entries = _as_list(await _robot("GET", "/missions"))
+    return {"missions": [{"guid": m.get("guid"), "name": m.get("name")} for m in entries]}
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Queue a mission",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=False,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
     )
 )
-async def mir_queue_mission(mission: str, wait_seconds: int = 0) -> str:
+async def mir_queue_mission(
+    mission: str,
+    wait_seconds: int = 0,
+    chosen: Annotated[Any, Resolve(_mission_choice)] = None,
+    ctx: Context | None = None,
+) -> dict[str, Any]:
     """Queue a mission for execution, by name (case-insensitive) or guid.
 
     The robot works the queue in order: Pending -> Executing -> Done. With
-    wait_seconds > 0, polls the queue entry and returns once it reaches
-    Done/Aborted or the wait expires (whichever comes first) — the returned
-    'state' is always the last observed one. Against a real robot this
-    physically moves the vehicle.
+    wait_seconds > 0, polls the queue entry (reporting progress) and
+    returns once it reaches Done/Aborted or the wait expires — the returned
+    'state' is always the last observed one. If the name is ambiguous and
+    the client supports elicitation, you are asked which mission was meant.
+    Against a real robot this physically moves the vehicle.
     """
-    resolved = await _resolve_mission(mission)
-    if isinstance(resolved, str):
-        return resolved
+    if chosen is None:
+        # Called outside the MCP framework (no resolver ran): resolve
+        # non-interactively.
+        resolved = await _mission_or_error(mission)
+    elif isinstance(chosen, BaseModel):
+        # The elicited answer: a guid picked from the ambiguous matches.
+        guid = chosen.guid  # type: ignore[attr-defined]
+        entries = _as_list(await _robot("GET", "/missions"))
+        resolved = next(m for m in entries if str(m.get("guid")) == guid)
+    else:
+        resolved = chosen
     entry = await _robot("POST", "/mission_queue", json_body={"mission_id": resolved["guid"]})
-    if isinstance(entry, str):
-        return entry
-    deadline = asyncio.get_event_loop().time() + min(wait_seconds, 300)
+    wait = min(wait_seconds, 300)
+    started = asyncio.get_event_loop().time()
     while wait_seconds and entry.get("state") not in ("Done", "Aborted"):
-        if asyncio.get_event_loop().time() >= deadline:
+        elapsed = asyncio.get_event_loop().time() - started
+        if elapsed >= wait:
             break
+        if ctx is not None:
+            await ctx.report_progress(
+                min(elapsed, wait), wait, f"queue entry {entry.get('id')}: {entry.get('state')}"
+            )
         await asyncio.sleep(0.5)
-        polled = await _robot("GET", f"/mission_queue/{entry.get('id')}")
-        if isinstance(polled, str):
-            return polled
-        entry = polled
-    return _dump({"mission": resolved["name"], "queue_entry": entry})
+        entry = await _robot("GET", f"/mission_queue/{entry.get('id')}")
+    return {"mission": resolved["name"], "queue_entry": entry}
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Show the mission queue",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_mission_queue(queue_id: int | None = None) -> str:
+async def mir_mission_queue(queue_id: int | None = None) -> dict[str, Any]:
     """Read the mission queue (all entries) or one entry by its integer id.
 
     Each entry carries id, state (Pending/Executing/Done/Aborted) and
-    timestamps. Poll a specific id to watch a queued mission finish.
+    timestamps. To wait for the queue to drain, prefer mir_wait_for
+    ('mission_queue_idle') over polling this tool.
     """
-    path = f"/mission_queue/{queue_id}" if queue_id is not None else "/mission_queue"
-    body = await _robot("GET", path)
-    return body if isinstance(body, str) else _dump(body)
+    if queue_id is not None:
+        return {"entry": await _robot("GET", f"/mission_queue/{queue_id}")}
+    return {"entries": _as_list(await _robot("GET", "/mission_queue"))}
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Cancel queued missions",
-        readOnlyHint=False,
-        destructiveHint=True,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_cancel_missions(queue_id: int | None = None) -> str:
+async def mir_cancel_missions(
+    queue_id: int | None = None,
+    confirmation: Annotated[  # ty: ignore[invalid-parameter-default]
+        ElicitationResult[_ConfirmClear], Resolve(_confirm_queue_clear)
+    ] = None,
+) -> dict[str, Any]:
     """Cancel one queued mission by id, or the entire queue when no id is
     given. Destructive: a cleared queue cannot be restored — re-queue the
-    missions if needed. On a real robot this stops planned work; confirm
-    intent before calling without an id.
+    missions if needed. Clearing the whole queue asks for confirmation
+    when the client supports elicitation; a decline cancels nothing.
     """
+    if confirmation is not None and (
+        confirmation.action != "accept" or not confirmation.data.confirm
+    ):
+        return {"cancelled": None, "declined": True}
     path = f"/mission_queue/{queue_id}" if queue_id is not None else "/mission_queue"
-    body = await _robot("DELETE", path)
-    # A successful DELETE has an empty body, so only error strings pass through.
-    if isinstance(body, str) and body.startswith("Error:"):
-        return body
+    await _robot("DELETE", path)
     scope = f"queue entry {queue_id}" if queue_id is not None else "entire mission queue"
-    return _dump({"cancelled": scope})
+    return {"cancelled": scope}
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="Wait for a robot condition",
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
+    )
+)
+async def mir_wait_for(
+    condition: Literal[
+        "mission_queue_idle", "state_ready", "state_executing", "error_cleared", "battery_above"
+    ],
+    threshold: float | None = None,
+    timeout_seconds: float = 60,
+    ctx: Context | None = None,
+) -> dict[str, Any]:
+    """Wait server-side until the robot reaches a condition — one call
+    instead of an agent-side polling loop.
+
+    Conditions: mission_queue_idle (no Pending/Executing entries),
+    state_ready, state_executing, error_cleared, battery_above (needs
+    threshold, in %). Polls twice a second up to timeout_seconds (max 300),
+    reporting progress and announcing mir://robot/status updates on every
+    observed state change. Returns whether the condition was met, the
+    elapsed time, the state transitions observed while waiting, and the
+    final trimmed status.
+    """
+    if condition == "battery_above" and threshold is None:
+        raise ToolError("Error: condition 'battery_above' needs a threshold (battery %).")
+    needed = float(threshold if threshold is not None else 0.0)
+    timeout = min(timeout_seconds, 300.0)
+
+    async def met(status: dict[str, Any]) -> bool:
+        if condition == "state_ready":
+            return status.get("state_id") == 3
+        if condition == "state_executing":
+            return status.get("state_id") == 5
+        if condition == "error_cleared":
+            return not status.get("errors")
+        if condition == "battery_above":
+            return float(status.get("battery_percentage", 0.0)) > needed
+        queue = _as_list(await _robot("GET", "/mission_queue"))
+        return not any(e.get("state") in ("Pending", "Executing") for e in queue)
+
+    loop = asyncio.get_event_loop()
+    started = loop.time()
+    transitions: list[dict[str, Any]] = []
+    last_state: str | None = None
+    while True:
+        status = _trim_status(await _robot("GET", "/status"))
+        elapsed = round(loop.time() - started, 2)
+        if status.get("state_text") != last_state:
+            if last_state is not None and ctx is not None:
+                await ctx.notify_resource_updated(STATUS_RESOURCE_URI)
+            transitions.append({"at_seconds": elapsed, "state_text": status.get("state_text")})
+            last_state = status.get("state_text")
+        if await met(status):
+            return {
+                "met": True,
+                "condition": condition,
+                "elapsed_seconds": elapsed,
+                "transitions": transitions,
+                "status": status,
+            }
+        if elapsed >= timeout:
+            return {
+                "met": False,
+                "condition": condition,
+                "elapsed_seconds": elapsed,
+                "transitions": transitions,
+                "status": status,
+                "hint": f"condition means: {WAIT_CONDITIONS[condition]}",
+            }
+        if ctx is not None:
+            await ctx.report_progress(
+                min(elapsed, timeout),
+                timeout,
+                f"waiting for {condition}; state={status.get('state_text')}",
+            )
+        await asyncio.sleep(0.5)
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Read a PLC register",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_read_register(register_id: int) -> str:
+async def mir_read_register(register_id: int) -> dict[str, Any]:
     """Read one of the robot's 200 PLC registers (id 1-200) — the standard
     integration channel between a MiR and external equipment (doors,
     lifts, PLCs)."""
-    body = await _robot("GET", f"/registers/{register_id}")
-    return body if isinstance(body, str) else _dump(body)
+    return await _robot("GET", f"/registers/{register_id}")
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Write a PLC register",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_write_register(register_id: int, value: float) -> str:
+async def mir_write_register(register_id: int, value: float) -> dict[str, Any]:
     """Write a value to a PLC register (id 1-200). On a real installation
     registers can trigger physical equipment — know what the register is
     wired to before writing."""
-    body = await _robot("PUT", f"/registers/{register_id}", json_body={"value": value})
-    return body if isinstance(body, str) else _dump(body)
+    return await _robot("PUT", f"/registers/{register_id}", json_body={"value": value})
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Inject or clear emulator faults",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_manage_faults(
@@ -421,7 +649,7 @@ async def mir_manage_faults(
         ]
     ]
     | None = None,
-) -> str:
+) -> dict[str, Any]:
     """EMULATOR ONLY — inject faults to test how an integration handles a
     misbehaving robot, or clear them all.
 
@@ -436,14 +664,10 @@ async def mir_manage_faults(
     hardware.
     """
     if faults:
-        body = await _robot("PUT", "/_emulator/faults", json_body={"faults": faults}, api=False)
-    else:
-        cleared = await _robot("DELETE", "/_emulator/faults", api=False)
-        if isinstance(cleared, str) and cleared.startswith("Error:"):
-            return cleared
-        # DELETE answers with an empty body; report the observed fault state.
-        body = await _robot("GET", "/_emulator/faults", api=False)
-    return body if isinstance(body, str) else _dump(body)
+        return await _robot("PUT", "/_emulator/faults", json_body={"faults": faults}, api=False)
+    await _robot("DELETE", "/_emulator/faults", api=False)
+    # DELETE answers with an empty body; report the observed fault state.
+    return await _robot("GET", "/_emulator/faults", api=False)
 
 
 # ---------------------------------------------------------------- fleet tools
@@ -452,31 +676,31 @@ async def mir_manage_faults(
 @mcp.tool(
     annotations=ToolAnnotations(
         title="List the fleet's robots",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_fleet_robots(robot_id: str | None = None) -> str:
+async def mir_fleet_robots(robot_id: str | None = None) -> dict[str, Any]:
     """List the robots a MiR Fleet manages, or fetch one robot's live view
     by its robot-id (a guid). The fleet derives robot state from the robots
     themselves, so this is the authoritative multi-robot picture."""
-    path = f"/robots/{robot_id}" if robot_id else "/robots"
-    body = await _fleet("GET", path)
-    return body if isinstance(body, str) else _dump(body)
+    if robot_id:
+        return await _fleet("GET", f"/robots/{robot_id}")
+    return await _fleet("GET", "/robots")
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Dispatch a fleet order",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=False,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
     )
 )
-async def mir_fleet_dispatch(missions: list[str], robot_id: str | None = None) -> str:
+async def mir_fleet_dispatch(missions: list[str], robot_id: str | None = None) -> dict[str, Any]:
     """Dispatch missions to the fleet as one serial order (POST
     /serial-order). Missions execute in the given sequence on a single
     robot — a specific robot_id, or the fleet's own choice when omitted.
@@ -487,8 +711,6 @@ async def mir_fleet_dispatch(missions: list[str], robot_id: str | None = None) -
     track it with mir_fleet_order_status.
     """
     site = await _fleet("GET", "/site/mission")
-    if isinstance(site, str):
-        return site
     catalog = site.get("missions", []) if isinstance(site, dict) else []
     phases = []
     for wanted in missions:
@@ -500,51 +722,47 @@ async def mir_fleet_dispatch(missions: list[str], robot_id: str | None = None) -
         if len(matches) != 1:
             available = ", ".join(f"{m.get('name')} ({m.get('id')})" for m in catalog) or "none"
             problem = "no site mission matches" if not matches else "ambiguous name"
-            return f"Error: {problem} '{wanted}'. Available: {available}"
+            raise ToolError(f"Error: {problem} '{wanted}'. Available: {available}")
         phases.append({"mission-id": matches[0]["id"]})
     order: dict[str, Any] = {"phases": phases}
     if robot_id:
         order["robot-id"] = robot_id
-    body = await _fleet("POST", "/serial-order", json_body={"serial-order": order})
-    return body if isinstance(body, str) else _dump(body)
+    return await _fleet("POST", "/serial-order", json_body={"serial-order": order})
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Check or abort a fleet order",
-        readOnlyHint=False,
-        destructiveHint=True,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
-async def mir_fleet_order_status(serial_order_id: str, abort: bool = False) -> str:
+async def mir_fleet_order_status(serial_order_id: str, abort: bool = False) -> dict[str, Any]:
     """Read a serial order's live per-phase status, or abort it with
     abort=true (destructive: aborted orders stay aborted). Phase states are
     derived from the assigned robot's actual mission queue."""
     if abort:
-        body = await _fleet("DELETE", f"/serial-order/{serial_order_id}")
-        if isinstance(body, str) and body.startswith("Error:"):
-            return body
-        return _dump({"aborted": serial_order_id})
-    body = await _fleet("GET", f"/serial-order/{serial_order_id}")
-    return body if isinstance(body, str) else _dump(body)
+        await _fleet("DELETE", f"/serial-order/{serial_order_id}")
+        return {"aborted": serial_order_id}
+    return await _fleet("GET", f"/serial-order/{serial_order_id}")
 
 
 @mcp.tool(
     annotations=ToolAnnotations(
         title="Generate an HTML status report",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def mir_generate_report(
     output_path: str,
     target: Literal["robot", "fleet"] = "robot",
     session_id: str | None = None,
-) -> str:
+) -> dict[str, Any]:
     """Generate a self-contained HTML dashboard for the configured robot or
     fleet: current-status indicators, the daily trend, and a descriptive
     timeline of actions.
@@ -552,7 +770,7 @@ async def mir_generate_report(
     Reads documented API endpoints only (robot: /status, /mission_queue,
     /log/error_reports, /statistics/distance; fleet: /robots, /order), so
     it is safe against real hardware — the only write is the local HTML
-    file at output_path. Returns a JSON summary; open the file to view."""
+    file at output_path. Returns a summary; open the file to view."""
     import os
     from pathlib import Path
 
@@ -563,7 +781,7 @@ async def mir_generate_report(
             client.resolved_robot_base() if target == "robot" else client.resolved_fleet_base()
         )
     except client.TargetResolutionError as exc:
-        return str(exc)
+        raise ToolError(str(exc)) from exc
     kwargs: dict[str, Any] = {"transport": client.TRANSPORT} if client.TRANSPORT else {}
     try:
         data = await collect_report_async(
@@ -575,25 +793,23 @@ async def mir_generate_report(
             **kwargs,
         )
     except Exception as exc:  # unreachable host, auth, kind gate — all actionable
-        return (
+        raise ToolError(
             f"Error: report collection from {base} failed: {exc}. Check the URL is a "
             "robot or fleet (mir_server_info) and credentials (MIR_USERNAME/"
             "MIR_PASSWORD or MIR_API_KEY)."
-        )
+        ) from exc
     Path(output_path).write_text(render_report(data))
-    return _dump(
-        {
-            "path": output_path,
-            "kind": data["kind"],
-            "version": data.get("version"),
-            "robots": [
-                {"name": r["name"], "battery": r["battery"], "state": r["state"]}
-                for r in data["robots"]
-            ],
-            "timeline_entries": len(data["timeline"]),
-            "trend_days": len(data["trend"]),
-        }
-    )
+    return {
+        "path": output_path,
+        "kind": data["kind"],
+        "version": data.get("version"),
+        "robots": [
+            {"name": r["name"], "battery": r["battery"], "state": r["state"]}
+            for r in data["robots"]
+        ],
+        "timeline_entries": len(data["timeline"]),
+        "trend_days": len(data["trend"]),
+    }
 
 
 def main() -> int:

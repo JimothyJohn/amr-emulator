@@ -1,17 +1,15 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-
-from ..types import UNSET, Unset
 
 from ..models.order_priority import OrderPriority
 from ..models.order_status import OrderStatus
 from ..models.order_type import OrderType
-from typing import cast
-import datetime
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.order_action import OrderAction
