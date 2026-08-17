@@ -236,6 +236,15 @@ def build_app() -> Starlette:
             status_code=404,
         )
 
+    async def method_not_allowed(_request: Request, _exc: Exception) -> JSONResponse:
+        return JSONResponse(
+            {
+                "error_code": "405",
+                "error_human": "Method not allowed on this path.",
+            },
+            status_code=405,
+        )
+
     routes: list[Route | Mount] = [
         Route("/", index),
         Route("/healthz", healthz),
@@ -259,7 +268,11 @@ def build_app() -> Starlette:
             max_age=86400,
         ),
     ]
-    return Starlette(routes=routes, exception_handlers={404: not_found}, middleware=middleware)
+    return Starlette(
+        routes=routes,
+        exception_handlers={404: not_found, 405: method_not_allowed},
+        middleware=middleware,
+    )
 
 
 def _event_headers(event: dict) -> list[tuple[bytes, bytes]]:
