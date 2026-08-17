@@ -1,0 +1,34 @@
+{
+  "config": {
+    "robots": 10,
+    "duration_s": 480.0,
+    "probe_rate_hz": 50.0,
+    "state_interval_s": 1.0,
+    "visualization_interval_s": 0.5,
+    "vda5050_version": "3.0.0"
+  },
+  "latency_ms": {
+    "samples": 21723,
+    "p50": 1.606,
+    "p99": 11.081,
+    "max": 33.725
+  },
+  "throughput": {
+    "robot_messages": 14320,
+    "messages_per_s": 29.8,
+    "second_half_messages_per_s": 29.8
+  },
+  "memory": {
+    "rss_peak_mib": 36.8,
+    "heap_mid_mib": 0.2,
+    "heap_end_mib": 0.29,
+    "heap_growth_mib_per_min": 0.0
+  },
+  "host": {
+    "platform": "macOS-14.4.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "python": "3.13.5",
+    "commit": "e6297b8",
+    "date": "2026-08-16"
+  }
+}
