@@ -216,7 +216,11 @@ async def connect(uri: str) -> WebSocket:
     )
     writer.write(request.encode())
     await writer.drain()
-    status = await _read_http_head(reader)
+    try:
+        status = await _read_http_head(reader)
+    except (asyncio.IncompleteReadError, asyncio.LimitOverrunError) as exc:
+        writer.close()
+        raise WSError("connection closed during handshake") from exc
     first = status[0]
     if b"101" not in first.split(b"\r\n")[0]:
         writer.close()
