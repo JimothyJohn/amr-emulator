@@ -39,13 +39,15 @@ MAX_EVENT_BODY_BYTES = 4 * 1024 * 1024
 # Site pages, bundled next to this module by scripts/deploy_demo.sh. Absent
 # in normal installs, where the HTML routes 404 and / stays JSON. The landing
 # page (docs/landing.html) is served at / to clients that prefer HTML; the
-# MiR console keeps /console (plus /mir), and the VDA 5050 and Omron ARCL
-# app pages get their own routes. curl and API clients keep the JSON index.
+# MiR console keeps /console (plus /mir), and the VDA 5050, Omron ARCL, and
+# MassRobotics app pages get their own routes. curl and API clients keep the
+# JSON index.
 CONSOLE_FILE = Path(__file__).with_name("console.html")
 LANDING_FILE = Path(__file__).with_name("landing.html")
 SITE_PAGES = {
     "vda5050": Path(__file__).with_name("vda5050.html"),
     "omron": Path(__file__).with_name("omron.html"),
+    "massrobotics": Path(__file__).with_name("massrobotics.html"),
 }
 
 # The console is a single inline-script page (hence 'unsafe-inline'); it

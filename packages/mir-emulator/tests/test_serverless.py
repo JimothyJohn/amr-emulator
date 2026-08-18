@@ -186,6 +186,30 @@ def test_console_serves_bundled_page_with_csp(call, tmp_path, monkeypatch):
     assert response["headers"]["x-content-type-options"] == "nosniff"
 
 
+@pytest.mark.parametrize("name", sorted(serverless.SITE_PAGES))
+def test_site_pages_serve_bundled_page_with_csp(call, tmp_path, monkeypatch, name):
+    # _page_route captures page paths when the app is built, so stage the
+    # page first and force this invocation to rebuild.
+    page = tmp_path / f"{name}.html"
+    page.write_text(f"<!DOCTYPE html><title>{name} app page</title>", encoding="utf-8")
+    monkeypatch.setitem(serverless.SITE_PAGES, name, page)
+    monkeypatch.setattr(serverless, "_app", None)
+    response = call(event("GET", f"/{name}"))
+    assert response["statusCode"] == 200
+    assert "text/html" in response["headers"]["content-type"]
+    assert f"{name} app page" in response["body"]
+    csp = response["headers"]["content-security-policy"]
+    assert "default-src 'none'" in csp
+    assert "frame-ancestors 'none'" in csp
+
+
+def test_site_pages_404_when_not_bundled(call):
+    for name in serverless.SITE_PAGES:
+        response = call(event("GET", f"/{name}"))
+        assert response["statusCode"] == 404
+        assert body_json(response)["error_code"] == "404"
+
+
 def test_console_csp_script_src_is_pinned():
     # The console is a single inline-script page with no third-party scripts;
     # script-src must stay exactly 'unsafe-inline' and nothing broader.

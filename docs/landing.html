@@ -13,8 +13,8 @@
   document.documentElement.setAttribute("data-theme", t);
 })();
 </script>
-<title>AMR Emulator — spec-faithful robot emulators for VDA 5050, MiR and Omron ARCL · advin.io</title>
-<meta name="description" content="Free, spec-faithful emulators of autonomous mobile robot interfaces: VDA 5050 (with embedded MQTT broker, validated against NVIDIA Isaac Mission Dispatch), the MiR REST API, and Omron ARCL. Handcrafted by advin.io.">
+<title>AMR Emulator — spec-faithful robot emulators for VDA 5050, MiR, Omron ARCL and MassRobotics · advin.io</title>
+<meta name="description" content="Free, spec-faithful emulators of autonomous mobile robot interfaces: VDA 5050 (with embedded MQTT broker, validated against NVIDIA Isaac Mission Dispatch), the MiR REST API, Omron ARCL, and the MassRobotics AMR Interop standard. Handcrafted by advin.io.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230d0d0d'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='bold' fill='%23fcfcfc' text-anchor='middle'>a.</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +35,7 @@
   --vda: #00783e;
   --mir: #1a76bc;
   --omron: #005eb8;
+  --mass: #d90b1c; /* massrobotics.org's own --metropolis accent red */
   --green: #1d9e61;
 }
 :root[data-theme="dark"] {
@@ -48,6 +49,7 @@
   --code-bg: #1a1a1a;
   --vda: #00a052;
   --omron: #4da3e0; /* lightened #005eb8 for AA on dark */
+  --mass: #ef5747; /* lightened #d90b1c for AA on dark */
 }
 * { box-sizing: border-box; }
 body {
@@ -86,6 +88,7 @@ pre {
 .app-header nav a.vda:hover { color: var(--vda); }
 .app-header nav a.mir:hover { color: var(--mir); }
 .app-header nav a.omr:hover { color: var(--omron); }
+.app-header nav a.mass:hover { color: var(--mass); }
 #theme-toggle {
   background: none; border: 1px solid var(--line); border-radius: .35rem;
   color: var(--ink-soft); cursor: pointer; padding: .25rem .55rem; font-size: .95rem;
@@ -154,6 +157,7 @@ footer a { color: var(--ink-soft); }
     <a class="vda" href="/vda5050">VDA 5050</a>
     <a class="mir" href="/console">MiR</a>
     <a class="omr" href="/omron">Omron ARCL</a>
+    <a class="mass" href="/massrobotics">MassRobotics</a>
     <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">GitHub</a>
     <button id="theme-toggle" aria-label="Toggle color theme">◐</button>
   </nav>
@@ -167,8 +171,9 @@ footer a { color: var(--ink-soft); }
       Develop and test your fleet integration against emulated mobile robots that
       follow the published specifications to the letter — starting with
       <strong>VDA&nbsp;5050</strong> (versions 2.0.0, 2.1.0 and 3.0.0, embedded MQTT
-      broker included), plus the MiR REST API and Omron ARCL. Point your master
-      control at an emulator today; point the same code at steel tomorrow.
+      broker included), plus the MiR REST API, Omron ARCL, and the MassRobotics
+      AMR Interop standard. Point your master control at an emulator today;
+      point the same code at steel tomorrow.
     </p>
     <div class="proof">
       <span><b>✓</b> Validated live against NVIDIA Isaac Mission Dispatch</span>
@@ -181,7 +186,7 @@ footer a { color: var(--ink-soft); }
     </div>
   </section>
 
-  <section class="apps" aria-label="The three emulator apps">
+  <section class="apps" aria-label="The four emulator apps">
     <a class="app-card" href="/vda5050" style="--accent: var(--vda)">
       <span class="tag">Featured · MQTT + JSON</span>
       <h2>VDA 5050</h2>
@@ -219,6 +224,19 @@ footer a { color: var(--ink-soft); }
         <li>Interactive session player</li>
       </ul>
       <span class="go">Open the Omron ARCL app →</span>
+    </a>
+    <a class="app-card" href="/massrobotics" style="--accent: var(--mass)">
+      <span class="tag">New · WebSocket + JSON</span>
+      <h2>MassRobotics</h2>
+      <p>A Vecna fleet speaking the MassRobotics AMR Interoperability Standard —
+         identity and status reports from a live movement model, plus a validating
+         fleet-side receiver, over a stdlib RFC 6455 WebSocket.</p>
+      <ul>
+        <li>Vecna vehicle presets: APT, ATG, AFL, CPJ</li>
+        <li>Judged valid by the standard's own reference receiver</li>
+        <li>Upstream schema quirks documented, never repaired</li>
+      </ul>
+      <span class="go">Open the MassRobotics app →</span>
     </a>
   </section>
 

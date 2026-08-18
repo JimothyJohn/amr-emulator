@@ -15,6 +15,7 @@ on:
       - docs/landing.html
       - docs/vda5050.html
       - docs/omron.html
+      - docs/massrobotics.html
       - scripts/deploy_demo.sh
       - .github/workflows/deploy.yml
       - uv.lock
