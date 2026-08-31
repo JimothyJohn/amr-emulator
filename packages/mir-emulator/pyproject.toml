@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-ws = ["websockets>=17.0.1"]
+ws = ["websockets>=17.1"]
 
 [project.scripts]
 mir-emulator = "mir_emulator.cli:main"
