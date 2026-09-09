@@ -10,8 +10,6 @@ T = TypeVar("T", bound="ManualControl")
 
 @_attrs_define
 class ManualControl:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

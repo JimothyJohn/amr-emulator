@@ -65,10 +65,10 @@ class SafetyStop:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.brake_release import BrakeRelease
-        from ..models.e_stop import EStop
-        from ..models.p_stop import PStop
-        from ..models.restart_required import RestartRequired
+        from ..models.brake_release import BrakeRelease  # noqa: PLC0415
+        from ..models.e_stop import EStop  # noqa: PLC0415
+        from ..models.p_stop import PStop  # noqa: PLC0415
+        from ..models.restart_required import RestartRequired  # noqa: PLC0415
 
         d = dict(src_dict)
         _p_stop = d.pop("p-stop", UNSET)

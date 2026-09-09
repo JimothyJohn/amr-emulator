@@ -67,9 +67,15 @@ class GetPathGuideOptions:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_path_guide_options_goals_item import GetPathGuideOptionsGoalsItem
-        from ..models.get_path_guide_options_starts_item import GetPathGuideOptionsStartsItem
-        from ..models.get_path_guide_options_vias_item import GetPathGuideOptionsViasItem
+        from ..models.get_path_guide_options_goals_item import (
+            GetPathGuideOptionsGoalsItem,  # noqa: PLC0415
+        )
+        from ..models.get_path_guide_options_starts_item import (
+            GetPathGuideOptionsStartsItem,  # noqa: PLC0415
+        )
+        from ..models.get_path_guide_options_vias_item import (
+            GetPathGuideOptionsViasItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         _goals = d.pop("goals", UNSET)

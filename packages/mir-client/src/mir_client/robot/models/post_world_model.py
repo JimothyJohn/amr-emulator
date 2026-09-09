@@ -59,7 +59,9 @@ class PostWorldModel:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_world_model_world_model_item import PostWorldModelWorldModelItem
+        from ..models.post_world_model_world_model_item import (
+            PostWorldModelWorldModelItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         enable_resource_tracking = d.pop("enable_resource_tracking")

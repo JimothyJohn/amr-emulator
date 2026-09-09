@@ -70,7 +70,9 @@ class PostMissionActions:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_mission_actions_parameters_item import PostMissionActionsParametersItem
+        from ..models.post_mission_actions_parameters_item import (
+            PostMissionActionsParametersItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         action_type = d.pop("action_type")

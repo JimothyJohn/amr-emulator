@@ -39,7 +39,7 @@ class IoModulesResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.guid_and_name import GuidAndName
+        from ..models.guid_and_name import GuidAndName  # noqa: PLC0415
 
         d = dict(src_dict)
         io_modules = []

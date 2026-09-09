@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class PalletDockingOption(str, Enum):
+class PalletDockingOption(StrEnum):
     MARKER = "Marker"
     MARKERWITHML = "MarkerWithMl"
     ML = "Ml"

@@ -65,10 +65,10 @@ class Position1:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.base_position_1 import BasePosition1
-        from ..models.charger_1 import Charger1
-        from ..models.marker_1 import Marker1
-        from ..models.utility_position_1 import UtilityPosition1
+        from ..models.base_position_1 import BasePosition1  # noqa: PLC0415
+        from ..models.charger_1 import Charger1  # noqa: PLC0415
+        from ..models.marker_1 import Marker1  # noqa: PLC0415
+        from ..models.utility_position_1 import UtilityPosition1  # noqa: PLC0415
 
         d = dict(src_dict)
         _base_position = d.pop("base-position", UNSET)

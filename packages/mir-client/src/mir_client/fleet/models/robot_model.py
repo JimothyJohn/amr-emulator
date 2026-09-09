@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class RobotModel(str, Enum):
+class RobotModel(StrEnum):
     MIR100 = "Mir100"
     MIR1000 = "Mir1000"
     MIR1200PALLETJACK = "Mir1200PalletJack"

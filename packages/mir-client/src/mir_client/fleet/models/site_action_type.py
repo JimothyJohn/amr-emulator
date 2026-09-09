@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class SiteActionType(str, Enum):
+class SiteActionType(StrEnum):
     CREATE = "Create"
     DELETE = "Delete"
     LOCKSTATECHANGE = "LockStateChange"

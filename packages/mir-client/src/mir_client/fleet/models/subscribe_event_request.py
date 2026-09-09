@@ -65,7 +65,7 @@ class SubscribeEventRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.event_type_with_endpoints_1 import EventTypeWithEndpoints1
+        from ..models.event_type_with_endpoints_1 import EventTypeWithEndpoints1  # noqa: PLC0415
 
         d = dict(src_dict)
         base_url = d.pop("base-url", UNSET)

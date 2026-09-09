@@ -106,7 +106,7 @@ class PutStatus:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.put_status_position import PutStatusPosition
+        from ..models.put_status_position import PutStatusPosition  # noqa: PLC0415
 
         d = dict(src_dict)
         answer = d.pop("answer", UNSET)

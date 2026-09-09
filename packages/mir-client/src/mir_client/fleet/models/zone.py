@@ -152,13 +152,13 @@ class Zone:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.directional_zone import DirectionalZone
-        from ..models.limit_zone import LimitZone
-        from ..models.planner_zone import PlannerZone
-        from ..models.point import Point
-        from ..models.sound_and_light_zone import SoundAndLightZone
-        from ..models.speed_zone import SpeedZone
-        from ..models.zone_event import ZoneEvent
+        from ..models.directional_zone import DirectionalZone  # noqa: PLC0415
+        from ..models.limit_zone import LimitZone  # noqa: PLC0415
+        from ..models.planner_zone import PlannerZone  # noqa: PLC0415
+        from ..models.point import Point  # noqa: PLC0415
+        from ..models.sound_and_light_zone import SoundAndLightZone  # noqa: PLC0415
+        from ..models.speed_zone import SpeedZone  # noqa: PLC0415
+        from ..models.zone_event import ZoneEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         type_ = ZoneType(d.pop("type"))

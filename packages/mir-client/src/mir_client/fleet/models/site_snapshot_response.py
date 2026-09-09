@@ -41,7 +41,7 @@ class SiteSnapshotResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.site_event import SiteEvent
+        from ..models.site_event import SiteEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         _site_events = d.pop("site-events", UNSET)

@@ -55,7 +55,9 @@ class PutMissionAction:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.put_mission_action_parameters_item import PutMissionActionParametersItem
+        from ..models.put_mission_action_parameters_item import (
+            PutMissionActionParametersItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         _parameters = d.pop("parameters", UNSET)

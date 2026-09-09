@@ -41,7 +41,7 @@ class GroupSnapshotResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.group_event import GroupEvent
+        from ..models.group_event import GroupEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         _group_events = d.pop("group-events", UNSET)

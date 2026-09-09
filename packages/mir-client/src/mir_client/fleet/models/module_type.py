@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ModuleType(str, Enum):
+class ModuleType(StrEnum):
     INTERNAL4PORT = "Internal4Port"
     WISE = "Wise"
 

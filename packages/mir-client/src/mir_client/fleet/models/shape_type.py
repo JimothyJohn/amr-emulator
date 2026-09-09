@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ShapeType(str, Enum):
+class ShapeType(StrEnum):
     LINE = "Line"
     POLYGON = "Polygon"
 

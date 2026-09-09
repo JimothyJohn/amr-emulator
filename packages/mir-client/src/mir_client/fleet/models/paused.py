@@ -10,8 +10,6 @@ T = TypeVar("T", bound="Paused")
 
 @_attrs_define
 class Paused:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

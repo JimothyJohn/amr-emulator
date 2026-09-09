@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class EntryPositionType(str, Enum):
+class EntryPositionType(StrEnum):
     CARTLEFT = "CartLeft"
     CARTPICKUP = "CartPickup"
     CARTRIGHT = "CartRight"

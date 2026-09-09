@@ -56,7 +56,7 @@ class ResourceEventRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.resource_event import ResourceEvent
+        from ..models.resource_event import ResourceEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         is_snapshot = d.pop("is-snapshot", UNSET)

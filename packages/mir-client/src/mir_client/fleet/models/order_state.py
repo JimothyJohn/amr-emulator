@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OrderState(str, Enum):
+class OrderState(StrEnum):
     ABORTED = "Aborted"
     ABORTING = "Aborting"
     CREATED = "Created"

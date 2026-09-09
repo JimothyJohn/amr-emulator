@@ -81,8 +81,8 @@ class Charger1:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.entry_position_1 import EntryPosition1
-        from ..models.pose_1 import Pose1
+        from ..models.entry_position_1 import EntryPosition1  # noqa: PLC0415
+        from ..models.pose_1 import Pose1  # noqa: PLC0415
 
         d = dict(src_dict)
         type_ = ChargerType(d.pop("type"))

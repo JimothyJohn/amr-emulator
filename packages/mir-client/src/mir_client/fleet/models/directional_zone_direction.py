@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DirectionalZoneDirection(str, Enum):
+class DirectionalZoneDirection(StrEnum):
     DIRECTION0 = "Direction0"
     DIRECTION135 = "Direction135"
     DIRECTION180 = "Direction180"

@@ -30,9 +30,9 @@ class Feature:
     geometry: GeometryDouble | GeometryMulti | GeometrySingle | GeometryTriple
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.geometry_double import GeometryDouble
-        from ..models.geometry_multi import GeometryMulti
-        from ..models.geometry_single import GeometrySingle
+        from ..models.geometry_double import GeometryDouble  # noqa: PLC0415
+        from ..models.geometry_multi import GeometryMulti  # noqa: PLC0415
+        from ..models.geometry_single import GeometrySingle  # noqa: PLC0415
 
         type_ = self.type_
 
@@ -62,11 +62,11 @@ class Feature:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.feature_properties import FeatureProperties
-        from ..models.geometry_double import GeometryDouble
-        from ..models.geometry_multi import GeometryMulti
-        from ..models.geometry_single import GeometrySingle
-        from ..models.geometry_triple import GeometryTriple
+        from ..models.feature_properties import FeatureProperties  # noqa: PLC0415
+        from ..models.geometry_double import GeometryDouble  # noqa: PLC0415
+        from ..models.geometry_multi import GeometryMulti  # noqa: PLC0415
+        from ..models.geometry_single import GeometrySingle  # noqa: PLC0415
+        from ..models.geometry_triple import GeometryTriple  # noqa: PLC0415
 
         d = dict(src_dict)
         type_ = d.pop("type")

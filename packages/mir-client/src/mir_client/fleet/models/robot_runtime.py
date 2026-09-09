@@ -83,8 +83,8 @@ class RobotRuntime:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.hook_data import HookData
-        from ..models.pose import Pose
+        from ..models.hook_data import HookData  # noqa: PLC0415
+        from ..models.pose import Pose  # noqa: PLC0415
 
         d = dict(src_dict)
         uptime = d.pop("uptime")

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ChargerType(str, Enum):
+class ChargerType(StrEnum):
     MIRCHARGE24V = "MiRCharge24V"
     MIRCHARGE48V = "MiRCharge48V"
     MIRCHARGE48VFAST = "MiRCharge48VFast"

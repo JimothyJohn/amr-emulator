@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class SerialOrderPriority(str, Enum):
+class SerialOrderPriority(StrEnum):
     HIGH = "High"
     LOW = "Low"
     MEDIUM = "Medium"

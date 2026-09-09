@@ -41,7 +41,7 @@ class TopModuleEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.top_module_event_payload import TopModuleEventPayload
+        from ..models.top_module_event_payload import TopModuleEventPayload  # noqa: PLC0415
 
         d = dict(src_dict)
         name = d.pop("name")

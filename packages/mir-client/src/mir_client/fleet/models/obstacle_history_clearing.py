@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ObstacleHistoryClearing(str, Enum):
+class ObstacleHistoryClearing(StrEnum):
     CLEARALL = "ClearAll"
     CLEARINFRONTOFROBOT = "ClearInFrontOfRobot"
     NOCLEARING = "NoClearing"

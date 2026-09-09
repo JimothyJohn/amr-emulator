@@ -101,8 +101,8 @@ class PostZones:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_zones_actions_item import PostZonesActionsItem
-        from ..models.post_zones_polygon_item import PostZonesPolygonItem
+        from ..models.post_zones_actions_item import PostZonesActionsItem  # noqa: PLC0415
+        from ..models.post_zones_polygon_item import PostZonesPolygonItem  # noqa: PLC0415
 
         d = dict(src_dict)
         map_id = d.pop("map_id")
