@@ -56,8 +56,8 @@ class SystemEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.evacuation import Evacuation
-        from ..models.robot import Robot
+        from ..models.evacuation import Evacuation  # noqa: PLC0415
+        from ..models.robot import Robot  # noqa: PLC0415
 
         d = dict(src_dict)
         _evacuation = d.pop("evacuation", UNSET)

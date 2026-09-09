@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OrderPriority(str, Enum):
+class OrderPriority(StrEnum):
     HIGH = "High"
     LOW = "Low"
     MEDIUM = "Medium"

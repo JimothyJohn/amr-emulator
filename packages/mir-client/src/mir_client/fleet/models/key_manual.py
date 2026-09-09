@@ -10,8 +10,6 @@ T = TypeVar("T", bound="KeyManual")
 
 @_attrs_define
 class KeyManual:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

@@ -44,7 +44,7 @@ class Footprint:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.point import Point
+        from ..models.point import Point  # noqa: PLC0415
 
         d = dict(src_dict)
         points = []

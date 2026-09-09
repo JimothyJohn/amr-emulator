@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DockingType(str, Enum):
+class DockingType(StrEnum):
     BAR = "Bar"
     LEG = "Leg"
 

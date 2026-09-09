@@ -56,9 +56,9 @@ class RobotState:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.idle import Idle
-        from ..models.not_operational import NotOperational
-        from ..models.operational import Operational
+        from ..models.idle import Idle  # noqa: PLC0415
+        from ..models.not_operational import NotOperational  # noqa: PLC0415
+        from ..models.operational import Operational  # noqa: PLC0415
 
         d = dict(src_dict)
         _idle = d.pop("idle", UNSET)

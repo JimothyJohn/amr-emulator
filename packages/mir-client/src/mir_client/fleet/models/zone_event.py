@@ -73,9 +73,9 @@ class ZoneEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.io_parameters import IoParameters
-        from ..models.plc_parameters import PlcParameters
-        from ..models.zone_event_event import ZoneEventEvent
+        from ..models.io_parameters import IoParameters  # noqa: PLC0415
+        from ..models.plc_parameters import PlcParameters  # noqa: PLC0415
+        from ..models.zone_event_event import ZoneEventEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         name = d.pop("name")

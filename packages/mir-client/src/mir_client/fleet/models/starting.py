@@ -10,8 +10,6 @@ T = TypeVar("T", bound="Starting")
 
 @_attrs_define
 class Starting:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

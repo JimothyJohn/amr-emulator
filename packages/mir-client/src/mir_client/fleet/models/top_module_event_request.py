@@ -56,8 +56,8 @@ class TopModuleEventRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.error_1 import Error1
-        from ..models.event import Event
+        from ..models.error_1 import Error1  # noqa: PLC0415
+        from ..models.event import Event  # noqa: PLC0415
 
         d = dict(src_dict)
         _event_type = d.pop("event-type", UNSET)

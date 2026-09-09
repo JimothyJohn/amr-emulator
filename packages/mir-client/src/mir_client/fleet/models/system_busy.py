@@ -47,8 +47,8 @@ class SystemBusy:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.shutting_down import ShuttingDown
-        from ..models.starting import Starting
+        from ..models.shutting_down import ShuttingDown  # noqa: PLC0415
+        from ..models.starting import Starting  # noqa: PLC0415
 
         d = dict(src_dict)
         _starting = d.pop("starting", UNSET)

@@ -47,7 +47,7 @@ class SystemEventRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.system_event import SystemEvent
+        from ..models.system_event import SystemEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         is_snapshot = d.pop("is-snapshot", UNSET)

@@ -46,7 +46,7 @@ class PostRobots:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_robots_robots_item import PostRobotsRobotsItem
+        from ..models.post_robots_robots_item import PostRobotsRobotsItem  # noqa: PLC0415
 
         d = dict(src_dict)
         robots = []

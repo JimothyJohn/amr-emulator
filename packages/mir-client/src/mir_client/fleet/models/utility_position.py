@@ -133,10 +133,10 @@ class UtilityPosition:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.bar import Bar
-        from ..models.deep_lane_setting import DeepLaneSetting
-        from ..models.elevation import Elevation
-        from ..models.pose import Pose
+        from ..models.bar import Bar  # noqa: PLC0415
+        from ..models.deep_lane_setting import DeepLaneSetting  # noqa: PLC0415
+        from ..models.elevation import Elevation  # noqa: PLC0415
+        from ..models.pose import Pose  # noqa: PLC0415
 
         d = dict(src_dict)
         type_ = d.pop("type")

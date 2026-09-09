@@ -84,8 +84,8 @@ class Zone1:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.geo_json import GeoJson
-        from ..models.zone_event import ZoneEvent
+        from ..models.geo_json import GeoJson  # noqa: PLC0415
+        from ..models.zone_event import ZoneEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         name = d.pop("name")

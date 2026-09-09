@@ -92,13 +92,15 @@ class NotOperational:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.error import Error
-        from ..models.external_cable_charger_connected import ExternalCableChargerConnected
-        from ..models.key import Key
-        from ..models.manual_control import ManualControl
-        from ..models.paused import Paused
-        from ..models.safety_stop import SafetyStop
-        from ..models.system_busy import SystemBusy
+        from ..models.error import Error  # noqa: PLC0415
+        from ..models.external_cable_charger_connected import (
+            ExternalCableChargerConnected,  # noqa: PLC0415
+        )
+        from ..models.key import Key  # noqa: PLC0415
+        from ..models.manual_control import ManualControl  # noqa: PLC0415
+        from ..models.paused import Paused  # noqa: PLC0415
+        from ..models.safety_stop import SafetyStop  # noqa: PLC0415
+        from ..models.system_busy import SystemBusy  # noqa: PLC0415
 
         d = dict(src_dict)
         _manual_control = d.pop("manual-control", UNSET)

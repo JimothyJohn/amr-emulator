@@ -47,7 +47,7 @@ class EntryPosition1:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.pose_1 import Pose1
+        from ..models.pose_1 import Pose1  # noqa: PLC0415
 
         d = dict(src_dict)
         entry_position_type = EntryPositionType(d.pop("entry-position-type"))

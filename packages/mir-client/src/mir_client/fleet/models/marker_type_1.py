@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class MarkerType1(str, Enum):
+class MarkerType1(StrEnum):
     BAR = "Bar"
     L = "L"
     PALLETRACK = "PalletRack"

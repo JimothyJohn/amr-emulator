@@ -227,12 +227,12 @@ class GetStatus:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_status_errors_item import GetStatusErrorsItem
-        from ..models.get_status_hook_data import GetStatusHookData
-        from ..models.get_status_hook_status import GetStatusHookStatus
-        from ..models.get_status_position import GetStatusPosition
-        from ..models.get_status_user_prompt import GetStatusUserPrompt
-        from ..models.get_status_velocity import GetStatusVelocity
+        from ..models.get_status_errors_item import GetStatusErrorsItem  # noqa: PLC0415
+        from ..models.get_status_hook_data import GetStatusHookData  # noqa: PLC0415
+        from ..models.get_status_hook_status import GetStatusHookStatus  # noqa: PLC0415
+        from ..models.get_status_position import GetStatusPosition  # noqa: PLC0415
+        from ..models.get_status_user_prompt import GetStatusUserPrompt  # noqa: PLC0415
+        from ..models.get_status_velocity import GetStatusVelocity  # noqa: PLC0415
 
         d = dict(src_dict)
         battery_percentage = d.pop("battery_percentage", UNSET)

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class SubscriptionEventType(str, Enum):
+class SubscriptionEventType(StrEnum):
     ALERT = "Alert"
     ERROR = "Error"
     GROUP = "Group"

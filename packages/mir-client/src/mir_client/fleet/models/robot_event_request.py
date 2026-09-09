@@ -122,7 +122,7 @@ class RobotEventRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.robot_state import RobotState
+        from ..models.robot_state import RobotState  # noqa: PLC0415
 
         d = dict(src_dict)
         robot_id = d.pop("robot-id", UNSET)

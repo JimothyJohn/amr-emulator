@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class SiteEntityType(str, Enum):
+class SiteEntityType(StrEnum):
     CART = "Cart"
     FOOTPRINT = "Footprint"
     GROUP = "Group"

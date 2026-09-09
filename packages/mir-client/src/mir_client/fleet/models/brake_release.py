@@ -10,8 +10,6 @@ T = TypeVar("T", bound="BrakeRelease")
 
 @_attrs_define
 class BrakeRelease:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class TopModuleEventType(str, Enum):
+class TopModuleEventType(StrEnum):
     ERROR = "Error"
     EVENT = "Event"
 

@@ -36,7 +36,7 @@ class SerialOrderRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.serial_order import SerialOrder
+        from ..models.serial_order import SerialOrder  # noqa: PLC0415
 
         d = dict(src_dict)
         serial_order = SerialOrder.from_dict(d.pop("serial-order"))

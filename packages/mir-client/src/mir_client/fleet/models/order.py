@@ -206,7 +206,7 @@ class Order:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.order_action import OrderAction
+        from ..models.order_action import OrderAction  # noqa: PLC0415
 
         d = dict(src_dict)
         order_id = d.pop("order-id")

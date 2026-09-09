@@ -79,7 +79,7 @@ class GetModbus:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_modbus_registers_item import GetModbusRegistersItem
+        from ..models.get_modbus_registers_item import GetModbusRegistersItem  # noqa: PLC0415
 
         d = dict(src_dict)
         data_type = d.pop("data_type", UNSET)
