@@ -210,7 +210,7 @@ def test_hibernation_mid_drive_and_past_wakeup():
                 lambda s: not s["nodeStates"] and not s["edgeStates"], timeout=10
             )
             # Race stopHibernation against the (already-due) auto-wake.
-            stop = await stack.m.send_instant_action("stopHibernation")
+            await stack.m.send_instant_action("stopHibernation")
             for _ in range(200):
                 if stack.r.hibernating is False:
                     break
@@ -224,7 +224,6 @@ def test_hibernation_mid_drive_and_past_wakeup():
                 lambda s: s["orderId"] == "awake" and s["lastNodeId"] == "n1",
                 timeout=20,
             )
-            del stop
 
     run(body(), timeout=60)
 
