@@ -143,7 +143,8 @@ def test_index_serves_console_page_to_browsers(call, tmp_path, monkeypatch):
     assert landing["statusCode"] == 200
     assert "text/html" in landing["headers"]["content-type"]
     assert "console" in landing["body"]
-    assert landing["headers"]["vary"] == "Accept"
+    # starlette>=1.7's CORSMiddleware appends "Origin" to any existing Vary header.
+    assert landing["headers"]["vary"] == "Accept, Origin"
     csp = landing["headers"]["content-security-policy"]
     assert "default-src 'none'" in csp
     assert "frame-ancestors 'none'" in csp
