@@ -208,7 +208,7 @@ footer a { color: var(--ink-soft); }
       <ul>
         <li>Robot API 2.x &amp; 3.x, Fleet Integration API</li>
         <li>Interactive console with fault injection</li>
-        <li><code>pip install mir-emulator==3.8.1</code></li>
+        <li>One public URL, every tracked software version</li>
       </ul>
       <span class="go">Open the MiR console →</span>
     </a>
@@ -268,14 +268,16 @@ footer a { color: var(--ink-soft); }
 
   <section class="strip">
     <h3>Sixty seconds to a running robot</h3>
-    <pre><code># VDA 5050: embedded broker on :1883 + one emulated robot
-uvx vda5050-emulator
+    <pre><code># from a checkout: git clone https://github.com/JimothyJohn/amr-emulator &amp;&amp; cd amr-emulator
+
+# VDA 5050: embedded broker on :1883 + one emulated robot
+uv run vda5050-emulator
 
 # your MiR robot as a VDA 5050 robot (any master control can drive it)
-uvx mir-vda5050-adapter --mir-url http://&lt;robot-ip&gt; --broker &lt;mqtt-host&gt;
+uv run mir-vda5050-adapter --mir-url http://&lt;robot-ip&gt; --broker &lt;mqtt-host&gt;
 
 # an Omron LD/HD that answers on telnet
-uvx arcl-emulator</code></pre>
+uv run arcl-emulator</code></pre>
   </section>
 </main>
 
@@ -285,7 +287,8 @@ uvx arcl-emulator</code></pre>
     intelligence · Dallas, TX<br>
     An open-source <a href="https://advin.io" rel="noopener">advin.io</a> project ·
     Get help: <a href="mailto:nick@advin.io">nick@advin.io</a> ·
-    <a href="https://github.com/JimothyJohn/amr-emulator/issues" rel="noopener">GitHub issues</a>
+    <a href="https://github.com/JimothyJohn/amr-emulator/issues" rel="noopener">GitHub issues</a><br>
+    AMR Emulator is an independent project, not affiliated with or endorsed by the robot vendors or standards bodies whose interfaces it emulates. Product names are trademarks of their respective owners.
   </div>
 </footer>
 

@@ -95,8 +95,9 @@ for the canonical reference; the emulator links to it rather than rebuilding it.
    Fleet Enterprise as native OpenAPI 3 JSON at public URLs. Discovery probes
    forward from the tracked versions (new patches, minors, majors) and the
    same selection rule applies per major line.
-6. **`release.yml`** builds one `mir-emulator` distribution per tracked MiR
-   version: `pip install mir-emulator==3.8.1` gets a 3.8.1 robot.
+6. **`release.yml`** builds one `mir-emulator` wheel per tracked MiR
+   version as an attested workflow artifact. Nothing is published to PyPI —
+   the product is the hosted endpoint; run locally from a checkout.
 
 ### Secrets
 
@@ -106,7 +107,6 @@ for the canonical reference; the emulator links to it rather than rebuilding it.
   summary on top of the mechanical API changelog in scrape PRs (model:
   `anthropic/claude-sonnet-5`, override with `MIR_SUMMARY_MODEL`). Strictly
   best-effort: any failure falls back to the mechanical report.
-- `PYPI_API_TOKEN` (optional) — to publish wheels from `release.yml`.
 
 ## Tracked versions
 
