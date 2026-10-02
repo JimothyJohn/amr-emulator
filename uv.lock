@@ -11,13 +11,13 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "amr-client",
+    "amr-emulator",
+    "amr-mcp",
+    "amr-spec-scraper",
+    "amr-vda5050-adapter",
     "arcl-emulator",
     "massrobotics-emulator",
-    "mir-client",
-    "mir-emulator",
-    "mir-mcp",
-    "mir-spec-scraper",
-    "mir-vda5050-adapter",
     "vda5050-emulator",
     "vda5050-master",
 ]
@@ -32,6 +32,94 @@ dev = [
     { name = "pytest-cov", specifier = ">=7.1.0" },
     { name = "ruff", specifier = ">=0.16.9" },
     { name = "ty", specifier = ">=0.0.84" },
+]
+
+[[package]]
+name = "amr-client"
+version = "0.1.0"
+source = { editable = "packages/amr-client" }
+dependencies = [
+    { name = "attrs" },
+    { name = "httpx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "attrs", specifier = ">=22.2" },
+    { name = "httpx", specifier = ">=0.27" },
+]
+
+[[package]]
+name = "amr-emulator"
+source = { editable = "packages/amr-emulator" }
+dependencies = [
+    { name = "httpx" },
+    { name = "jsonschema" },
+    { name = "pyyaml" },
+    { name = "starlette" },
+    { name = "uvicorn" },
+]
+
+[package.optional-dependencies]
+ws = [
+    { name = "websockets" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "jsonschema", specifier = ">=4.20" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "starlette", specifier = ">=1.7.0" },
+    { name = "uvicorn", specifier = ">=0.53.0" },
+    { name = "websockets", marker = "extra == 'ws'", specifier = ">=17.1" },
+]
+provides-extras = ["ws"]
+
+[[package]]
+name = "amr-mcp"
+version = "0.1.0"
+source = { editable = "packages/amr-mcp" }
+dependencies = [
+    { name = "amr-client" },
+    { name = "httpx" },
+    { name = "mcp" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "amr-client", editable = "packages/amr-client" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "mcp", specifier = ">=2.2.0" },
+]
+
+[[package]]
+name = "amr-spec-scraper"
+version = "0.1.0"
+source = { editable = "packages/amr-spec-scraper" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pdfplumber" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "pdfplumber", specifier = ">=0.11" },
+]
+
+[[package]]
+name = "amr-vda5050-adapter"
+source = { editable = "packages/amr-vda5050-adapter" }
+dependencies = [
+    { name = "httpx" },
+    { name = "vda5050-emulator" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "vda5050-emulator", editable = "packages/vda5050-emulator" },
 ]
 
 [[package]]
@@ -778,94 +866,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
-]
-
-[[package]]
-name = "mir-client"
-version = "0.1.0"
-source = { editable = "packages/mir-client" }
-dependencies = [
-    { name = "attrs" },
-    { name = "httpx" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "attrs", specifier = ">=22.2" },
-    { name = "httpx", specifier = ">=0.27" },
-]
-
-[[package]]
-name = "mir-emulator"
-source = { editable = "packages/mir-emulator" }
-dependencies = [
-    { name = "httpx" },
-    { name = "jsonschema" },
-    { name = "pyyaml" },
-    { name = "starlette" },
-    { name = "uvicorn" },
-]
-
-[package.optional-dependencies]
-ws = [
-    { name = "websockets" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "jsonschema", specifier = ">=4.20" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "starlette", specifier = ">=1.7.0" },
-    { name = "uvicorn", specifier = ">=0.53.0" },
-    { name = "websockets", marker = "extra == 'ws'", specifier = ">=17.1" },
-]
-provides-extras = ["ws"]
-
-[[package]]
-name = "mir-mcp"
-version = "0.1.0"
-source = { editable = "packages/mir-mcp" }
-dependencies = [
-    { name = "httpx" },
-    { name = "mcp" },
-    { name = "mir-client" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "mcp", specifier = ">=2.2.0" },
-    { name = "mir-client", editable = "packages/mir-client" },
-]
-
-[[package]]
-name = "mir-spec-scraper"
-version = "0.1.0"
-source = { editable = "packages/mir-spec-scraper" }
-dependencies = [
-    { name = "httpx" },
-    { name = "pdfplumber" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "pdfplumber", specifier = ">=0.11" },
-]
-
-[[package]]
-name = "mir-vda5050-adapter"
-source = { editable = "packages/mir-vda5050-adapter" }
-dependencies = [
-    { name = "httpx" },
-    { name = "vda5050-emulator" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "vda5050-emulator", editable = "packages/vda5050-emulator" },
 ]
 
 [[package]]

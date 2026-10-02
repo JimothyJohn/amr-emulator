@@ -553,8 +553,8 @@ async function authToken() {
 
 /* ---------- virtual robot session ----------
    Every browser gets a private virtual robot: a random key, kept in
-   localStorage so the robot survives a reload, sent as X-MiR-Session. */
-const SESSION_KEY = "mir-console-session";
+   localStorage so the robot survives a reload, sent as X-AMR-Session. */
+const SESSION_KEY = "amr-console-session";
 function newSessionId() {
   const bytes = new Uint8Array(4);
   crypto.getRandomValues(bytes);
@@ -569,7 +569,7 @@ async function requestHeaders(extra = {}) {
   const headers = currentKind === "mirfleet"
     ? { "x-api-key": API_KEY, ...extra }
     : { Authorization: "Basic " + await authToken(), ...extra };
-  headers["X-MiR-Session"] = SESSION;
+  headers["X-AMR-Session"] = SESSION;
   return headers;
 }
 
@@ -598,9 +598,9 @@ function highlight(json) {
    across visits) ----------
    Each sampler emits a complete, runnable program: robot samples derive MiR's
    Basic BASE64(user ":" SHA-256-hex(password)) token in-language, fleet
-   samples send the x-api-key header, both carry X-MiR-Session when a virtual
+   samples send the x-api-key header, both carry X-AMR-Session when a virtual
    robot session is active and target the selected software version. */
-const LANG_KEY = "mir-console-lang";
+const LANG_KEY = "amr-console-lang";
 const LANGS = [["curl", "cURL"], ["python", "Python"], ["javascript", "JavaScript"], ["go", "Go"], ["rust", "Rust"]];
 let lang = "curl";
 try {
@@ -631,7 +631,7 @@ const SAMPLERS = {
         "TOKEN=$(printf '%s:%s' " + shQ(c.user) + " \"$HASH\" | base64 | tr -d '\\n')\n" +
         "curl -X " + c.method + " " + shQ(c.url) + " \\\n  -H \"Authorization: Basic $TOKEN\"";
     }
-    if (c.session) out += " \\\n  -H " + shQ("X-MiR-Session: " + c.session);
+    if (c.session) out += " \\\n  -H " + shQ("X-AMR-Session: " + c.session);
     if (c.body) out += " \\\n  -H 'Content-Type: application/json' \\\n  -d " + shQ(c.body);
     return out;
   },
@@ -652,7 +652,7 @@ const SAMPLERS = {
         "token = base64.b64encode(f\"{USER}:{digest}\".encode()).decode()",
         "headers = {\"Authorization\": \"Basic \" + token}",
       ];
-    if (c.session) lines.push("headers[\"X-MiR-Session\"] = " + pyS(c.session) + "  # your virtual robot");
+    if (c.session) lines.push("headers[\"X-AMR-Session\"] = " + pyS(c.session) + "  # your virtual robot");
     lines.push("");
     if (c.body) {
       lines.push(
@@ -681,7 +681,7 @@ const SAMPLERS = {
         "const hex = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, \"0\")).join(\"\");",
         "const headers = { Authorization: \"Basic \" + btoa(USER + \":\" + hex) };",
       ];
-    if (c.session) lines.push("headers[\"X-MiR-Session\"] = " + dq(c.session) + "; // your virtual robot");
+    if (c.session) lines.push("headers[\"X-AMR-Session\"] = " + dq(c.session) + "; // your virtual robot");
     lines.push("");
     if (c.body) {
       lines.push(
@@ -727,7 +727,7 @@ const SAMPLERS = {
       c.fleet
         ? "\treq.Header.Set(\"x-api-key\", " + dq(c.apikey) + ")"
         : "\treq.Header.Set(\"Authorization\", \"Basic \"+token)");
-    if (c.session) lines.push("\treq.Header.Set(\"X-MiR-Session\", " + dq(c.session) + ") // your virtual robot");
+    if (c.session) lines.push("\treq.Header.Set(\"X-AMR-Session\", " + dq(c.session) + ") // your virtual robot");
     if (c.body) lines.push("\treq.Header.Set(\"Content-Type\", \"application/json\")");
     lines.push(
       "",
@@ -768,7 +768,7 @@ const SAMPLERS = {
       c.fleet
         ? "        .header(\"x-api-key\", " + dq(c.apikey) + ")"
         : "        .header(\"Authorization\", format!(\"Basic {token}\"))");
-    if (c.session) lines.push("        .header(\"X-MiR-Session\", " + dq(c.session) + ") // your virtual robot");
+    if (c.session) lines.push("        .header(\"X-AMR-Session\", " + dq(c.session) + ") // your virtual robot");
     if (c.body) lines.push(
       "        .header(\"Content-Type\", \"application/json\")",
       "        .body(" + dq(c.body) + ")");

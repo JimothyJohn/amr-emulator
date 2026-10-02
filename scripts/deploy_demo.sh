@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the mir-emulator Lambda bundle and deploy the public demo stack.
+# Build the amr-emulator Lambda bundle and deploy the public demo stack.
 #
 #   ./scripts/deploy_demo.sh            # build + deploy + smoke test
 #   SKIP_SMOKE=1 ./scripts/deploy_demo.sh
@@ -32,11 +32,11 @@ REGION="${AWS_REGION:-$(aws configure get region)}"
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 BUCKET="mir-emulator-artifacts-${ACCOUNT_ID}-${REGION}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/mir-emulator-lambda.XXXXXX")"
+BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/amr-emulator-lambda.XXXXXX")"
 trap 'rm -rf "$BUILD_DIR"' EXIT
 
 log "Building wheel"
-uv build --package mir-emulator --wheel -o "$BUILD_DIR/wheels" >/dev/null
+uv build --package amr-emulator --wheel -o "$BUILD_DIR/wheels" >/dev/null
 
 log "Cross-installing for aarch64-manylinux2014 / CPython 3.13"
 uv pip install \
@@ -44,18 +44,18 @@ uv pip install \
     --python-version 3.13 \
     --python-platform aarch64-manylinux2014 \
     --only-binary :all: \
-    "$BUILD_DIR"/wheels/mir_emulator-*.whl >/dev/null
+    "$BUILD_DIR"/wheels/amr_emulator-*.whl >/dev/null
 
 find "$BUILD_DIR/site" -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
 
 # Site pages ship inside the bundle: the advin.io landing at /, the MiR
 # console at /console (+ /mir), and the VDA 5050 / Omron ARCL app pages at
 # their own routes.
-cp "$REPO_ROOT/docs/index.html" "$BUILD_DIR/site/mir_emulator/console.html"
-cp "$REPO_ROOT/docs/landing.html" "$BUILD_DIR/site/mir_emulator/landing.html"
-cp "$REPO_ROOT/docs/vda5050.html" "$BUILD_DIR/site/mir_emulator/vda5050.html"
-cp "$REPO_ROOT/docs/omron.html" "$BUILD_DIR/site/mir_emulator/omron.html"
-cp "$REPO_ROOT/docs/massrobotics.html" "$BUILD_DIR/site/mir_emulator/massrobotics.html"
+cp "$REPO_ROOT/docs/index.html" "$BUILD_DIR/site/amr_emulator/console.html"
+cp "$REPO_ROOT/docs/landing.html" "$BUILD_DIR/site/amr_emulator/landing.html"
+cp "$REPO_ROOT/docs/vda5050.html" "$BUILD_DIR/site/amr_emulator/vda5050.html"
+cp "$REPO_ROOT/docs/omron.html" "$BUILD_DIR/site/amr_emulator/omron.html"
+cp "$REPO_ROOT/docs/massrobotics.html" "$BUILD_DIR/site/amr_emulator/massrobotics.html"
 
 log "Zipping bundle"
 (cd "$BUILD_DIR/site" && zip -qr "$BUILD_DIR/code.zip" .)

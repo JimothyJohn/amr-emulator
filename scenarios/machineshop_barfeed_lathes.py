@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["httpx>=0.27", "mir-client"]
+# dependencies = ["httpx>=0.27", "amr-client"]
 #
 # [tool.uv.sources]
-# mir-client = { path = "../packages/mir-client" }
+# amr-client = { path = "../packages/amr-client" }
 # ///
 """Machine shop — one robot feeds five bar-fed lathes from a central rod rack.
 
@@ -22,7 +22,7 @@ What this exercises on the emulator:
     publishes its magazine level, the rack publishes remaining stock
   * lowest-stock-first dispatch — the priority decision lives in the shop's
     dispatcher, not the robot's FIFO queue (which only ever holds one job)
-  * per-lathe X-MiR-Mission-Duration in *simulated* seconds — near lathes
+  * per-lathe X-AMR-Mission-Duration in *simulated* seconds — near lathes
     are a 1-minute (~30 m) run, the far wall 3 minutes (~90 m)
   * PUT /_emulator/clock at 60x: those realistic trips finish in 1-3 wall
     seconds while odometry, /statistics/distance, battery drain, and
@@ -38,7 +38,7 @@ Register map used here (pick your own on a real site):
   50     central rack stock (rods remaining)
 
 Run:
-    uv run mir-emulator --mission-duration 2 &
+    uv run amr-emulator --mission-duration 2 &
     uv run scenarios/machineshop_barfeed_lathes.py
 """
 
@@ -47,9 +47,9 @@ import sys
 import time
 
 import httpx
-from mir_client import robot_token
+from amr_client import robot_token
 
-MIR_URL = os.environ.get("MIR_URL", "http://127.0.0.1:8080")
+AMR_URL = os.environ.get("AMR_URL", "http://127.0.0.1:8080")
 API = "/api/v2.0.0"
 
 # The compressed production day: consumption advances once per tick whether
@@ -66,7 +66,7 @@ RACK_INITIAL = 80  # rods on the central storage rack at shift start
 RACK_REG = 50
 
 # One row per lathe: PLC register for its magazine, delivery duration from
-# the rack (X-MiR-Mission-Duration, emulator-only, in simulated seconds —
+# the rack (X-AMR-Mission-Duration, emulator-only, in simulated seconds —
 # near bays are a 1-minute / ~30 m run, the far wall 3 minutes / ~90 m),
 # and part cycle time as ticks-per-rod.
 LATHES = [
@@ -79,12 +79,12 @@ LATHES = [
 
 
 def client(session: str) -> httpx.Client:
-    user = os.environ.get("MIR_USERNAME", "distributor")
-    password = os.environ.get("MIR_PASSWORD", "distributor")
+    user = os.environ.get("AMR_USERNAME", "distributor")
+    password = os.environ.get("AMR_PASSWORD", "distributor")
     token = robot_token(user, password)
     return httpx.Client(
-        base_url=MIR_URL,
-        headers={"Authorization": f"Basic {token}", "X-MiR-Session": session},
+        base_url=AMR_URL,
+        headers={"Authorization": f"Basic {token}", "X-AMR-Session": session},
         timeout=15,
     )
 
@@ -93,10 +93,10 @@ def require_emulator(c: httpx.Client) -> None:
     try:
         index = c.get("/").json()
     except httpx.ConnectError:
-        sys.exit(f"Nothing at {MIR_URL} — start one: uv run mir-emulator --mission-duration 2")
+        sys.exit(f"Nothing at {AMR_URL} — start one: uv run amr-emulator --mission-duration 2")
     if "emulated_mir_version" not in index:
         sys.exit(
-            f"{MIR_URL} does not look like the emulator; refusing to write PLC registers on it."
+            f"{AMR_URL} does not look like the emulator; refusing to write PLC registers on it."
         )
 
 
@@ -195,7 +195,7 @@ def run_shift(c: httpx.Client) -> None:
                 qid = c.post(
                     f"{API}/mission_queue",
                     json={"mission_id": lathe["mission"]},
-                    headers={"X-MiR-Mission-Duration": lathe["trip_s"]},
+                    headers={"X-AMR-Mission-Duration": lathe["trip_s"]},
                 ).json()["id"]
                 in_flight = {"qid": qid, "lathe": lathe, "bundle": bundle}
                 trip_sim = int(lathe["trip_s"])

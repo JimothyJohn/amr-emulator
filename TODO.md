@@ -35,7 +35,7 @@ _Nothing queued here — `PROMOTION.md` Phase 0 is the current work._
       a session an opt-in durable store so a robot key survives restarts —
       the browser already persists the key itself; the server should be able
       to persist what that key points at. Acceptance: enqueue a mission,
-      restart the emulator, reconnect with the same `X-MiR-Session`, and the
+      restart the emulator, reconnect with the same `X-AMR-Session`, and the
       queue is still there.
 
 - [ ] **Cart / hook modeling.** `hook_status` currently always reports
@@ -47,7 +47,7 @@ _Nothing queued here — `PROMOTION.md` Phase 0 is the current work._
       `cart_attached` with a spec-shaped cart document, and a drop-off
       clears it.
 
-- [ ] **Richer reporting.** `mir-report` ships current status, one daily
+- [ ] **Richer reporting.** `amr-report` ships current status, one daily
       trend, and the action timeline. Next: per-mission-kind breakdowns,
       battery history (sampled via the status WebSocket), and multi-day
       trends once `/statistics/distance` has history to show. Acceptance:
@@ -63,7 +63,7 @@ below is what separates "passes its own suite" from production-worthy.
 - [ ] **Close the conformance loop externally (VDA 5050).** Passing our
       own torture suite proves consistency, not correctness — the emulator,
       the adapter, and their tests share assumptions, and the one live
-      validation so far (master control → adapter → mir-emulator) was
+      validation so far (master control → adapter → amr-emulator) was
       in-house on both ends. Research independent open-source
       master-control implementations, pick one, and run it against
       `vda5050-emulator` for each supported spec version. Acceptance: an

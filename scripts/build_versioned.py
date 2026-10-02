@@ -1,7 +1,7 @@
-"""Build one mir-emulator wheel per tracked MiR version.
+"""Build one amr-emulator wheel per tracked MiR version.
 
 Each wheel's package version equals the MiR software version it emulates by
-default, so ``pip install mir-emulator==3.5.4`` gets a 3.5.4 robot. Run from
+default, so ``pip install amr-emulator==3.5.4`` gets a 3.5.4 robot. Run from
 the repo root:
 
     uv run python scripts/build_versioned.py [--out dist]
@@ -15,9 +15,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-PACKAGE_DIR = Path("packages/mir-emulator")
-VERSION_FILE = PACKAGE_DIR / "src/mir_emulator/_version.py"
-REGISTRY = PACKAGE_DIR / "src/mir_emulator/specs/registry.json"
+PACKAGE_DIR = Path("packages/amr-emulator")
+VERSION_FILE = PACKAGE_DIR / "src/amr_emulator/_version.py"
+REGISTRY = PACKAGE_DIR / "src/amr_emulator/specs/registry.json"
 
 STAMP_TEMPLATE = """# Stamped by scripts/build_versioned.py — do not commit this form.
 __version__ = "{version}"
@@ -42,14 +42,14 @@ def main() -> int:
         for version in versions:
             VERSION_FILE.write_text(STAMP_TEMPLATE.format(version=version))
             subprocess.run(  # noqa: S603 - fixed argv
-                ["uv", "build", "--package", "mir-emulator", "--out-dir", str(args.out)],  # noqa: S607 - uv from PATH by design
+                ["uv", "build", "--package", "amr-emulator", "--out-dir", str(args.out)],  # noqa: S607 - uv from PATH by design
                 check=True,
             )
             built.append(version)
     finally:
         VERSION_FILE.write_text(original)
 
-    print(f"built mir-emulator wheels for MiR versions: {', '.join(built)} -> {args.out}/")
+    print(f"built amr-emulator wheels for MiR versions: {', '.join(built)} -> {args.out}/")
     return 0
 
 

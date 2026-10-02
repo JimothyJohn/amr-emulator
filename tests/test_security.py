@@ -3,8 +3,8 @@
 import concurrent.futures
 
 import pytest
-from mir_emulator import auth
-from mir_emulator.app import create_app
+from amr_emulator import auth
+from amr_emulator.app import create_app
 from starlette.testclient import TestClient
 
 from tests.conftest import AUTH_HEADER

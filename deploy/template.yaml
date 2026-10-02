@@ -94,7 +94,7 @@ Resources:
       Description: MiR REST API emulator - all tracked versions at /<version>/api/v2.0.0
       Runtime: python3.13
       Architectures: [arm64]
-      Handler: mir_emulator.serverless.handler
+      Handler: amr_emulator.serverless.handler
       MemorySize: 512
       Timeout: 10
       ReservedConcurrentExecutions: !Ref ReservedConcurrency

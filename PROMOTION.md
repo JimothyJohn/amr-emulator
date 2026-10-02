@@ -15,12 +15,12 @@ Each line says what was checked. Anything not checked is marked as such.
 | Repo topics | **none set** | `repositoryTopics: null` in the same call |
 | Repo description | "…of autonomous mobile robot REST APIs (MiR today; more brands coming)" — stale: VDA 5050, ARCL and MassRobotics already ship | same call vs. `README.md` |
 | PyPI | **nothing published, and nothing will be** — decided 2026-10-01: this is a web endpoint, not a library. All nine package names answer 404 | `curl https://pypi.org/pypi/<name>/json` |
-| `pip install` / `uvx` claims | were stated in `README.md`, `docs/landing.html` and `packages/mir-emulator/README.md`; removed 2026-10-01 in favour of "from a checkout" | `grep -n "pip install\|uvx"` |
-| Container image | **not published anywhere.** `ci.yml` builds `mir-emulator:ci` and smoke-tests it; no workflow pushes to a registry | `grep -i "ghcr\|docker" .github/workflows/*.yml` |
+| `pip install` / `uvx` claims | were stated in `README.md`, `docs/landing.html` and `packages/amr-emulator/README.md`; removed 2026-10-01 in favour of "from a checkout" | `grep -n "pip install\|uvx"` |
+| Container image | **not published anywhere.** `ci.yml` builds `amr-emulator:ci` and smoke-tests it; no workflow pushes to a registry | `grep -i "ghcr\|docker" .github/workflows/*.yml` |
 | Hosted demo | up. `https://amr-emulator.com/` → 200 JSON index, `/console` → 200 HTML, `/healthz` lists 9 robot + 3 fleet versions, `/latest/api/v2.0.0/status` → 401 without auth (correct) | `curl` |
 | Crawlability | `/robots.txt`, `/sitemap.xml`, `/llms.txt` all 404 (as JSON); the bare domain serves JSON, not a page | `curl` |
 | Page metadata | `docs/index.html`, `landing.html`, `vda5050.html` have `<title>` and `<meta name="description">`; no Open Graph, canonical, or JSON-LD tags found | `grep` over `docs/*.html` |
-| MCP registry | `mir-mcp` not listed (search for "mir" returns unrelated servers only). With no published package, a listing would have to point at a hosted MCP endpoint instead | `curl "https://registry.modelcontextprotocol.io/v0/servers?search=mir"` |
+| MCP registry | `amr-mcp` not listed (search for "mir" returns unrelated servers only). With no published package, a listing would have to point at a hosted MCP endpoint instead | `curl "https://registry.modelcontextprotocol.io/v0/servers?search=mir"` |
 | GHCR listing | **unverified** — the `gh` token lacks `read:packages`; the workflow evidence above says nothing is pushed | `gh api users/JimothyJohn/packages` → 403 |
 | Search ranking, inbound links, traffic | **unverified** — nothing measured yet (see Metrics) | — |
 
@@ -35,10 +35,10 @@ contribute. Fix findability before posting anywhere.
 | Audience | Their problem | What they search for | What we hand them |
 |---|---|---|---|
 | **Integrator / automation engineer** with a MiR on order or on a busy floor (PLC, SCADA, MES/WMS people; Ignition, UR+MiR cells) | Cannot develop against a robot that is not there or is in production | "MiR REST API example", "MiR REST API authorization", "MiR API 401", "MiR mission queue POST", "MiR robot simulator" | Hosted URL that answers the same requests + the auth one-liner |
-| **Software developer** building a WCS/dashboard/app on MiR or MiR Fleet | No test target for CI; version drift between robots | "MiR API mock", "MiR Fleet API sandbox", "MiR python client", "MiR openapi / swagger json" | The hosted URL as the CI target (one `X-MiR-Session` per run), `/openapi.json` to generate their own client |
+| **Software developer** building a WCS/dashboard/app on MiR or MiR Fleet | No test target for CI; version drift between robots | "MiR API mock", "MiR Fleet API sandbox", "MiR python client", "MiR openapi / swagger json" | The hosted URL as the CI target (one `X-AMR-Session` per run), `/openapi.json` to generate their own client |
 | **Fleet-software / master-control developer** | Needs VDA 5050 robots to drive without hardware | "VDA 5050 simulator", "VDA5050 test robot", "VDA 5050 MQTT emulator" | `vda5050-emulator` with embedded broker; external validations in `docs/validation/` |
-| **Robotics platform / interop people** (ROS, Open-RMF, MassRobotics) | Adapter and conformance testing | "MiR VDA5050 adapter", "MassRobotics AMR interop test" | `mir-vda5050-adapter`, `massrobotics-emulator`, `interop/` harnesses |
-| **Agent / LLM tooling developers** | Want a physical-world API that is safe to let an agent loose on | "robot MCP server", "MCP robotics" | `mir-mcp` against the hosted emulator |
+| **Robotics platform / interop people** (ROS, Open-RMF, MassRobotics) | Adapter and conformance testing | "MiR VDA5050 adapter", "MassRobotics AMR interop test" | `amr-vda5050-adapter`, `massrobotics-emulator`, `interop/` harnesses |
+| **Agent / LLM tooling developers** | Want a physical-world API that is safe to let an agent loose on | "robot MCP server", "MCP robotics" | `amr-mcp` against the hosted emulator |
 | **MiR itself** (API team, partner engineering) | — | — | `FEEDBACK.md`, as a courtesy and a relationship, not a channel |
 
 The first two rows are the request. The auth scheme is the hook: MiR Basic
@@ -53,8 +53,8 @@ we can build.
 ## Positioning
 
 The name is **AMR Emulator** — `amr-emulator` where spaces cannot be used
-(repo, domain, paths). Never "mir-emulator" as the project's name; that
-string survives only as an internal Python package name.
+(repo, domain, paths, packages, commands, headers). "MiR" appears only
+where it means the vendor's robot or API.
 
 One sentence, reused everywhere (repo description, page title, post
 titles):
@@ -127,7 +127,7 @@ Nothing in Phase 1+ starts until these are done. Ordered.
       are a real audience here. Acceptance: all three URLs return 200 with
       the right content type; `curl -H 'Accept: text/html'
       https://amr-emulator.com/` returns the landing page;
-      the JSON index that `mir_client.detect_server()` probes is unchanged
+      the JSON index that `amr_client.detect_server()` probes is unchanged
       for clients that do not ask for HTML (regression test in
       `test_serverless.py`).
 - [ ] **README above the fold.** Today the README opens on VDA 5050 and
@@ -161,16 +161,16 @@ minutes locally.
       `TEST_HARDWARE.md` phase 5) a real robot.
 - [ ] **"Switch to your robot" step.** The promise is "same code, real
       robot". Show the one-line change (base URL + credentials) and what
-      to expect to differ (no `/_emulator/*`, no `X-MiR-Session`).
+      to expect to differ (no `/_emulator/*`, no `X-AMR-Session`).
       Acceptance: the quickstart ends with that diff, and it has been
       exercised on hardware.
 - [ ] **CI recipe.** A copy-paste block for GitHub Actions that points a
-      test suite at the hosted endpoint with a fresh `X-MiR-Session` per
+      test suite at the hosted endpoint with a fresh `X-AMR-Session` per
       run, so parallel jobs never share a robot. Acceptance: a public
       example repo or `examples/` directory whose CI is green against
       `https://amr-emulator.com` with nothing installed from this repo.
-- [ ] **MCP as an endpoint, not a package.** Today `mir-mcp` runs from a
-      checkout over stdio (`packages/mir-mcp/README.md`). The
+- [ ] **MCP as an endpoint, not a package.** Today `amr-mcp` runs from a
+      checkout over stdio (`packages/amr-mcp/README.md`). The
       web-endpoint-shaped version is a hosted MCP URL; the unmerged local
       branch `feat/mcp-serverless` adds a streamable-HTTP transport and a
       deploy template for exactly that (the template is an unreviewed wip
@@ -201,7 +201,7 @@ first, and ends on the hosted URL. One per week, not a burst.
 6. **"A VDA 5050 robot fleet with zero infrastructure."** Embedded broker,
    three protocol versions, the schema defects found along the way.
 7. **Scenario write-ups.** `scenarios/` already reconstructs nine
-   deployments; two or three become short posts with the `mir-report`
+   deployments; two or three become short posts with the `amr-report`
    output as the picture.
 8. **A 90-second screen recording** of the console: get a robot, queue a
    mission, hit the e-stop, clear it. Embedded on the page and the README.
@@ -233,7 +233,7 @@ existing questions before posting anything of our own.
 | Hacker News, Show HN | Developers at large | Piece 4, title leading with the PDF→Swagger angle | One shot; do it after Phase 0 |
 | Reddit r/robotics, r/ROS, r/PLC | Mixed | Piece 3 (r/PLC), 5/6 (r/ROS) | **Existence not machine-verified** (Reddit answers 403 to scripted requests); each has self-promotion rules — read them first |
 | Awesome lists: `punkpeye/awesome-mcp-servers`, `kiloreux/awesome-robotics` | Browsers of lists | One-line PRs | After the hosted MCP endpoint exists |
-| MCP registry (`modelcontextprotocol/registry`) | Agent developers | `mir-mcp` entry | Needs the hosted MCP endpoint (Phase 1) |
+| MCP registry (`modelcontextprotocol/registry`) | Agent developers | `amr-mcp` entry | Needs the hosted MCP endpoint (Phase 1) |
 | LinkedIn | Automation managers, MiR distributors, MiR staff | The recording + piece 9 | Where the non-developer half of the MiR audience actually is; no API to verify anything here |
 | MiR Community (`mobile-industrial-robots.com/community`) | MiR partners and customers | Piece 1, then the recording; answer API questions with the hosted URL | Closed to partners/customers; **Nick has access.** With Academy and distributor contacts this is the first channel, ahead of every public one above |
 | MiR directly | API / partner engineering | `FEEDBACK.md` as a private, constructive note, plus an offer: a test target their integrators can use | Before any public post that mentions the feedback. MiR already welcomes the project and Nick has Academy access; a MiR Academy "Software Integration" path exists (`academy.mobile-industrial-robots.com`) — ask for a link from it, which would outrank everything above |
@@ -304,7 +304,10 @@ positioning or channels are wrong — revisit this file, do not post more.
 - **Closed channels:** Nick has MiR Community, Academy and distributor
   access; those lead Phase 3.
 - **Disclaimer:** in the footer of every site page.
-- **Name:** AMR Emulator, or `amr-emulator` where spaces cannot be used.
+- **Name:** AMR Emulator, or `amr-emulator` where spaces cannot be used —
+  including the Python packages, commands, emulator-only headers
+  (`X-AMR-*`; the old `X-MiR-*` spellings are still accepted) and
+  environment variables (`AMR_*`).
 - **Hosted endpoint limits:** none planned unless the AWS bill spikes.
 - **Hardware target:** a MiR250 (`TEST_HARDWARE.md`).
 
@@ -315,6 +318,3 @@ positioning or channels are wrong — revisit this file, do not post more.
   for CI and self-hosting from a checkout.
 - **`release.yml` publish step.** Remove the dormant PyPI step, or leave
   it? It is a deploy-chain edit, so it was not touched here.
-- **Package names.** The Python packages are still `mir-emulator`,
-  `mir-client`, `mir-mcp`. Renaming them is a refactor across imports,
-  CLIs and CI; say if "everything" includes them.

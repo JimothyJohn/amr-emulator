@@ -1,0 +1,21 @@
+[project]
+name = "amr-spec-scraper"
+version = "0.1.0"
+description = "Scrapes the MiR support portal for new REST API definition files"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "httpx>=0.27",
+    # The portal only publishes PDFs; pdfplumber's ruled-table extraction is
+    # what makes the PDF->swagger conversion reliable (pulls in pdfminer.six,
+    # pypdfium2, Pillow — scraper-side only, never shipped with the emulator).
+    "pdfplumber>=0.11",
+]
+
+[project.scripts]
+amr-spec-scraper = "amr_spec_scraper.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

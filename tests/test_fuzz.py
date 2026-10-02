@@ -9,9 +9,9 @@ import string
 from urllib.parse import quote
 
 import pytest
+from amr_emulator.app import create_app
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-from mir_emulator.app import create_app
 from starlette.testclient import TestClient
 
 from tests.conftest import ALL_VERSIONS, AUTH_HEADER
@@ -114,7 +114,7 @@ def test_never_5xx_and_errors_stay_json(fuzz_client, op_index, values, payload, 
 
 # httpx only sends ASCII header values; non-ASCII fails client-side before the
 # server sees it. High-byte fuzz of the verifier itself lives in
-# packages/mir-emulator/tests/test_auth.py.
+# packages/amr-emulator/tests/test_auth.py.
 _header_text = st.text(alphabet=st.characters(min_codepoint=0x20, max_codepoint=0x7E), max_size=100)
 
 
@@ -137,8 +137,8 @@ def test_unknown_paths_never_5xx(fuzz_client, path):
 
 # ---- the fleet surface holds the same invariant --------------------------------
 
-from mir_emulator import registry  # noqa: E402
-from mir_emulator.fleet import DEFAULT_API_KEY, create_fleet_app  # noqa: E402
+from amr_emulator import registry  # noqa: E402
+from amr_emulator.fleet import DEFAULT_API_KEY, create_fleet_app  # noqa: E402
 
 
 @pytest.fixture(params=registry.fleet_supported_versions(), scope="module")

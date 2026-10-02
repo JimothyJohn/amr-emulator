@@ -388,7 +388,7 @@ viewBtn.addEventListener("click", () => {
 document.getElementById("foot").innerHTML =
   `Driven live against one <a href="https://github.com/JimothyJohn/amr-emulator">AMR Emulator</a> MiR250 started with
    <code>--time-scale ${M.scale}</code>: ${M.sim_hours} simulated hours in ${M.wall_min} minutes of wall clock.
-   ${DATA.jobs.length} missions with realistic per-mission runtimes via <code>X-MiR-Mission-Duration</code>;
+   ${DATA.jobs.length} missions with realistic per-mission runtimes via <code>X-AMR-Mission-Duration</code>;
    timestamps read back from the robot's own <code>mission_queue</code>;
    opportunity charging below ${M.charge_below}% via <code>/_emulator/battery</code>;
    the clock scaled at runtime via <code>PUT /_emulator/clock</code>.<br>
