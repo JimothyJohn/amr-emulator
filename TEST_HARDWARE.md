@@ -163,6 +163,7 @@ curl -s -o /dev/null -w '%{http_code}\n' "$API/status"   # expect 401 without au
 
 ```python
 from mir_client import detect_server
+
 info = detect_server("http://<robot-ip>")
 print(info.kind, info.version)
 ```
@@ -415,7 +416,7 @@ Pass: as phase 1 and phase 3, for the fleet surface.
 from mir_client import connect
 from mir_client.robot.api.default import get_status
 
-client = connect("http://<robot-ip>")   # pass the account per mir_client's signature
+client = connect("http://<robot-ip>")  # pass the account per mir_client's signature
 status = get_status.sync(client=client)
 print(status.state_text, status.battery_percentage)
 ```
