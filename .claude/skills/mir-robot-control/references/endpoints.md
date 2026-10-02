@@ -39,7 +39,7 @@ the target instead of configuring it — probe in order, first hit wins:
 Against a dispatcher, prefix every call with `/<version>` (robot) or
 `/fleet/<version>` (fleet); `latest` aliases the newest. Implementations of
 this handshake: `mir_client.discovery` (SDK), `mir_mcp.client.detect_target`
-(MCP), `connectTo()` in `docs/index.html` (console).
+(MCP).
 
 ## Robot API — `/api/v2.0.0`
 
