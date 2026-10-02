@@ -1,7 +1,8 @@
 # Hardware test plan
 
 What to run the first time this repo is connected to a real MiR robot (and
-MiR Fleet, if there is one). Two goals:
+MiR Fleet, if there is one). The target is a **MiR250** (decided
+2026-10-01) — the model the robot specs were converted from. Two goals:
 
 1. **Fidelity.** Find every place the emulator disagrees with a real robot
    on the same software version, and turn each into a regression test.
@@ -58,7 +59,7 @@ not exist yet (see "Tooling to build first").
 
 | Item | Why |
 |---|---|
-| Robot model (MiR100/200/250/500/600/1350…) and top module (hook, shelf lift, none) | Specs are converted from the MiR250 PDFs; other models may differ |
+| Robot model (planned: MiR250) and top module (hook, shelf lift, none) | Specs are converted from the MiR250 PDFs, so a MiR250 is the like-for-like comparison; other models may differ |
 | Software version, exactly as the robot reports it | Decides which emulator version is the comparison target, and whether it is tracked at all |
 | Robot IP, and how you reach it (robot's own WiFi AP, site WiFi, cable) | |
 | An API account and its role | Use a dedicated account for testing if one can be created; note its permission group |
@@ -588,5 +589,5 @@ Top module: <none/hook/…> · Fleet-managed: yes/no · Present: <roles, not nam
 - What does a robot do with a mission that has no actions?
 - Is the MiR map frame directly usable as the VDA 5050 map frame, or is an
   origin/rotation transform needed per site?
-- Which robot, model, and software version will this actually be run on,
-  and who owns it? Everything above is written without knowing.
+- The robot is a MiR250. Still unknown: its software version, its top
+  module, whether it is fleet-managed, and who signs off on moving it.

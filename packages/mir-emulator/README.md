@@ -5,7 +5,8 @@ Local emulator of the Mobile Industrial Robots (MiR) robot REST API
 MiR integrations without a robot.
 
 ```sh
-uvx mir-emulator --mir-version 3.5.4 --port 8080
+# from a checkout of https://github.com/JimothyJohn/amr-emulator
+uv run mir-emulator --mir-version 3.5.4 --port 8080
 curl -H "Authorization: Basic $(printf '%s:%s' distributor "$(printf distributor | shasum -a 256 | cut -d' ' -f1)" | base64)" \
   http://127.0.0.1:8080/api/v2.0.0/status
 ```

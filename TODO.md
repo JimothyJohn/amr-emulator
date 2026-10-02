@@ -14,14 +14,7 @@ intro and mirroring the live console request.)
 
 ## Now
 
-- [ ] **Publish `mir-client` to PyPI.** The SDK is generated, gated, and
-      contract-tested; `release.yml` builds attested wheels and has a
-      publish step waiting on credentials. BLOCKED on a PyPI-side action
-      only a maintainer can take: register the project and configure
-      trusted publishing (OIDC) — preferred over a long-lived
-      `PYPI_API_TOKEN`, per the note in the workflow. Acceptance:
-      `pip install mir-client` in a clean venv, drive a local emulator with
-      `robot_client()`.
+_Nothing queued here — `PROMOTION.md` Phase 0 is the current work._
 
 ## Next
 
