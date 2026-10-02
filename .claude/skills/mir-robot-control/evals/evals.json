@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Start a MiR robot I can test against, then tell me its battery level and whether it has any errors.",
-      "expected_output": "An emulator is started (uv run mir-emulator), GET /status is called with correct MiR Basic auth (SHA-256-hashed password), and battery_percentage plus errors are reported in plain language.",
+      "expected_output": "An emulator is started (uv run amr-emulator), GET /status is called with correct MiR Basic auth (SHA-256-hashed password), and battery_percentage plus errors are reported in plain language.",
       "files": []
     },
     {

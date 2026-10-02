@@ -6,9 +6,9 @@ assert that the emulator answers with a declared status code and — for JSON
 200s — a body that validates against the declared response schema.
 """
 
+from amr_emulator.examples import example_from_schema
+from amr_emulator.spec import Operation
 from jsonschema import Draft4Validator
-from mir_emulator.examples import example_from_schema
-from mir_emulator.spec import Operation
 
 from tests.conftest import AUTH_HEADER
 

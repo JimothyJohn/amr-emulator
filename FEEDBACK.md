@@ -1,7 +1,7 @@
 # API feedback for the MiR development team
 
 This document collects concrete, version-specific issues we found while building
-[mir-emulator](README.md), a spec-faithful emulator of the MiR robot REST API and the
+[amr-emulator](README.md), a spec-faithful emulator of the MiR robot REST API and the
 MiR Fleet Enterprise Integration API. Every finding below was observed either in the
 official API definitions themselves or in behavior we had to special-case to stay
 faithful to real robots. We track the latest patch of the newest four minor lines of
@@ -285,8 +285,8 @@ upgrade audits from spelunking into a diff read.
 
 ---
 
-*Compiled 2026-07-04 from the mir-emulator project's spec registry
-(`packages/mir-emulator/src/mir_emulator/specs/registry.json`), its PDF→Swagger
-conversion pipeline (`packages/mir-spec-scraper/`), and emulator workarounds
-required for spec-faithfulness (`packages/mir-emulator/`). Reproduction details for
+*Compiled 2026-07-04 from the amr-emulator project's spec registry
+(`packages/amr-emulator/src/amr_emulator/specs/registry.json`), its PDF→Swagger
+conversion pipeline (`packages/amr-spec-scraper/`), and emulator workarounds
+required for spec-faithfulness (`packages/amr-emulator/`). Reproduction details for
 any finding are available in those sources.*

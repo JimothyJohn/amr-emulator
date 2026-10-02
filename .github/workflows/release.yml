@@ -1,7 +1,7 @@
 name: Release versioned wheels
 
-# One mir-emulator distribution per tracked MiR version, so package versions
-# match the robot software they emulate (pip install mir-emulator==3.8.1).
+# One amr-emulator distribution per tracked MiR version, so package versions
+# match the robot software they emulate (pip install amr-emulator==3.8.1).
 # Wheels get build-provenance attestations. Publishing to PyPI happens only
 # when PYPI_API_TOKEN is configured (switch to PyPI trusted publishing by
 # replacing the publish step with pypa/gh-action-pypi-publish + id-token).

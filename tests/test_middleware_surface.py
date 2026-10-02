@@ -1,6 +1,6 @@
 """The emulator as middleware: spec endpoints, security headers, CORS."""
 
-from mir_emulator.app import create_app
+from amr_emulator.app import create_app
 from starlette.testclient import TestClient
 
 from tests.conftest import AUTH_HEADER

@@ -12,11 +12,11 @@ source of truth per fact, and CI that proves claims instead of trusting them.
    The emulator mirrors the published MiR robot REST API and Fleet Enterprise
    Integration API. Never invent an endpoint, field, enum value, or status
    code — every behavior must trace to an official spec (the files under
-   `packages/mir-emulator/src/mir_emulator/specs/`), an official MiR document,
+   `packages/amr-emulator/src/amr_emulator/specs/`), an official MiR document,
    or an explicitly emulator-only surface (everything under `/_emulator/*`).
    If MiR's docs don't say, the emulator doesn't guess.
 2. **Never hand-edit spec files or `registry.json`.** Specs land via the
-   scraper pipeline (`packages/mir-spec-scraper/`) so provenance and hashes
+   scraper pipeline (`packages/amr-spec-scraper/`) so provenance and hashes
    stay honest. If a spec looks wrong, fix the converter or file an issue —
    don't patch the JSON.
 3. **Determinism is a feature.** Same requests, same answers. No wall-clock
@@ -47,10 +47,10 @@ you; Python ≥3.11.
 
 ## Layout
 
-- `packages/mir-emulator/` — the emulator library (Starlette). Spec-driven
+- `packages/amr-emulator/` — the emulator library (Starlette). Spec-driven
   routing in `app.py`, stateful overlays in `behaviors.py`, fleet emulation
   in `fleet.py`, auth in `auth.py`, tracked specs in `specs/`.
-- `packages/mir-spec-scraper/` — portal login, listing parser, PDF→Swagger
+- `packages/amr-spec-scraper/` — portal login, listing parser, PDF→Swagger
   converter, selection rule, registry updater.
 - `tests/` — cross-version conformance, adversarial, fuzz, and real-TCP
   integration suites, parametrized over every tracked version.

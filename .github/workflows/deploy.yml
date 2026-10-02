@@ -9,7 +9,7 @@ on:
   push:
     branches: [master]
     paths:
-      - packages/mir-emulator/**
+      - packages/amr-emulator/**
       - deploy/template.yaml
       - docs/index.html
       - docs/landing.html

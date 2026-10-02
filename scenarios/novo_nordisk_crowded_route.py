@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["httpx>=0.27", "mir-client"]
+# dependencies = ["httpx>=0.27", "amr-client"]
 #
 # [tool.uv.sources]
-# mir-client = { path = "../packages/mir-client" }
+# amr-client = { path = "../packages/amr-client" }
 # ///
 """Novo Nordisk Tianjin — a crowded 100 m route and a congested network.
 
@@ -19,11 +19,11 @@ What this exercises on the emulator:
   * /_emulator/faults blocked_path mid-mission — a forklift crosses the
     aisle; an active planner error appears while the robot keeps trying,
     and clearing the path clears the error
-  * X-MiR-Latency — per-request response delay to prove your client's
+  * X-AMR-Latency — per-request response delay to prove your client's
     timeout-and-retry path actually works before you meet real plant Wi-Fi
 
 Run:
-    uv run mir-emulator --mission-duration 3 &
+    uv run amr-emulator --mission-duration 3 &
     uv run scenarios/novo_nordisk_crowded_route.py
 """
 
@@ -32,19 +32,19 @@ import sys
 import time
 
 import httpx
-from mir_client import robot_token
+from amr_client import robot_token
 
-MIR_URL = os.environ.get("MIR_URL", "http://127.0.0.1:8080")
+AMR_URL = os.environ.get("AMR_URL", "http://127.0.0.1:8080")
 API = "/api/v2.0.0"
 
 
 def client(session: str) -> httpx.Client:
-    user = os.environ.get("MIR_USERNAME", "distributor")
-    password = os.environ.get("MIR_PASSWORD", "distributor")
+    user = os.environ.get("AMR_USERNAME", "distributor")
+    password = os.environ.get("AMR_PASSWORD", "distributor")
     token = robot_token(user, password)
     return httpx.Client(
-        base_url=MIR_URL,
-        headers={"Authorization": f"Basic {token}", "X-MiR-Session": session},
+        base_url=AMR_URL,
+        headers={"Authorization": f"Basic {token}", "X-AMR-Session": session},
         timeout=15,
     )
 
@@ -53,9 +53,9 @@ def require_emulator(c: httpx.Client) -> None:
     try:
         index = c.get("/").json()
     except httpx.ConnectError:
-        sys.exit(f"Nothing at {MIR_URL} — start one: uv run mir-emulator --mission-duration 3")
+        sys.exit(f"Nothing at {AMR_URL} — start one: uv run amr-emulator --mission-duration 3")
     if "emulated_mir_version" not in index:
-        sys.exit(f"{MIR_URL} does not look like the emulator; refusing to inject faults into it.")
+        sys.exit(f"{AMR_URL} does not look like the emulator; refusing to inject faults into it.")
 
 
 def status(c: httpx.Client) -> dict:
@@ -117,9 +117,9 @@ def main() -> None:
     # Busy plant Wi-Fi: the same GET /status with 2s of injected latency
     # against a 1s client timeout. First attempt must fail; the retry
     # (patient timeout, no injected latency) must succeed.
-    print("network resilience drill (X-MiR-Latency=2000 vs timeout=1.0):")
+    print("network resilience drill (X-AMR-Latency=2000 vs timeout=1.0):")
     try:
-        c.get(f"{API}/status", headers={"X-MiR-Latency": "2000"}, timeout=1.0)
+        c.get(f"{API}/status", headers={"X-AMR-Latency": "2000"}, timeout=1.0)
         sys.exit("BUG: a 2s-delayed response beat a 1s timeout")
     except httpx.TimeoutException:
         print("  attempt 1: timed out as designed — client survives, no crash")

@@ -1,0 +1,28 @@
+[project]
+name = "amr-emulator"
+dynamic = ["version"]
+description = "Local emulator for the Mobile Industrial Robots (MiR) robot REST API"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "starlette>=1.7.0",
+    "uvicorn>=0.53.0",
+    "jsonschema>=4.20",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+ws = ["websockets>=17.1"]
+
+[project.scripts]
+amr-emulator = "amr_emulator.cli:main"
+
+[tool.hatch.version]
+path = "src/amr_emulator/_version.py"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

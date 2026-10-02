@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["httpx>=0.27", "mir-client"]
+# dependencies = ["httpx>=0.27", "amr-client"]
 #
 # [tool.uv.sources]
-# mir-client = { path = "../packages/mir-client" }
+# amr-client = { path = "../packages/amr-client" }
 # ///
 """DHL-style parcel hub — a warehouse control system over 12 AMRs.
 
@@ -24,13 +24,13 @@ This script IS that WCS, pointed at 12 session-isolated emulated robots:
     ledger must balance against the order book
 
 What this exercises on the emulator:
-  * X-MiR-Session at fleet scale (12 concurrent isolated robots; the cap is
+  * X-AMR-Session at fleet scale (12 concurrent isolated robots; the cap is
     256 per process — past it the LRU session silently resets)
   * /_emulator/battery charge rotation, /_emulator/faults incident handling
   * sustained concurrent load (~50 req/s) with zero expected API errors
 
 Run:
-    uv run mir-emulator --mission-duration 2 &
+    uv run amr-emulator --mission-duration 2 &
     uv run scenarios/dhl_parcel_hub_wcs.py
 """
 
@@ -41,9 +41,9 @@ import sys
 import time
 
 import httpx
-from mir_client import robot_token
+from amr_client import robot_token
 
-MIR_URL = os.environ.get("MIR_URL", "http://127.0.0.1:8080")
+AMR_URL = os.environ.get("AMR_URL", "http://127.0.0.1:8080")
 API = "/api/v2.0.0"
 
 N_ROBOTS = 12
@@ -101,11 +101,11 @@ class Order:
 
 def require_emulator() -> None:
     try:
-        index = httpx.get(MIR_URL + "/", timeout=5).json()
+        index = httpx.get(AMR_URL + "/", timeout=5).json()
     except httpx.ConnectError:
-        sys.exit(f"Nothing at {MIR_URL} — start one: uv run mir-emulator --mission-duration 2")
+        sys.exit(f"Nothing at {AMR_URL} — start one: uv run amr-emulator --mission-duration 2")
     if "emulated_mir_version" not in index:
-        sys.exit(f"{MIR_URL} does not look like the emulator; refusing to inject faults into it.")
+        sys.exit(f"{AMR_URL} does not look like the emulator; refusing to inject faults into it.")
 
 
 async def bring_up(robots: list["Robot"]):
@@ -151,14 +151,14 @@ async def quarantine(robot: Robot, reason: str, orders_back: list[Order]):
 async def main():
     require_emulator()
     token = robot_token(
-        os.environ.get("MIR_USERNAME", "distributor"),
-        os.environ.get("MIR_PASSWORD", "distributor"),
+        os.environ.get("AMR_USERNAME", "distributor"),
+        os.environ.get("AMR_PASSWORD", "distributor"),
     )
     limits = httpx.Limits(max_connections=64)
     clients = [
         httpx.AsyncClient(
-            base_url=MIR_URL,
-            headers={"Authorization": f"Basic {token}", "X-MiR-Session": f"dhl-DC-R{i + 1:02d}"},
+            base_url=AMR_URL,
+            headers={"Authorization": f"Basic {token}", "X-AMR-Session": f"dhl-DC-R{i + 1:02d}"},
             timeout=10.0,
             limits=limits,
         )

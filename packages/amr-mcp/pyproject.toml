@@ -1,0 +1,22 @@
+[project]
+name = "amr-mcp"
+version = "0.1.0"
+description = "MCP server exposing MiR robot and fleet control tools (against the emulator or real hardware)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "mcp>=2.2.0",
+    "httpx>=0.27",
+    "amr-client",
+]
+
+[tool.uv.sources]
+amr-client = { workspace = true }
+
+[project.scripts]
+amr-mcp = "amr_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["httpx>=0.27", "mir-client"]
+# dependencies = ["httpx>=0.27", "amr-client"]
 #
 # [tool.uv.sources]
-# mir-client = { path = "../packages/mir-client" }
+# amr-client = { path = "../packages/amr-client" }
 # ///
 """DENSO — just-in-time delivery from PLC call buttons and door I/O.
 
@@ -26,7 +26,7 @@ Register map used here (pick your own on a real site):
   20  cleanroom door command           (1 = open, 0 = closed)
 
 Run:
-    uv run mir-emulator --mission-duration 2 &
+    uv run amr-emulator --mission-duration 2 &
     uv run scenarios/denso_jit_callbuttons.py
 """
 
@@ -35,21 +35,21 @@ import sys
 import time
 
 import httpx
-from mir_client import robot_token
+from amr_client import robot_token
 
-MIR_URL = os.environ.get("MIR_URL", "http://127.0.0.1:8080")
+AMR_URL = os.environ.get("AMR_URL", "http://127.0.0.1:8080")
 API = "/api/v2.0.0"
 BUTTONS = {10: "assembly line A", 11: "assembly line B"}
 DOOR = 20
 
 
 def client(session: str) -> httpx.Client:
-    user = os.environ.get("MIR_USERNAME", "distributor")
-    password = os.environ.get("MIR_PASSWORD", "distributor")
+    user = os.environ.get("AMR_USERNAME", "distributor")
+    password = os.environ.get("AMR_PASSWORD", "distributor")
     token = robot_token(user, password)
     return httpx.Client(
-        base_url=MIR_URL,
-        headers={"Authorization": f"Basic {token}", "X-MiR-Session": session},
+        base_url=AMR_URL,
+        headers={"Authorization": f"Basic {token}", "X-AMR-Session": session},
         timeout=15,
     )
 
@@ -58,10 +58,10 @@ def require_emulator(c: httpx.Client) -> None:
     try:
         index = c.get("/").json()
     except httpx.ConnectError:
-        sys.exit(f"Nothing at {MIR_URL} — start one: uv run mir-emulator --mission-duration 2")
+        sys.exit(f"Nothing at {AMR_URL} — start one: uv run amr-emulator --mission-duration 2")
     if "emulated_mir_version" not in index:
         sys.exit(
-            f"{MIR_URL} does not look like the emulator; refusing to write PLC registers on it."
+            f"{AMR_URL} does not look like the emulator; refusing to write PLC registers on it."
         )
 
 

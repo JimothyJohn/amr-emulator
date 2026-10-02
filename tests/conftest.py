@@ -1,7 +1,7 @@
 import pytest
-from mir_emulator import auth, registry
-from mir_emulator.app import create_app
-from mir_emulator.spec import load_spec
+from amr_emulator import auth, registry
+from amr_emulator.app import create_app
+from amr_emulator.spec import load_spec
 from starlette.testclient import TestClient
 
 ALL_VERSIONS = registry.supported_versions()

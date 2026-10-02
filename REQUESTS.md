@@ -28,7 +28,7 @@ Which tracked versions you saw it on (e.g. 3.8.1, 2.14.7), or "all".
 
 ## Reproduce
 # exact commands, runnable from a fresh clone
-uv run mir-emulator --mir-version 3.8.1 --no-auth &
+uv run amr-emulator --mir-version 3.8.1 --no-auth &
 curl -s http://127.0.0.1:8080/api/v2.0.0/mission_queue/999
 
 ## Expected vs actual

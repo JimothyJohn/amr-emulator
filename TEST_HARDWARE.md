@@ -6,8 +6,8 @@ MiR Fleet, if there is one). The target is a **MiR250** (decided
 
 1. **Fidelity.** Find every place the emulator disagrees with a real robot
    on the same software version, and turn each into a regression test.
-2. **Tooling.** Prove `mir-client`, `mir-discover`, `mir-report`, `mir-mcp`
-   and `mir-vda5050-adapter` work against hardware, which so far they have
+2. **Tooling.** Prove `amr-client`, `amr-discover`, `amr-report`, `amr-mcp`
+   and `amr-vda5050-adapter` work against hardware, which so far they have
    only been asserted to.
 
 Same convention as `TODO.md`: every phase has a pass bar. Phases are
@@ -70,13 +70,13 @@ not exist yet (see "Tooling to build first").
 
 ```sh
 # .env.hardware — gitignored, mode 600, never pasted into an issue
-MIR_URL=http://<robot-ip>
-MIR_USERNAME=<account>
-MIR_PASSWORD=<password>
+AMR_URL=http://<robot-ip>
+AMR_USERNAME=<account>
+AMR_PASSWORD=<password>
 ```
 
-`MIR_URL`, `MIR_USERNAME`, `MIR_PASSWORD` are the names `scenarios/` and
-the adapter already read; `mir-mcp` reads `MIR_ROBOT_URL` for the address.
+`AMR_URL`, `AMR_USERNAME`, `AMR_PASSWORD` are the names `scenarios/` and
+the adapter already read; `amr-mcp` reads `AMR_ROBOT_URL` for the address.
 `.env.hardware` is already ignored (`.gitignore`: `.env.*`; confirm with
 `git check-ignore -v .env.hardware`). `hardware-runs/` is **not** ignored
 yet — add it to `.gitignore` in its own commit before the first capture.
@@ -85,8 +85,8 @@ Shell setup used by every command below:
 
 ```sh
 set -a; . ./.env.hardware; set +a
-TOKEN=$(printf '%s:%s' "$MIR_USERNAME" "$(printf '%s' "$MIR_PASSWORD" | shasum -a 256 | cut -d' ' -f1)" | base64)
-API="$MIR_URL/api/v2.0.0"
+TOKEN=$(printf '%s:%s' "$AMR_USERNAME" "$(printf '%s' "$AMR_PASSWORD" | shasum -a 256 | cut -d' ' -f1)" | base64)
+API="$AMR_URL/api/v2.0.0"
 OUT=hardware-runs/$(date +%Y%m%d)        # gitignored; raw captures stay local
 mkdir -p "$OUT"
 ```
@@ -149,7 +149,7 @@ Needed before phase 1, each as its own PR with tests against the emulator:
       `/sessions/{guid}/export`, `/system/setup/sick_configs/{guid}/download`,
       `/hw/export`), streams (`/sounds/{guid}/stream`), and anything
       whose `GET` has side effects. The operation list comes from the spec
-      (`uv run mir-emulator --mir-version <v> --export swagger2`); review
+      (`uv run amr-emulator --mir-version <v> --export swagger2`); review
       it by hand once and commit the exclusions with a reason each.
       Acceptance: the list is in the script, reviewed against the spec for
       the robot's version.
@@ -157,13 +157,13 @@ Needed before phase 1, each as its own PR with tests against the emulator:
 ## Phase 0 — connect and identify (no auth, no writes)
 
 ```sh
-uv run mir-discover "<robot-ip>"            # one host; ports 80 and 8080
-uv run mir-discover "<subnet>/24" --json    # only with the network owner's OK
+uv run amr-discover "<robot-ip>"            # one host; ports 80 and 8080
+uv run amr-discover "<subnet>/24" --json    # only with the network owner's OK
 curl -s -o /dev/null -w '%{http_code}\n' "$API/status"   # expect 401 without auth
 ```
 
 ```python
-from mir_client import detect_server
+from amr_client import detect_server
 
 info = detect_server("http://<robot-ip>")
 print(info.kind, info.version)
@@ -174,7 +174,7 @@ Record: which handshake probe identified the robot (`/healthz`, `/`,
 kind and version, and the raw status code of each probe.
 
 Caution: `detect_server()` sends `x-api-key: distributor` on its Fleet
-probe unless told otherwise, and `mir-discover` sweeps a /24 by default.
+probe unless told otherwise, and `amr-discover` sweeps a /24 by default.
 Against a real Fleet that probe is a failed authentication attempt; on a
 plant network a sweep is a port scan. Scan a single host unless the network
 owner has agreed.
@@ -183,7 +183,7 @@ Pass: the robot is found, `kind` is `robot`, and the version is either
 reported or correctly reported as unknown. If the version is unknown, read
 it from the robot's own UI and record that the handshake could not.
 
-Decision point: **is the robot's version tracked?** (`mir-emulator --help`
+Decision point: **is the robot's version tracked?** (`amr-emulator --help`
 lists them.) If yes, compare against that version. If no, compare against
 the nearest tracked patch in the same minor line, say so in the results,
 and expect noise.
@@ -193,7 +193,7 @@ and expect noise.
 Start the comparison target:
 
 ```sh
-uv run mir-emulator --mir-version <robot-version> --port 8080
+uv run amr-emulator --mir-version <robot-version> --port 8080
 ```
 
 First request, by hand, before any script:
@@ -209,8 +209,8 @@ the robot and against the emulator, and the diff.
 Also by hand, one request each:
 
 ```sh
-curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Basic $TOKEN" "$MIR_URL/swagger.json"
-curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Basic $TOKEN" "$MIR_URL/_emulator/faults"   # expect 404
+curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Basic $TOKEN" "$AMR_URL/swagger.json"
+curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Basic $TOKEN" "$AMR_URL/_emulator/faults"   # expect 404
 curl -s -H "Authorization: Basic $TOKEN" "$API/does_not_exist"            # 404 body shape
 curl -s -H "Authorization: Basic $TOKEN" "$API/missions/not-a-guid"       # unknown-id body shape
 curl -s -H "Authorization: Basic $TOKEN" "$API/registers/1"
@@ -295,7 +295,7 @@ actions; what a real robot does with an empty mission is unknown).
 | 3.5 | Let it finish | Final state string; whether the entry stays listed |
 | 3.6 | Queue two, then `DELETE /mission_queue/<second id>` | Then `GET` it: 404 (emulator) or an `Aborted` record? |
 | 3.7 | Queue one, `DELETE /mission_queue` while executing | What the robot does physically; resulting entry states |
-| 3.8 | `uv run mir-report "$MIR_URL" --username "$MIR_USERNAME" --password "$MIR_PASSWORD" -o "$OUT/report.html" --json` | Renders without error; numbers match the robot's UI |
+| 3.8 | `uv run amr-report "$AMR_URL" --username "$AMR_USERNAME" --password "$AMR_PASSWORD" -o "$OUT/report.html" --json` | Renders without error; numbers match the robot's UI |
 
 Record the whole status poll as a time series (local). It is the reference
 for the emulator's mission simulation: real state sequence, real field
@@ -303,7 +303,7 @@ values during transitions, real battery drain per minute, real
 `distance_to_next_target` behaviour.
 
 Pass: the state *sequence* and every state *string* match the emulator's;
-`DELETE` semantics match; `mir-report` works unmodified. Durations and
+`DELETE` semantics match; `amr-report` works unmodified. Durations and
 positions are expected to differ.
 
 ## Phase 4 — faults the emulator simulates
@@ -355,7 +355,7 @@ Also record: does the robot answer on HTTPS; does HTTP redirect; is there a
 session cookie; do CORS preflights (`OPTIONS`) get answered and how.
 
 Pass: the emulator's auth decisions match case for case. Any mismatch is an
-emulator bug with a regression test in `packages/mir-emulator/tests/test_auth.py`.
+emulator bug with a regression test in `packages/amr-emulator/tests/test_auth.py`.
 
 ## Phase 6 — timing, rate and push
 
@@ -386,14 +386,14 @@ to every robot the fleet can reach, and the fleet's owner agrees to each
 write.
 
 ```sh
-curl -s -H "x-api-key: $MIR_API_KEY" "$MIR_FLEET_URL/api/v1/system/version"
-curl -s -H "x-api-key: $MIR_API_KEY" "$MIR_FLEET_URL/api/v1/robots"
+curl -s -H "x-api-key: $AMR_API_KEY" "$AMR_FLEET_URL/api/v1/system/version"
+curl -s -H "x-api-key: $AMR_API_KEY" "$AMR_FLEET_URL/api/v1/robots"
 ```
 
 - 7.0 Identify: `detect_server(fleet_url, api_key=...)`; version tracked
   (1.5.0, 1.4.2, 1.3.1)?
 - 7.1 Read-only sweep and diff, as phase 1, against
-  `uv run mir-emulator --fleet-version <v>`. Fleet specs are MiR's own
+  `uv run amr-emulator --fleet-version <v>`. Fleet specs are MiR's own
   OpenAPI 3 documents, so spec-vs-robot disagreements here are squarely
   `FEEDBACK.md` material.
 - 7.2 Auth negatives: no key, wrong key — one request each.
@@ -414,10 +414,10 @@ Pass: as phase 1 and phase 3, for the fleet surface.
 ### SDK
 
 ```python
-from mir_client import connect
-from mir_client.robot.api.default import get_status
+from amr_client import connect
+from amr_client.robot.api.default import get_status
 
-client = connect("http://<robot-ip>")  # pass the account per mir_client's signature
+client = connect("http://<robot-ip>")  # pass the account per amr_client's signature
 status = get_status.sync(client=client)
 print(status.state_text, status.battery_percentage)
 ```
@@ -429,14 +429,14 @@ parse a real robot's answer is an SDK bug even when the emulator is right.
 
 ### MCP
 
-Point `mir-mcp` at the robot (`MIR_ROBOT_URL`, `MIR_USERNAME`,
-`MIR_PASSWORD` in the client's env; keep destructive-tool confirmation on).
-Run, in order: `mir_server_info`, `mir_robot_status`, `mir_list_missions`,
-`mir_mission_queue`, `mir_read_register`. Then, with the owner at the
-e-stop: `mir_set_robot_state` pause/ready, `mir_queue_mission` (owner's
-mission) with wait, `mir_wait_for` queue idle. `mir_manage_faults` must
+Point `amr-mcp` at the robot (`AMR_ROBOT_URL`, `AMR_USERNAME`,
+`AMR_PASSWORD` in the client's env; keep destructive-tool confirmation on).
+Run, in order: `amr_server_info`, `amr_robot_status`, `amr_list_missions`,
+`amr_mission_queue`, `amr_read_register`. Then, with the owner at the
+e-stop: `amr_set_robot_state` pause/ready, `amr_queue_mission` (owner's
+mission) with wait, `amr_wait_for` queue idle. `amr_manage_faults` must
 fail cleanly (404 from hardware surfaced as a tool error, not a crash).
-Do not run `mir_cancel_missions` without the owner's go-ahead; confirm the
+Do not run `amr_cancel_missions` without the owner's go-ahead; confirm the
 elicitation prompt appears before it clears the queue.
 
 ### VDA 5050 adapter (moves the robot)
@@ -448,14 +448,14 @@ REST as of 3.8.1. Against a 2.x robot expect it to fail; record how.
 
 ```sh
 uv run vda5050-emulator --robots 0 --port 1884          # broker only
-uv run mir-vda5050-adapter --mir-url "$MIR_URL" \
-    --mir-username "$MIR_USERNAME" --mir-password "$MIR_PASSWORD" \
+uv run amr-vda5050-adapter --mir-url "$AMR_URL" \
+    --mir-username "$AMR_USERNAME" --mir-password "$AMR_PASSWORD" \
     --broker 127.0.0.1:1884 --spec 2.0.0 --manufacturer hwtest --serial hw01
 mosquitto_sub -h 127.0.0.1 -p 1884 -t '#' -v            # watch connection/state/factsheet
 ```
 
 Note the password is on the command line here (visible in `ps`); the
-adapter also reads `MIR_USERNAME`/`MIR_PASSWORD` from the environment —
+adapter also reads `AMR_USERNAME`/`AMR_PASSWORD` from the environment —
 prefer that and omit the flags.
 
 - 8.1 Adapter starts, publishes `connection` ONLINE, a factsheet, and a
