@@ -1,6 +1,6 @@
 # MiR API endpoint reference (as served by this emulator)
 
-Everything here is verified against `packages/mir-emulator/src/mir_emulator/`
+Everything here is verified against `packages/amr-emulator/src/amr_emulator/`
 (`behaviors.py`, `fleet.py`, `app.py`, `auth.py`). The robot API mirrors the
 official MiR REST API; paths under `/_emulator/*` and `X-MiR-*` headers are
 emulator-only test surfaces that do not exist on real hardware.
@@ -13,7 +13,7 @@ documents — code defensively:
 - **List endpoints declared with the element's object schema.** Servers
   differ on which shape they answer with (a list, or a single object).
   Treat an object-shaped answer as a one-element list, never as "nothing":
-  see `mir_client.report._as_list` and `mir_mcp.server._as_list`.
+  see `amr_client.report._as_list` and `amr_mcp.server._as_list`.
 - **Fields typed differently in request and response.** e.g. a mission
   action's `parameters` is an array in the request body but a string in
   the response schema, and `POST /positions` responses omit
@@ -38,7 +38,7 @@ the target instead of configuring it — probe in order, first hit wins:
 
 Against a dispatcher, prefix every call with `/<version>` (robot) or
 `/fleet/<version>` (fleet); `latest` aliases the newest. Implementations of
-this handshake: `mir_client.discovery` (SDK), `mir_mcp.client.detect_target`
+this handshake: `amr_client.discovery` (SDK), `amr_mcp.client.detect_target`
 (MCP).
 
 ## Robot API — `/api/v2.0.0`
@@ -78,7 +78,7 @@ Merges exactly the writable fields; a real robot ignores the rest.
   emulator accepts any string.
 - `POST /mission_queue {"mission_id": "<guid>"}` — enqueue; unknown
   mission → 400. Returns the queue entry with monotonic integer `id`.
-  Emulator-only: an `X-MiR-Mission-Duration: <seconds 0.1–3600>` header
+  Emulator-only: an `X-AMR-Mission-Duration: <seconds 0.1–3600>` header
   freezes that duration onto the new entry (mixed long-haul/short-hop
   workloads on one robot); battery drain and odometry scale with it.
 - `GET /mission_queue` — all entries with live `state`:
@@ -103,7 +103,7 @@ Merges exactly the writable fields; a real robot ignores the rest.
 ## Fleet API — `/api/v1`
 
 Auth header: `x-api-key: <key>` (emulator default `distributor`; override
-`--api-key` / env `MIR_EMULATOR_API_KEY`). The fleet embeds real robot
+`--api-key` / env `AMR_EMULATOR_API_KEY`). The fleet embeds real robot
 emulators and drives them over their own REST API, so fleet state and robot
 state never disagree.
 
@@ -172,15 +172,15 @@ state never disagree.
   battery curves scale identically. Changing scale never rewinds simulated
   time (mission history stays consistent), so `DELETE` (back to 1.0) keeps
   whatever offset accumulated. Startup baseline: `--time-scale N`.
-- **`X-MiR-Session: <id>`** header (1–64 chars `[A-Za-z0-9._-]`) — fully
+- **`X-AMR-Session: <id>`** header (1–64 chars `[A-Za-z0-9._-]`) — fully
   isolated state per session id, robots *and* fleet. Invalid format → 400.
   Sessions are LRU-capped at 256 per emulator process: the 257th distinct
   id silently evicts the oldest, which "factory resets" that robot with no
   error. Size fleet-scale simulations (or long soak tests with churning
   ids) accordingly.
-- **`X-MiR-Latency: <ms>`** header (cap 10000) — delays that one response;
+- **`X-AMR-Latency: <ms>`** header (cap 10000) — delays that one response;
   for client timeout testing.
-- **`X-MiR-Mission-Duration: <seconds>`** header (0.1–3600) — on
+- **`X-AMR-Mission-Duration: <seconds>`** header (0.1–3600) — on
   `POST /mission_queue`, gives exactly that entry its own duration instead
   of the global `--mission-duration`. Validated (400 out of range) on any
   request; only enqueues consume it.
@@ -192,13 +192,13 @@ state never disagree.
 
 ## Reporting
 
-- **`mir-report <base-url> -o report.html`** — self-contained HTML
+- **`amr-report <base-url> -o report.html`** — self-contained HTML
   dashboard from documented endpoints only (robot: `/status`,
   `/mission_queue`, `/log/error_reports`, `/statistics/distance`; fleet:
   `/robots`, `/order`): current-status indicator cards, the daily trend,
   and a descriptive timeline of actions. Auto-detects robot vs fleet;
   `--session <id>` reports on an isolated emulator session. Python:
-  `mir_client.report`; MCP: `mir_generate_report`.
+  `amr_client.report`; MCP: `amr_generate_report`.
 - **`GET /log/error_reports`** (official) — on the emulator, every fault
   activation appends a spec-shaped report (module, description, time),
   session-isolated, surviving the fault being cleared.
@@ -209,13 +209,13 @@ state never disagree.
 ## CLI quick reference
 
 ```sh
-uv run mir-emulator                          # newest robot version, :8080
-uv run mir-emulator --mir-version 2.14.7 --port 8081
-uv run mir-emulator --fleet-version 1.5.0 --fleet-robots 3.8.1,2.14.7
-uv run mir-emulator --no-auth --mission-duration 2   # fast, auth-free tests
-uv run mir-emulator --export openapi3 > api.json     # dump the contract
+uv run amr-emulator                          # newest robot version, :8080
+uv run amr-emulator --mir-version 2.14.7 --port 8081
+uv run amr-emulator --fleet-version 1.5.0 --fleet-robots 3.8.1,2.14.7
+uv run amr-emulator --no-auth --mission-duration 2   # fast, auth-free tests
+uv run amr-emulator --export openapi3 > api.json     # dump the contract
 ```
 
 Tracked versions live in
-`packages/mir-emulator/src/mir_emulator/specs/registry.json`; ask the
+`packages/amr-emulator/src/amr_emulator/specs/registry.json`; ask the
 running server via `GET /` rather than assuming.

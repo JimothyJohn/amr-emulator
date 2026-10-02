@@ -40,7 +40,7 @@ Options:
   -s, --serve             Run the MiR emulator (SERVE_ARGS to customize)
       --serve-vda5050     Run the VDA 5050 emulator: embedded MQTT broker + robot
       --scrape            Sync specs from the MiR portal (needs MIR_PORTAL_EMAIL/PASSWORD)
-      --build             Build one mir-emulator wheel per tracked MiR version
+      --build             Build one amr-emulator wheel per tracked MiR version
 
 Examples:
   ./Quickstart -t
@@ -89,10 +89,10 @@ validate_and_build() {
 test_unit() {
     log "Running unit + conformance + fuzz tests (coverage-gated, same as CI)..."
     if ! uv run pytest -q -m "not integration and not live_portal" \
-        --cov=packages/mir-emulator/src/mir_emulator \
-        --cov=packages/mir-spec-scraper/src/mir_spec_scraper \
+        --cov=packages/amr-emulator/src/amr_emulator \
+        --cov=packages/amr-spec-scraper/src/amr_spec_scraper \
         --cov=packages/vda5050-emulator/src/vda5050_emulator \
-        --cov=packages/mir-vda5050-adapter/src/mir_vda5050_adapter \
+        --cov=packages/amr-vda5050-adapter/src/amr_vda5050_adapter \
         --cov=packages/arcl-emulator/src/arcl_emulator \
         --cov-report=term --cov-fail-under=82; then
         log "ERROR: unit tests failed"
@@ -112,7 +112,7 @@ test_integration() {
 
 scrape() {
     log "Scraping MiR support portal for new REST API files..."
-    uv run mir-spec-scraper sync
+    uv run amr-spec-scraper sync
     log "Review changes with: git status && git diff"
 }
 
@@ -123,7 +123,7 @@ serve_vda5050() {
 
 serve() {
     # SERVE_ARGS example: "--mir-version 2.7.0 --port 9090 --no-auth"
-    uv run mir-emulator ${SERVE_ARGS:-}
+    uv run amr-emulator ${SERVE_ARGS:-}
 }
 
 build_wheels() {

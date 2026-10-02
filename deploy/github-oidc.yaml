@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
-  CI/CD identity for the mir-emulator demo: a role GitHub Actions assumes via
+  CI/CD identity for the amr-emulator demo: a role GitHub Actions assumes via
   the account's existing OIDC provider (scoped to one repo + branch), and a
   CloudFormation service role that holds the resource permissions so the
   GitHub role itself can only drive CloudFormation and the artifacts bucket.

@@ -7,7 +7,7 @@ import time
 
 import httpx
 import pytest
-from mir_emulator import auth
+from amr_emulator import auth
 
 from tests.conftest import ALL_VERSIONS, AUTH_HEADER
 
@@ -27,7 +27,7 @@ def live_server(request):
         [
             sys.executable,
             "-m",
-            "mir_emulator.cli",
+            "amr_emulator.cli",
             "--mir-version",
             request.param,
             "--port",
@@ -86,8 +86,8 @@ def test_index_reports_emulated_version(live_server):
 def test_sync_discovery_and_connect_over_real_tcp(live_server):
     """The SDK handshake against a real socket: detect the version the server
     was started with (no client-side pin) and drive it with the result."""
-    from mir_client import connect, detect_server
-    from mir_client.robot.api.default import get_status
+    from amr_client import connect, detect_server
+    from amr_client.robot.api.default import get_status
 
     version, base = live_server
     info = detect_server(base)

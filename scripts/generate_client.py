@@ -1,10 +1,10 @@
-"""Regenerate the mir-client SDK from the bundled official specs.
+"""Regenerate the amr-client SDK from the bundled official specs.
 
     uv run python scripts/generate_client.py [--check]
 
 Reads the spec registry, converts the newest robot swagger to OpenAPI 3, and
 runs openapi-python-client for the robot API and the Fleet Integration API
-into packages/mir-client/src/mir_client/{robot,fleet}. Those two directories
+into packages/amr-client/src/amr_client/{robot,fleet}. Those two directories
 are ENTIRELY generated — never hand-edit them; edit the specs pipeline or this
 script instead. Hand-written files (pyproject, __init__, auth.py) live outside
 them. `--check` regenerates into a temp dir and exits 1 on drift, which is how
@@ -24,7 +24,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-CLIENT_SRC = REPO / "packages" / "mir-client" / "src" / "mir_client"
+CLIENT_SRC = REPO / "packages" / "amr-client" / "src" / "amr_client"
 
 
 def _generate(spec_path: Path, package: str, out_dir: Path, extra_config: str = "") -> None:
@@ -33,7 +33,7 @@ def _generate(spec_path: Path, package: str, out_dir: Path, extra_config: str = 
         raise RuntimeError("openapi-python-client not installed (uv sync --all-packages)")
     with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False) as config:
         config.write(f"package_name_override: {package}\n")
-        config.write(f"project_name_override: mir-client-{package}\n")
+        config.write(f"project_name_override: amr-client-{package}\n")
         # --isolated pins the generator's ruff post-processing to default
         # rules regardless of where the output lands; otherwise generating
         # into the repo picks up our config and into /tmp does not, and the
@@ -154,9 +154,9 @@ def _strip_deprecated_properties(node: object) -> None:
 
 def generate_into(base: Path) -> dict:
     """Generate both clients under *base*; return provenance details."""
-    from mir_emulator import registry
-    from mir_emulator.openapi3 import to_openapi3
-    from mir_emulator.spec import load_spec
+    from amr_emulator import registry
+    from amr_emulator.openapi3 import to_openapi3
+    from amr_emulator.spec import load_spec
 
     robot_version, robot_path = registry.spec_path()
     fleet_version, fleet_path = registry.fleet_spec_path()
@@ -215,7 +215,7 @@ def main() -> int:
 
     if not args.check:
         provenance = generate_into(CLIENT_SRC)
-        print(f"generated mir_client from {provenance}")
+        print(f"generated amr_client from {provenance}")
         return 0
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -232,12 +232,12 @@ def main() -> int:
             else:
                 diffs.extend(f"{part}/{d}" for d in _tree_differs(committed, regenerated))
         if diffs:
-            print("mir-client has drifted from the registry; regenerate with:")
+            print("amr-client has drifted from the registry; regenerate with:")
             print("    uv run python scripts/generate_client.py")
             for d in diffs[:20]:
                 print(f"  differs: {d}")
             return 1
-        print("mir-client matches the registry")
+        print("amr-client matches the registry")
         return 0
 
 

@@ -1,0 +1,214 @@
+{
+  "source": "https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/",
+  "selection_rule": {
+    "minors_per_major": 4,
+    "policy": "For every major release line that publishes REST API files, track the latest patch of each of its newest 4 minor lines. Once a minor line is tracked it is permanent: it keeps updating to its latest published patch but is never dropped, even when newer minors push it past the newest-4 window or the portal stops publishing it."
+  },
+  "updated": "2026-07-04",
+  "tracked": [
+    {
+      "mir_version": "3.8.1",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "3.8.1/swagger.json",
+      "sha256": "ea752c8707d6dad69a674993612bbc9bfb752813ebc64acc3bf33e650cdd2e4d",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.8.1.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.8.1.pdf",
+      "source_sha256": "1f494d8742866758623c3111ee298582cc36c27fd3c6b94ff09c49ac91ce4ad3"
+    },
+    {
+      "mir_version": "3.7.2",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "3.7.2/swagger.json",
+      "sha256": "e3698e66934c1a1032231461d6551221232b56473d7ad84013383af3c50bc121",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.7.2.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.7.2.pdf",
+      "source_sha256": "e965404aee1dba219088ce1b43e6a00512595278dec12d2cb60b2f576dc7fa1a"
+    },
+    {
+      "mir_version": "3.6.7",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "3.6.7/swagger.json",
+      "sha256": "fbf519227a8b15bbd0c358738ca7db2e05e9bf2a246c84b2d3edb92f637f4e64",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.6.7.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.6.7.pdf",
+      "source_sha256": "1c1471f482694b7087065a606cbe04734b54ff518eaa233da41275a6f85ad9ee"
+    },
+    {
+      "mir_version": "3.5.6",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "3.5.6/swagger.json",
+      "sha256": "268e551a66a249800af9c8f0730f72137c108987b2684cc362cad5399f087fa2",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.5.6.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_3.5.6.pdf",
+      "source_sha256": "d7d1dc665ae001ee1e9378fdce6127ff047c16a781f1aa5cc5055fa904e0314b"
+    },
+    {
+      "mir_version": "3.5.4",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "3.5.4/swagger.json",
+      "sha256": "0eb3d15345500f9c78129be7c54afb3c014fdeb834d10bef8cb4457ede94d01d",
+      "official": true,
+      "pinned": true,
+      "provenance": "Official MiR250 3.5.4 swagger.json, mirrored from github.com/processrobotics/mir-api@master. Pinned: the only machine-readable spec MiR ever published \u2014 the correctness oracle for the PDF converter."
+    },
+    {
+      "mir_version": "2.14.7",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "2.14.7/swagger.json",
+      "sha256": "0ae42ab2d49c16664d3d66482fc3c8438321e85ed5ce917de573979fea731c3d",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.14.7.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.14.7.pdf",
+      "source_sha256": "a1381316eaac11bf88c8986f5c0ec9697e693c8e46b7c284d5636655aa483bc6"
+    },
+    {
+      "mir_version": "2.13.5.4",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "2.13.5.4/swagger.json",
+      "sha256": "b364c0da8561166598ae6e25309a59212f41665ee789c8523ba196094c98bbf3",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.13.5.4.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.13.5.4.pdf",
+      "source_sha256": "edb6a463d80015bdfc82da1b4e8b8802159ee389bb9b7f77a31e143e876fd869"
+    },
+    {
+      "mir_version": "2.12.0.4",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "2.12.0.4/swagger.json",
+      "sha256": "dadadbe62c6471d005a82e59d41e8e762b589fd28fbc55445522e7a8756ebf8f",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.12.0.4.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.12.0.4.pdf",
+      "source_sha256": "b61e3e36362f01b2db14dca5c945d577eeb8c89901865854e0d3172da4282f34"
+    },
+    {
+      "mir_version": "2.10.5.8",
+      "api_path_version": "v2.0.0",
+      "format": "swagger-2.0",
+      "file": "2.10.5.8/swagger.json",
+      "sha256": "48f258f724c66d3f6e425d9446e8357eff81a1d423198cb3779a252f59f236ed",
+      "official": true,
+      "provenance": "Converted from the official MiR REST API PDF: https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.10.5.8.pdf",
+      "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/PDF/rest_api/MiR_MIR250_REST_API_2.10.5.8.pdf",
+      "source_sha256": "50790c2c20b24fcf5433760c9d0b0383aa1b55373d004ebebce546bc26a1f45c"
+    }
+  ],
+  "wanted": [],
+  "notes": "The portal (free account required; MIR_PORTAL_EMAIL/MIR_PORTAL_PASSWORD) publishes the API definitions as PDFs only. The scraper converts the preferred robot PDF (MIR250 first; FLEET/HOOK excluded) to Swagger 2.0; the converter is validated against the pinned official 3.5.4 swagger.json every scrape run.",
+  "fleet": {
+    "source": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/",
+    "selection_rule": {
+      "minors_per_major": 4,
+      "policy": "For every major MiR Fleet Enterprise release line that publishes an OpenAPI specification, track the latest patch of each of its newest 4 minor lines."
+    },
+    "docs_url_template": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/{version}/index.html?urls.primaryName=MiR+Fleet+Integration+API+v1",
+    "notes": "MiR publishes the Fleet Enterprise APIs as native OpenAPI 3 JSON behind a public Swagger UI (no login) - no PDF conversion involved. Each version directory publishes three documents: the Integration API (primary entry fields), plus the Top Module API and the Compatibility API (extra_apis) - all three are emulated on one fleet app.",
+    "tracked": [
+      {
+        "fleet_version": "1.5.0",
+        "api_path_version": "v1",
+        "format": "openapi-3.0",
+        "file": "fleet/1.5.0/openapi_v1.json",
+        "sha256": "75a1ec70c5e084584443041ebc8f2cc44c40336d3e702921110769e341341e67",
+        "official": true,
+        "provenance": "Official MiR Fleet Enterprise Integration API OpenAPI document, downloaded verbatim from the public MiR support portal Swagger UI.",
+        "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/openapi_v1.json",
+        "source_sha256": "75a1ec70c5e084584443041ebc8f2cc44c40336d3e702921110769e341341e67",
+        "extra_apis": [
+          {
+            "name": "top_module",
+            "title": "Top Module API v1",
+            "file": "fleet/1.5.0/openapi_topmodule_v1.json",
+            "sha256": "f3d9e8ea3228b1447159a6e4d0d7ff23617a5162b4bc7d15d91991341c83a958",
+            "official": true,
+            "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/openapi_topmodule_v1.json",
+            "source_sha256": "f3d9e8ea3228b1447159a6e4d0d7ff23617a5162b4bc7d15d91991341c83a958"
+          },
+          {
+            "name": "compatibility",
+            "title": "MiR Fleet Compatibility API",
+            "file": "fleet/1.5.0/openapi_compatibility_v1.json",
+            "sha256": "b18cc9f12af8f9682b78953f035436cf2b05752c4481138164e9c6c2c1b2dd77",
+            "official": true,
+            "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/openapi_compatibility_v1.json",
+            "source_sha256": "b18cc9f12af8f9682b78953f035436cf2b05752c4481138164e9c6c2c1b2dd77"
+          }
+        ]
+      },
+      {
+        "fleet_version": "1.4.2",
+        "api_path_version": "v1",
+        "format": "openapi-3.0",
+        "file": "fleet/1.4.2/openapi_v1.json",
+        "sha256": "b055910202490d002882be50bd228cef492a4362d5f25f33528b6098bcd3a28d",
+        "official": true,
+        "provenance": "Official MiR Fleet Enterprise Integration API OpenAPI document, downloaded verbatim from the public MiR support portal Swagger UI.",
+        "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.4.2/openapi_v1.json",
+        "source_sha256": "b055910202490d002882be50bd228cef492a4362d5f25f33528b6098bcd3a28d",
+        "extra_apis": [
+          {
+            "name": "top_module",
+            "title": "Top Module API v1",
+            "file": "fleet/1.4.2/openapi_topmodule_v1.json",
+            "sha256": "f3d9e8ea3228b1447159a6e4d0d7ff23617a5162b4bc7d15d91991341c83a958",
+            "official": true,
+            "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.4.2/openapi_topmodule_v1.json",
+            "source_sha256": "f3d9e8ea3228b1447159a6e4d0d7ff23617a5162b4bc7d15d91991341c83a958"
+          },
+          {
+            "name": "compatibility",
+            "title": "MiR Fleet Compatibility API",
+            "file": "fleet/1.4.2/openapi_compatibility_v1.json",
+            "sha256": "5a147093b713feeae6f63017b129f0f0ef09e75cf14c3d10e872ff80c78a7f87",
+            "official": true,
+            "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.4.2/openapi_compatibility_v1.json",
+            "source_sha256": "5a147093b713feeae6f63017b129f0f0ef09e75cf14c3d10e872ff80c78a7f87"
+          }
+        ]
+      },
+      {
+        "fleet_version": "1.3.1",
+        "api_path_version": "v1",
+        "format": "openapi-3.0",
+        "file": "fleet/1.3.1/openapi_v1.json",
+        "sha256": "1f262116010db8faf7bcc9e2b3876113863319f8f32a7a954f911059bba259f9",
+        "official": true,
+        "provenance": "Official MiR Fleet Enterprise Integration API OpenAPI document, downloaded verbatim from the public MiR support portal Swagger UI.",
+        "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.3.1/openapi_v1.json",
+        "source_sha256": "1f262116010db8faf7bcc9e2b3876113863319f8f32a7a954f911059bba259f9",
+        "extra_apis": [
+          {
+            "name": "top_module",
+            "title": "Top Module API v1",
+            "file": "fleet/1.3.1/openapi_topmodule_v1.json",
+            "sha256": "f3d9e8ea3228b1447159a6e4d0d7ff23617a5162b4bc7d15d91991341c83a958",
+            "official": true,
+            "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.3.1/openapi_topmodule_v1.json",
+            "source_sha256": "f3d9e8ea3228b1447159a6e4d0d7ff23617a5162b4bc7d15d91991341c83a958"
+          },
+          {
+            "name": "compatibility",
+            "title": "MiR Fleet Compatibility API",
+            "file": "fleet/1.3.1/openapi_compatibility_v1.json",
+            "sha256": "9dcc9d8461600673d8521dea7b49deb877b45550a9b1c99a33a7754d57eb3fc7",
+            "official": true,
+            "source_url": "https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.3.1/openapi_compatibility_v1.json",
+            "source_sha256": "9dcc9d8461600673d8521dea7b49deb877b45550a9b1c99a33a7754d57eb3fc7"
+          }
+        ]
+      }
+    ]
+  }
+}

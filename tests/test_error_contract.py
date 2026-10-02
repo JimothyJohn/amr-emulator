@@ -8,9 +8,9 @@ did not. The contract under test: any 4xx from any app parses as JSON and
 carries ``error_code``.
 """
 
-from mir_emulator import serverless
-from mir_emulator.app import create_app
-from mir_emulator.fleet import create_fleet_app
+from amr_emulator import serverless
+from amr_emulator.app import create_app
+from amr_emulator.fleet import create_fleet_app
 from starlette.testclient import TestClient
 
 

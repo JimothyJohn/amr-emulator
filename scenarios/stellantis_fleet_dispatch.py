@@ -19,7 +19,7 @@ What this exercises on the emulator (Fleet API, /api/v1):
   * throughput extrapolation against the real plant's 1,000 missions/day
 
 Run (fleet emulator, separate port so it can coexist with a robot emulator):
-    uv run mir-emulator --fleet-version 1.5.0 --fleet-robots 3.8.1,3.8.1,3.8.1 \
+    uv run amr-emulator --fleet-version 1.5.0 --fleet-robots 3.8.1,3.8.1,3.8.1 \
         --port 9090 --mission-duration 2 &
     uv run scenarios/stellantis_fleet_dispatch.py
 """
@@ -30,13 +30,13 @@ import time
 
 import httpx
 
-FLEET_URL = os.environ.get("MIR_FLEET_URL", "http://127.0.0.1:9090")
+FLEET_URL = os.environ.get("AMR_FLEET_URL", "http://127.0.0.1:9090")
 API = "/api/v1"
 ORDERS = int(os.environ.get("ORDERS", "9"))
 
 
 def client() -> httpx.Client:
-    key = os.environ.get("MIR_FLEET_API_KEY", "distributor")
+    key = os.environ.get("AMR_FLEET_API_KEY", "distributor")
     return httpx.Client(base_url=FLEET_URL, headers={"x-api-key": key}, timeout=15)
 
 
@@ -46,7 +46,7 @@ def require_fleet(c: httpx.Client) -> None:
     except httpx.ConnectError:
         sys.exit(
             f"No fleet at {FLEET_URL} — start one:\n"
-            "  uv run mir-emulator --fleet-version 1.5.0 "
+            "  uv run amr-emulator --fleet-version 1.5.0 "
             "--fleet-robots 3.8.1,3.8.1,3.8.1 --port 9090 --mission-duration 2"
         )
     if "fleet" not in str(index).lower():

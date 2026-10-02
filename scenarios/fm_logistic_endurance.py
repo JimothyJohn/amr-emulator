@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["httpx>=0.27", "mir-client"]
+# dependencies = ["httpx>=0.27", "amr-client"]
 #
 # [tool.uv.sources]
-# mir-client = { path = "../packages/mir-client" }
+# amr-client = { path = "../packages/amr-client" }
 # ///
 """FM Logistic — "Mirek" runs the recycling loop, shift after shift.
 
@@ -17,7 +17,7 @@ stop for a charge.
 
 What this exercises on the emulator:
   * back-to-back mission cycles on one robot
-  * X-MiR-Mission-Duration — the loaded 300 m haul runs 3x longer than the
+  * X-AMR-Mission-Duration — the loaded 300 m haul runs 3x longer than the
     empty return, in the same FIFO queue; odometry and drain scale with it
   * `moved` odometry and `battery_percentage` deltas per cycle
   * a low-battery guard (stop dispatching below a threshold)
@@ -25,7 +25,7 @@ What this exercises on the emulator:
     scrape, including the mission completed/aborted counters
 
 Run:
-    uv run mir-emulator --mission-duration 2 &
+    uv run amr-emulator --mission-duration 2 &
     uv run scenarios/fm_logistic_endurance.py         # CYCLES=5 by default
 """
 
@@ -34,23 +34,23 @@ import sys
 import time
 
 import httpx
-from mir_client import robot_token
+from amr_client import robot_token
 
-MIR_URL = os.environ.get("MIR_URL", "http://127.0.0.1:8080")
+AMR_URL = os.environ.get("AMR_URL", "http://127.0.0.1:8080")
 API = "/api/v2.0.0"
 CYCLES = int(os.environ.get("CYCLES", "5"))
 MIN_BATTERY = 20.0  # % — hold dispatch below this, like Fleet would
-HAUL_S = "6"  # loaded 300 m run (X-MiR-Mission-Duration, emulator-only)
+HAUL_S = "6"  # loaded 300 m run (X-AMR-Mission-Duration, emulator-only)
 RETURN_S = "2"  # empty run back to the co-packing line
 
 
 def client(session: str) -> httpx.Client:
-    user = os.environ.get("MIR_USERNAME", "distributor")
-    password = os.environ.get("MIR_PASSWORD", "distributor")
+    user = os.environ.get("AMR_USERNAME", "distributor")
+    password = os.environ.get("AMR_PASSWORD", "distributor")
     token = robot_token(user, password)
     return httpx.Client(
-        base_url=MIR_URL,
-        headers={"Authorization": f"Basic {token}", "X-MiR-Session": session},
+        base_url=AMR_URL,
+        headers={"Authorization": f"Basic {token}", "X-AMR-Session": session},
         timeout=15,
     )
 
@@ -59,9 +59,9 @@ def require_emulator(c: httpx.Client) -> None:
     try:
         index = c.get("/").json()
     except httpx.ConnectError:
-        sys.exit(f"Nothing at {MIR_URL} — start one: uv run mir-emulator --mission-duration 2")
+        sys.exit(f"Nothing at {AMR_URL} — start one: uv run amr-emulator --mission-duration 2")
     if "emulated_mir_version" not in index:
-        sys.exit(f"{MIR_URL} does not look like the emulator; refusing to run a demo against it.")
+        sys.exit(f"{AMR_URL} does not look like the emulator; refusing to run a demo against it.")
 
 
 def status(c: httpx.Client) -> dict:
@@ -98,7 +98,7 @@ def main() -> None:
         qid = c.post(
             f"{API}/mission_queue",
             json={"mission_id": mission},
-            headers={"X-MiR-Mission-Duration": duration},
+            headers={"X-AMR-Mission-Duration": duration},
         ).json()["id"]
         deadline = time.monotonic() + 60
         while time.monotonic() < deadline:

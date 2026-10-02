@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["httpx>=0.27", "mir-client"]
+# dependencies = ["httpx>=0.27", "amr-client"]
 #
 # [tool.uv.sources]
-# mir-client = { path = "../packages/mir-client" }
+# amr-client = { path = "../packages/amr-client" }
 # ///
 """Whirlpool Łódź — line-side delivery loop with a hot-spare robot.
 
@@ -15,16 +15,16 @@ missions while the third waits on the charger as a hot spare; MiR Fleet
 watches batteries and rotates robots.
 
 What this exercises on the emulator:
-  * X-MiR-Session — three fully isolated robots on one emulator
+  * X-AMR-Session — three fully isolated robots on one emulator
   * PUT /status {"name": ...} — naming robots
   * POST /missions + POST /mission_queue — per-robot mission definitions
-  * X-MiR-Mission-Duration — the 130 m loop outlasts the global default
+  * X-AMR-Mission-Duration — the 130 m loop outlasts the global default
   * battery drain across repeated cycles + spare rotation on low battery,
     with the spare genuinely recharging on /_emulator/battery — the swap
     is a real trade, not theater
 
 Run:
-    uv run mir-emulator --mission-duration 2 &
+    uv run amr-emulator --mission-duration 2 &
     uv run scenarios/whirlpool_lineside_loop.py
 """
 
@@ -33,9 +33,9 @@ import sys
 import time
 
 import httpx
-from mir_client import robot_token
+from amr_client import robot_token
 
-MIR_URL = os.environ.get("MIR_URL", "http://127.0.0.1:8080")
+AMR_URL = os.environ.get("AMR_URL", "http://127.0.0.1:8080")
 API = "/api/v2.0.0"
 CYCLES = 4
 ROTATE_BELOW = 99.0  # % — artificially high so the demo shows a rotation
@@ -44,12 +44,12 @@ CHARGE_RATE = 0.25  # %/s on the charger — visibly outpaces the loop's drain
 
 
 def client(session: str) -> httpx.Client:
-    user = os.environ.get("MIR_USERNAME", "distributor")
-    password = os.environ.get("MIR_PASSWORD", "distributor")
+    user = os.environ.get("AMR_USERNAME", "distributor")
+    password = os.environ.get("AMR_PASSWORD", "distributor")
     token = robot_token(user, password)
     return httpx.Client(
-        base_url=MIR_URL,
-        headers={"Authorization": f"Basic {token}", "X-MiR-Session": session},
+        base_url=AMR_URL,
+        headers={"Authorization": f"Basic {token}", "X-AMR-Session": session},
         timeout=15,
     )
 
@@ -58,9 +58,9 @@ def require_emulator(c: httpx.Client) -> None:
     try:
         index = c.get("/").json()
     except httpx.ConnectError:
-        sys.exit(f"Nothing at {MIR_URL} — start one: uv run mir-emulator --mission-duration 2")
+        sys.exit(f"Nothing at {AMR_URL} — start one: uv run amr-emulator --mission-duration 2")
     if "emulated_mir_version" not in index:
-        sys.exit(f"{MIR_URL} does not look like the emulator; refusing to run a demo against it.")
+        sys.exit(f"{AMR_URL} does not look like the emulator; refusing to run a demo against it.")
 
 
 def make_mission(c: httpx.Client, name: str) -> str:
@@ -74,7 +74,7 @@ def run_mission(c: httpx.Client, guid: str) -> int:
     r = c.post(
         f"{API}/mission_queue",
         json={"mission_id": guid},
-        headers={"X-MiR-Mission-Duration": LOOP_DURATION_S},
+        headers={"X-AMR-Mission-Duration": LOOP_DURATION_S},
     )
     r.raise_for_status()
     return r.json()["id"]

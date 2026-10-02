@@ -22,12 +22,12 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
-    "packages/mir-emulator/tests",
-    "packages/mir-mcp/tests",
-    "packages/mir-spec-scraper/tests",
-    "packages/mir-client/tests",
+    "packages/amr-emulator/tests",
+    "packages/amr-mcp/tests",
+    "packages/amr-spec-scraper/tests",
+    "packages/amr-client/tests",
     "packages/vda5050-emulator/tests",
-    "packages/mir-vda5050-adapter/tests",
+    "packages/amr-vda5050-adapter/tests",
     "packages/arcl-emulator/tests",
     "packages/vda5050-master/tests",
     "packages/massrobotics-emulator/tests",
@@ -40,11 +40,11 @@ addopts = "-ra"
 
 [tool.ruff]
 line-length = 100
-# mir_client/{robot,fleet} are generated verbatim (scripts/generate_client.py)
+# amr_client/{robot,fleet} are generated verbatim (scripts/generate_client.py)
 # and follow the generator's style, not ours; the drift check guards them.
 extend-exclude = [
-    "packages/mir-client/src/mir_client/robot",
-    "packages/mir-client/src/mir_client/fleet",
+    "packages/amr-client/src/amr_client/robot",
+    "packages/amr-client/src/amr_client/fleet",
 ]
 target-version = "py311"
 
@@ -62,8 +62,8 @@ ignore = [
 
 [tool.ty.src]
 exclude = [
-    "packages/mir-client/src/mir_client/robot",
-    "packages/mir-client/src/mir_client/fleet",
+    "packages/amr-client/src/amr_client/robot",
+    "packages/amr-client/src/amr_client/fleet",
     # ROS 2 code that only runs inside the interop container (rclpy et al.
     # are not installable on the host).
     "interop/otto-vda5050/mock_adapter",

@@ -1,11 +1,11 @@
-# External validation: Mission Dispatch → mir-vda5050-adapter → mir-emulator
+# External validation: Mission Dispatch → amr-vda5050-adapter → amr-emulator
 
 Date: 2026-08-16 · branch `feat/vda5050-emulator` · Mission Dispatch 4.3.0
 
 The point of the adapter: any VDA 5050 master control can drive a MiR robot.
 Proven live with the full triangle — NVIDIA Isaac Mission Dispatch (external
-master) → `mir-vda5050-adapter` (VDA 5050 2.0.0 ↔ MiR REST 3.8.1) →
-`mir-emulator` (spec-faithful MiR robot). The adapter translated MD's route
+master) → `amr-vda5050-adapter` (VDA 5050 2.0.0 ↔ MiR REST 3.8.1) →
+`amr-emulator` (spec-faithful MiR robot). The adapter translated MD's route
 orders into MiR missions (positions + move actions + mission_queue), tracked
 execution by polling `GET /status`, and published spec-valid state back.
 
@@ -43,9 +43,9 @@ reported through the adapter.
 ## Reproduce
 
 ```
-uv run mir-emulator --port 8080 --mission-duration 4
+uv run amr-emulator --port 8080 --mission-duration 4
 uv run vda5050-emulator --robots 0 --port 1884          # broker-only
-uv run mir-vda5050-adapter --broker 127.0.0.1:1884 \
+uv run amr-vda5050-adapter --broker 127.0.0.1:1884 \
     --manufacturer RobotCompany --serial carter01
 # then the Mission Dispatch stack + driver from isaac-mission-dispatch/
 ```

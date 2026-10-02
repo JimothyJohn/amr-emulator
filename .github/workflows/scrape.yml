@@ -65,7 +65,7 @@ jobs:
           MIR_PORTAL_PASSWORD: ${{ secrets.MIR_PORTAL_PASSWORD }}
           # Optional: adds an AI "release impact" summary to the PR body.
           OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
-        run: uv run mir-spec-scraper sync --report scrape-report.md
+        run: uv run amr-spec-scraper sync --report scrape-report.md
 
       - name: Test against the updated spec set before proposing it
         if: steps.scrape.outputs.changed == 'true'
@@ -76,7 +76,7 @@ jobs:
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           branch: scrape/update-specs
-          add-paths: packages/mir-emulator/src/mir_emulator/specs
+          add-paths: packages/amr-emulator/src/amr_emulator/specs
           commit-message: "feat(specs): ${{ steps.scrape.outputs.summary }}"
           title: "Track new MiR REST API versions"
           body-path: scrape-report.md

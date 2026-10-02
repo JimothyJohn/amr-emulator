@@ -53,18 +53,18 @@ minor lines of every major software generation.
 curl -H "Authorization: Basic $(printf '%s:%s' distributor "$(printf distributor | shasum -a 256 | cut -d' ' -f1)" | base64)" \
   http://127.0.0.1:8080/api/v2.0.0/status
 
-uv run mir-emulator --fleet-version 1.5.0   # a MiR Fleet with two embedded robots
+uv run amr-emulator --fleet-version 1.5.0   # a MiR Fleet with two embedded robots
 curl -H 'x-api-key: distributor' http://127.0.0.1:8080/api/v1/robots
 ```
 
 ## The fleet emulates MiR Fleet Enterprise — by driving robot emulators
 
-`mir_emulator.fleet` embeds a configurable set of robot emulators and controls
+`amr_emulator.fleet` embeds a configurable set of robot emulators and controls
 them the way a real MiR Fleet does: **over the robots' own REST API** (auth,
 validation, mission simulation — the full HTTP stack, via an in-process ASGI
 transport). A `POST /api/v1/serial-order` really enqueues missions on a robot's
 `/mission_queue`; order status is derived live from the robot's simulation, so
-the fleet view and the robot view can never disagree. `X-MiR-Session` composes:
+the fleet view and the robot view can never disagree. `X-AMR-Session` composes:
 one session id gets an isolated fleet **and** isolated robots. Fleet specs are
 MiR's official OpenAPI 3 documents, served verbatim (no PDF conversion) —
 see the public [Swagger UI](https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/index.html?urls.primaryName=MiR+Fleet+Integration+API+v1)
@@ -81,21 +81,21 @@ for the canonical reference; the emulator links to it rather than rebuilding it.
    Asciidoctor renderings of their internal swagger doc). The scraper picks
    one robot PDF per selected version (MIR250 preferred; FLEET/HOOK are
    different APIs and excluded) and **converts it back to Swagger 2.0**
-   (`mir_spec_scraper/pdf_convert.py`).
+   (`amr_spec_scraper/pdf_convert.py`).
 3. The converter is gated by a **correctness oracle**: MiR published exactly
    one machine-readable spec ever (3.5.4 `swagger.json`, pinned in the
    registry). Every scrape run re-converts the 3.5.4 PDF and requires zero
    structural differences (operations, parameters, response schemas,
    definition property types) against that official document.
 4. New or changed specs land in
-   `packages/mir-emulator/src/mir_emulator/specs/` + `registry.json` via an
+   `packages/amr-emulator/src/amr_emulator/specs/` + `registry.json` via an
    automated PR; **`ci.yml`** proves every tracked version against the full
    conformance + adversarial suite before it merges.
 5. The **fleet half** of the same scrape needs no credentials: MiR publishes
    Fleet Enterprise as native OpenAPI 3 JSON at public URLs. Discovery probes
    forward from the tracked versions (new patches, minors, majors) and the
    same selection rule applies per major line.
-6. **`release.yml`** builds one `mir-emulator` wheel per tracked MiR
+6. **`release.yml`** builds one `amr-emulator` wheel per tracked MiR
    version as an attested workflow artifact. Nothing is published to PyPI —
    the product is the hosted endpoint; run locally from a checkout.
 
@@ -105,12 +105,12 @@ for the canonical reference; the emulator links to it rather than rebuilding it.
   account); without them the scrape workflow no-ops with a notice.
 - `OPEN_ROUTER_API_KEY` (optional) — adds an AI-generated "release impact"
   summary on top of the mechanical API changelog in scrape PRs (model:
-  `anthropic/claude-sonnet-5`, override with `MIR_SUMMARY_MODEL`). Strictly
+  `anthropic/claude-sonnet-5`, override with `AMR_SUMMARY_MODEL`). Strictly
   best-effort: any failure falls back to the mechanical report.
 
 ## Tracked versions
 
-`packages/mir-emulator/src/mir_emulator/specs/registry.json` is the
+`packages/amr-emulator/src/amr_emulator/specs/registry.json` is the
 authoritative list (versions, hashes, provenance, source PDF URLs). New
 releases are picked up as the latest patch of each major's newest 4 minor
 lines; once tracked, a minor line is permanent — it keeps updating to its
@@ -146,8 +146,8 @@ latest patch but is never dropped. Currently:
   embedded robot so orders can be chaos-tested in flight; `/_emulator/clock`
   runs simulated time Nx wall speed (process-wide) so missions and charging
   keep realistic durations and timestamps while tests wait seconds, not
-  minutes (`--time-scale` at startup); `X-MiR-Latency`
-  delays any response for timeout testing; `X-MiR-Mission-Duration` gives one
+  minutes (`--time-scale` at startup); `X-AMR-Latency`
+  delays any response for timeout testing; `X-AMR-Mission-Duration` gives one
   queue entry its own runtime (real routes are not uniform);
   `/_emulator/diff?from=&to=` on the dispatcher reports structural API changes
   between tracked versions.
@@ -159,7 +159,7 @@ latest patch but is never dropped. Currently:
   (`docker compose up` → MiR 3.8.1 on :8080 and 2.14.7 on :8081).
 
 ```python
-from mir_emulator import create_app, supported_versions
+from amr_emulator import create_app, supported_versions
 
 app = create_app("3.8.1")  # ASGI app: run under uvicorn, or hit with httpx/TestClient
 ```
@@ -169,15 +169,15 @@ app = create_app("3.8.1")  # ASGI app: run under uvicorn, or hit with httpx/Test
 - `packages/vda5050-emulator/` — VDA 5050 mobile-robot emulator (asyncio;
   embedded MQTT 3.1.1 broker, virtual AGV core, fleet-control test client).
   Bundles the official schemas for every tracked protocol version.
-- `packages/mir-vda5050-adapter/` — VDA 5050 robot-side adapter for MiR:
+- `packages/amr-vda5050-adapter/` — VDA 5050 robot-side adapter for MiR:
   drive a MiR robot (real or emulated) from any VDA 5050 master control.
-  Validated live: Isaac Mission Dispatch → adapter → mir-emulator.
+  Validated live: Isaac Mission Dispatch → adapter → amr-emulator.
 - `packages/arcl-emulator/` — Omron ARCL (LD/HD AMR) emulator: line-based
   TCP protocol per the public I617-E-02 reference manual, with the fleet
   queuing loop, docking/charging and fault injection.
-- `packages/mir-emulator/` — the emulator library (Starlette; spec-driven
+- `packages/amr-emulator/` — the emulator library (Starlette; spec-driven
   routes + behavior overlays). Bundles all tracked spec files.
-- `packages/mir-spec-scraper/` — portal login, listing parser, selection
+- `packages/amr-spec-scraper/` — portal login, listing parser, selection
   rule, registry updater.
 - `tests/` — cross-version conformance, adversarial/negative-path, and
   real-TCP integration suites, parametrized over every tracked version.

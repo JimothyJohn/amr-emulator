@@ -346,13 +346,13 @@ five-minute check with any MQTT client:
 
 <section id="adapter">
   <h2>Your MiR robot is already a VDA 5050 robot</h2>
-  <p class="lead"><code>mir-vda5050-adapter</code> bridges the MiR REST API (3.8.1)
+  <p class="lead"><code>amr-vda5050-adapter</code> bridges the MiR REST API (3.8.1)
   to VDA 5050 — orders become MiR missions, <code>GET /status</code> becomes spec-valid
   state. Validated live: Isaac Mission Dispatch → adapter → MiR emulator,
   <strong>mission COMPLETED in 11&nbsp;s</strong>.</p>
-<pre><span class="prompt">$</span> uv run mir-emulator &amp;                      <span class="dim"># or a real MiR on your network</span>
+<pre><span class="prompt">$</span> uv run amr-emulator &amp;                      <span class="dim"># or a real MiR on your network</span>
 <span class="prompt">$</span> uv run vda5050-emulator --robots 0 &amp;       <span class="dim"># broker-only mode</span>
-<span class="prompt">$</span> uv run mir-vda5050-adapter --mir-url http://127.0.0.1:8080 --broker 127.0.0.1:1883</pre>
+<span class="prompt">$</span> uv run amr-vda5050-adapter --mir-url http://127.0.0.1:8080 --broker 127.0.0.1:1883</pre>
   <p><a class="btn secondary" href="/console">Open the MiR console app</a>
      <a class="btn secondary" href="https://github.com/JimothyJohn/amr-emulator/blob/master/docs/validation/mir-adapter-mission-dispatch.md" rel="noopener">Adapter validation transcript</a></p>
 </section>

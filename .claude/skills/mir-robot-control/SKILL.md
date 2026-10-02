@@ -25,28 +25,28 @@ Work out where the robot is and whether it is real:
    `/api/v1/...` is a Fleet.
 2. **User has a robot but no address** — scan the network for it:
    ```sh
-   uv run mir-discover                    # local /24, ports 80 (real) + 8080 (emulator)
-   uv run mir-discover 192.168.12.0/24    # a specific subnet
-   uv run mir-discover mir.local:8080     # a specific host[:port], --json for parsing
+   uv run amr-discover                    # local /24, ports 80 (real) + 8080 (emulator)
+   uv run amr-discover 192.168.12.0/24    # a specific subnet
+   uv run amr-discover mir.local:8080     # a specific host[:port], --json for parsing
    ```
    It returns only confirmed MiR targets with their kind and software
    version; each line's URL is ready to use. (From Python:
-   `mir_client.scan_network()`; from an MCP client: the `mir_discover_robots`
+   `amr_client.scan_network()`; from an MCP client: the `amr_discover_robots`
    tool.)
 3. **Something is already listening locally** — probe before starting
    anything new: `curl -s http://127.0.0.1:8080/` (the emulator's index
    describes itself and lists versions).
 4. **Nothing running** — start an emulator from this repo:
    ```sh
-   uv run mir-emulator &                          # newest robot on :8080
-   uv run mir-emulator --fleet-version 1.5.0 &    # a Fleet with embedded robots
+   uv run amr-emulator &                          # newest robot on :8080
+   uv run amr-emulator --fleet-version 1.5.0 &    # a Fleet with embedded robots
    ```
    Useful flags: `--mir-version 2.14.7`, `--port`, `--no-auth`,
    `--time-scale 60` (simulated time runs 60x wall speed — missions and
    charging keep realistic durations and timestamps but finish in seconds;
    runtime control via `PUT /_emulator/clock {"scale": N}`, prefer this
    over the older shortcuts below when timestamps matter),
-   `--mission-duration 3` (seconds per mission — an `X-MiR-Mission-Duration`
+   `--mission-duration 3` (seconds per mission — an `X-AMR-Mission-Duration`
    header on `POST /mission_queue` overrides it per entry).
 
 **Then ask the target what it is — never assume a version.** The path
@@ -66,9 +66,9 @@ curl -s -o /dev/null -w '%{http_code}' $BASE/api/v2.0.0/status  # 200/401 → ro
 ```
 
 All probes are unauthenticated reads — safe against real hardware. From
-Python, `mir_client.connect(base_url)` / `detect_server(base_url)` run this
+Python, `amr_client.connect(base_url)` / `detect_server(base_url)` run this
 same handshake and return a ready client; the MCP server's
-`mir_server_info` tool does it too. When versions differ structurally,
+`amr_server_info` tool does it too. When versions differ structurally,
 `GET /_emulator/diff?from=<v>&to=<v>` (dispatcher) shows exactly what
 changed between two tracked versions.
 
@@ -136,11 +136,11 @@ it; generate the standing dashboard (current-status indicators, daily
 trend, descriptive action timeline) from official endpoints only:
 
 ```sh
-uv run mir-report http://127.0.0.1:8080 -o report.html   # robot or fleet, auto-detected
+uv run amr-report http://127.0.0.1:8080 -o report.html   # robot or fleet, auto-detected
 ```
 
-Python: `mir_client.report.write_report(url, path)`; MCP: the
-`mir_generate_report` tool. Read-only API traffic, so it is safe against
+Python: `amr_client.report.write_report(url, path)`; MCP: the
+`amr_generate_report` tool. Read-only API traffic, so it is safe against
 real hardware; works on any tracked software version.
 
 ## Step 4: Execute and report
@@ -159,7 +159,7 @@ real hardware; works on any tracked software version.
 
 ## Multi-robot / test isolation (emulator only)
 
-Send `X-MiR-Session: <name>` (1–64 chars of `[A-Za-z0-9._-]`) on every
+Send `X-AMR-Session: <name>` (1–64 chars of `[A-Za-z0-9._-]`) on every
 request to get a private robot/fleet instance per session id — parallel
 tests never see each other's state. Keep the header consistent across a
 scenario or the state "disappears". Sessions are LRU-capped at 256 per

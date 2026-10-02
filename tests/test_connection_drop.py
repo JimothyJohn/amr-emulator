@@ -32,7 +32,7 @@ def _free_port() -> int:
 def live_server():
     port = _free_port()
     proc = subprocess.Popen(  # noqa: S603 - fixed argv, our own interpreter
-        [sys.executable, "-m", "mir_emulator.cli", "--mir-version", VERSION, "--port", str(port)],
+        [sys.executable, "-m", "amr_emulator.cli", "--mir-version", VERSION, "--port", str(port)],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
@@ -92,25 +92,25 @@ def test_connection_drop_is_session_isolated(live_server):
     httpx.put(
         f"{base}/_emulator/faults",
         json={"faults": ["connection_drop"]},
-        headers={**AUTH_HEADER, "X-MiR-Session": "rebooting"},
+        headers={**AUTH_HEADER, "X-AMR-Session": "rebooting"},
         timeout=5,
     )
     try:
         with pytest.raises(httpx.TransportError):
             httpx.get(
                 f"{base}/api/v2.0.0/status",
-                headers={**AUTH_HEADER, "X-MiR-Session": "rebooting"},
+                headers={**AUTH_HEADER, "X-AMR-Session": "rebooting"},
                 timeout=5,
             )
         untouched = httpx.get(
             f"{base}/api/v2.0.0/status",
-            headers={**AUTH_HEADER, "X-MiR-Session": "healthy"},
+            headers={**AUTH_HEADER, "X-AMR-Session": "healthy"},
             timeout=5,
         )
         assert untouched.status_code == 200
     finally:
         httpx.delete(
             f"{base}/_emulator/faults",
-            headers={**AUTH_HEADER, "X-MiR-Session": "rebooting"},
+            headers={**AUTH_HEADER, "X-AMR-Session": "rebooting"},
             timeout=5,
         )
