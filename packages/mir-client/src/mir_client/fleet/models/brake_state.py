@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class BrakeState(str, Enum):
+class BrakeState(StrEnum):
     ACTIVATING = "Activating"
     ACTIVE = "Active"
     DEACTIVATING = "Deactivating"

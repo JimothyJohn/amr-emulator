@@ -85,7 +85,7 @@ class Event:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.event_payload import EventPayload
+        from ..models.event_payload import EventPayload  # noqa: PLC0415
 
         d = dict(src_dict)
         name = d.pop("name", UNSET)

@@ -73,7 +73,9 @@ class PostModbusMissions:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_modbus_missions_parameters_item import PostModbusMissionsParametersItem
+        from ..models.post_modbus_missions_parameters_item import (
+            PostModbusMissionsParametersItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         coil_id = d.pop("coil_id")

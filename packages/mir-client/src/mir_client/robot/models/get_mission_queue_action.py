@@ -99,7 +99,7 @@ class GetMissionQueueAction:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.get_mission_queue_action_parameters_item import (
-            GetMissionQueueActionParametersItem,
+            GetMissionQueueActionParametersItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

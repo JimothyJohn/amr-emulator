@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Alert(str, Enum):
+class Alert(StrEnum):
     DEADLOCKDETECTED = "DeadlockDetected"
     INCOMPATIBLEROBOT = "IncompatibleRobot"
     INTERNALALERTREPORTED = "InternalAlertReported"

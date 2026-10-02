@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class SubscriptionState(str, Enum):
+class SubscriptionState(StrEnum):
     SUBSCRIBED = "Subscribed"
     UNSUBSCRIBED = "Unsubscribed"
 

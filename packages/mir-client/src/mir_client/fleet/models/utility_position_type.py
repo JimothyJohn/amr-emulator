@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UtilityPositionType(str, Enum):
+class UtilityPositionType(StrEnum):
     CART = "Cart"
     DEEPLANE = "DeepLane"
     ELEVATEDBARPALLET = "ElevatedBarPallet"

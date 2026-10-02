@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ParameterType(str, Enum):
+class ParameterType(StrEnum):
     BOOLEAN = "Boolean"
     CART = "Cart"
     DURATION = "Duration"

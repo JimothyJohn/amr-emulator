@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class PlcAction(str, Enum):
+class PlcAction(StrEnum):
     ADD = "Add"
     NONE = "None"
     SET = "Set"

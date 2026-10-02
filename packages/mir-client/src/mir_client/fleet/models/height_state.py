@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class HeightState(str, Enum):
+class HeightState(StrEnum):
     CHANGING = "Changing"
     ERROR = "Error"
     HOMING = "Homing"

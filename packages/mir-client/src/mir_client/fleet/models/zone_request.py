@@ -36,7 +36,7 @@ class ZoneRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.zone_1 import Zone1
+        from ..models.zone_1 import Zone1  # noqa: PLC0415
 
         d = dict(src_dict)
         zone = Zone1.from_dict(d.pop("zone"))

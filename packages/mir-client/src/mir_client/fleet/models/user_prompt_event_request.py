@@ -59,8 +59,8 @@ class UserPromptEventRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.user_prompt_event import UserPromptEvent
-        from ..models.user_prompt_resolved_event import UserPromptResolvedEvent
+        from ..models.user_prompt_event import UserPromptEvent  # noqa: PLC0415
+        from ..models.user_prompt_resolved_event import UserPromptResolvedEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         is_snapshot = d.pop("is-snapshot", UNSET)

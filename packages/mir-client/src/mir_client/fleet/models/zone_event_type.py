@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ZoneEventType(str, Enum):
+class ZoneEventType(StrEnum):
     ENTRY = "Entry"
     EXIT = "Exit"
 

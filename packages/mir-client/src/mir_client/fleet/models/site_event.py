@@ -139,15 +139,15 @@ class SiteEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.cart import Cart
-        from ..models.footprint_1 import Footprint1
-        from ..models.io_module import IoModule
-        from ..models.map_1 import Map1
-        from ..models.marker_type import MarkerType
-        from ..models.mission import Mission
-        from ..models.position_1 import Position1
-        from ..models.sound import Sound
-        from ..models.zone import Zone
+        from ..models.cart import Cart  # noqa: PLC0415
+        from ..models.footprint_1 import Footprint1  # noqa: PLC0415
+        from ..models.io_module import IoModule  # noqa: PLC0415
+        from ..models.map_1 import Map1  # noqa: PLC0415
+        from ..models.marker_type import MarkerType  # noqa: PLC0415
+        from ..models.mission import Mission  # noqa: PLC0415
+        from ..models.position_1 import Position1  # noqa: PLC0415
+        from ..models.sound import Sound  # noqa: PLC0415
+        from ..models.zone import Zone  # noqa: PLC0415
 
         d = dict(src_dict)
         entity_id = d.pop("entity-id")

@@ -10,8 +10,6 @@ T = TypeVar("T", bound="ExternalCableChargerConnected")
 
 @_attrs_define
 class ExternalCableChargerConnected:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class BasePositionType(str, Enum):
+class BasePositionType(StrEnum):
     EVACUATION = "Evacuation"
     ROBOT = "Robot"
     STAGING = "Staging"

@@ -75,7 +75,9 @@ class PostMissionQueues:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_mission_queues_parameters_item import PostMissionQueuesParametersItem
+        from ..models.post_mission_queues_parameters_item import (
+            PostMissionQueuesParametersItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         mission_id = d.pop("mission_id")

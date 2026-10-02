@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class LockZoneState(str, Enum):
+class LockZoneState(StrEnum):
     LOCKED = "Locked"
     LOCKING = "Locking"
     UNLOCKED = "Unlocked"

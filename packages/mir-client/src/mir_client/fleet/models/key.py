@@ -47,8 +47,8 @@ class Key:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.key_idle import KeyIdle
-        from ..models.key_manual import KeyManual
+        from ..models.key_idle import KeyIdle  # noqa: PLC0415
+        from ..models.key_manual import KeyManual  # noqa: PLC0415
 
         d = dict(src_dict)
         _key_manual = d.pop("key-manual", UNSET)

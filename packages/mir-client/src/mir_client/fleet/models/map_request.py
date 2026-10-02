@@ -36,7 +36,7 @@ class MapRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.map_ import Map
+        from ..models.map_ import Map  # noqa: PLC0415
 
         d = dict(src_dict)
         map_ = Map.from_dict(d.pop("map"))

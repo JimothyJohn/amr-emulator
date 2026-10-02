@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OrderType(str, Enum):
+class OrderType(StrEnum):
     CHARGING = "Charging"
     EVACUATION = "Evacuation"
     GOTO = "GoTo"

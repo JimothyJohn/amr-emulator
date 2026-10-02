@@ -386,12 +386,13 @@ viewBtn.addEventListener("click", () => {
 
 /* ---- footer ---- */
 document.getElementById("foot").innerHTML =
-  `Driven live against one <a href="https://github.com/JimothyJohn/amr-emulator">mir-emulator</a> MiR250 started with
+  `Driven live against one <a href="https://github.com/JimothyJohn/amr-emulator">AMR Emulator</a> MiR250 started with
    <code>--time-scale ${M.scale}</code>: ${M.sim_hours} simulated hours in ${M.wall_min} minutes of wall clock.
    ${DATA.jobs.length} missions with realistic per-mission runtimes via <code>X-MiR-Mission-Duration</code>;
    timestamps read back from the robot's own <code>mission_queue</code>;
    opportunity charging below ${M.charge_below}% via <code>/_emulator/battery</code>;
-   the clock scaled at runtime via <code>PUT /_emulator/clock</code>.`;
+   the clock scaled at runtime via <code>PUT /_emulator/clock</code>.<br>
+   AMR Emulator is an independent project, not affiliated with or endorsed by the robot vendors or standards bodies whose interfaces it emulates. Product names are trademarks of their respective owners.`;
 </script>
 </body>
 </html>

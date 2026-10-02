@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ActionStatus(str, Enum):
+class ActionStatus(StrEnum):
     ABORTED = "Aborted"
     EXECUTING = "Executing"
     FAILED = "Failed"

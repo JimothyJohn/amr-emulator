@@ -86,11 +86,11 @@ class RobotResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.footprint import Footprint
-        from ..models.robot_error import RobotError
-        from ..models.robot_identity import RobotIdentity
-        from ..models.robot_runtime import RobotRuntime
-        from ..models.robot_state import RobotState
+        from ..models.footprint import Footprint  # noqa: PLC0415
+        from ..models.robot_error import RobotError  # noqa: PLC0415
+        from ..models.robot_identity import RobotIdentity  # noqa: PLC0415
+        from ..models.robot_runtime import RobotRuntime  # noqa: PLC0415
+        from ..models.robot_state import RobotState  # noqa: PLC0415
 
         d = dict(src_dict)
         robot_identity = RobotIdentity.from_dict(d.pop("robot-identity"))

@@ -10,8 +10,6 @@ T = TypeVar("T", bound="KeyIdle")
 
 @_attrs_define
 class KeyIdle:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

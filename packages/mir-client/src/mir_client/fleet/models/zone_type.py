@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ZoneType(str, Enum):
+class ZoneType(StrEnum):
     ACCESSZONE = "AccessZone"
     DIRECTIONALZONE = "DirectionalZone"
     EVACUATIONZONE = "EvacuationZone"

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class RobotEndState(str, Enum):
+class RobotEndState(StrEnum):
     BRAKE_RELEASED = "Brake Released"
     CABLE_CHARGER_CONNECTED = "Cable Charger Connected"
     EMERGENCY_STOP = "Emergency Stop"

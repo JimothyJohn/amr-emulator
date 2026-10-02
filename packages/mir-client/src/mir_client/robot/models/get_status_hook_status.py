@@ -52,7 +52,7 @@ class GetStatusHookStatus:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_status_hook_status_cart import GetStatusHookStatusCart
+        from ..models.get_status_hook_status_cart import GetStatusHookStatusCart  # noqa: PLC0415
 
         d = dict(src_dict)
         available = d.pop("available", UNSET)

@@ -112,8 +112,8 @@ class GetZone:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_zone_actions import GetZoneActions
-        from ..models.get_zone_polygon_item import GetZonePolygonItem
+        from ..models.get_zone_actions import GetZoneActions  # noqa: PLC0415
+        from ..models.get_zone_polygon_item import GetZonePolygonItem  # noqa: PLC0415
 
         d = dict(src_dict)
         _actions = d.pop("actions", UNSET)

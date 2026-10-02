@@ -41,7 +41,7 @@ class UserPromptSnapshotResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.user_prompt_event import UserPromptEvent
+        from ..models.user_prompt_event import UserPromptEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         _user_prompt_events = d.pop("user-prompt-events", UNSET)

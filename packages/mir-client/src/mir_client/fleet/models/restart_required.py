@@ -10,8 +10,6 @@ T = TypeVar("T", bound="RestartRequired")
 
 @_attrs_define
 class RestartRequired:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

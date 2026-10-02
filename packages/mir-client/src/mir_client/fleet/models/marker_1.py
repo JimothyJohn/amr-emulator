@@ -86,8 +86,8 @@ class Marker1:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.bar_1 import Bar1
-        from ..models.pose_1 import Pose1
+        from ..models.bar_1 import Bar1  # noqa: PLC0415
+        from ..models.pose_1 import Pose1  # noqa: PLC0415
 
         d = dict(src_dict)
         type_ = MarkerType1(d.pop("type"))

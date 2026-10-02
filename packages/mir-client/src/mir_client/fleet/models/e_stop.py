@@ -10,8 +10,6 @@ T = TypeVar("T", bound="EStop")
 
 @_attrs_define
 class EStop:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

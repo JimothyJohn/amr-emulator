@@ -111,7 +111,9 @@ class PostWifiConnections:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.post_wifi_connections_scan_freqs_item import PostWifiConnectionsScanFreqsItem
+        from ..models.post_wifi_connections_scan_freqs_item import (
+            PostWifiConnectionsScanFreqsItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         ssid = d.pop("ssid")

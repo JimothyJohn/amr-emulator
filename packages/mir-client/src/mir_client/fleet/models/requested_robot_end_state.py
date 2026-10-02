@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class RequestedRobotEndState(str, Enum):
+class RequestedRobotEndState(StrEnum):
     OPERATIONAL = "Operational"
     PAUSED = "Paused"
 

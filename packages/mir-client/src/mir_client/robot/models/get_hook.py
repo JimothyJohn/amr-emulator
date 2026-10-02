@@ -70,9 +70,9 @@ class GetHook:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_hook_brake import GetHookBrake
-        from ..models.get_hook_gripper import GetHookGripper
-        from ..models.get_hook_height import GetHookHeight
+        from ..models.get_hook_brake import GetHookBrake  # noqa: PLC0415
+        from ..models.get_hook_gripper import GetHookGripper  # noqa: PLC0415
+        from ..models.get_hook_height import GetHookHeight  # noqa: PLC0415
 
         d = dict(src_dict)
         angle = d.pop("angle", UNSET)

@@ -42,7 +42,7 @@ class PostActionDefinition:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.post_action_definition_parameters_item import (
-            PostActionDefinitionParametersItem,
+            PostActionDefinitionParametersItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

@@ -52,7 +52,7 @@ class GetStatusHookData:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_status_hook_data_angle import GetStatusHookDataAngle
+        from ..models.get_status_hook_data_angle import GetStatusHookDataAngle  # noqa: PLC0415
 
         d = dict(src_dict)
         _angle = d.pop("angle", UNSET)

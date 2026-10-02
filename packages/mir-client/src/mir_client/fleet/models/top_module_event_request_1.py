@@ -41,7 +41,7 @@ class TopModuleEventRequest1:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.top_module_event import TopModuleEvent
+        from ..models.top_module_event import TopModuleEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         robot_id = d.pop("robot-id")

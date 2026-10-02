@@ -73,8 +73,8 @@ class PutZone:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.put_zone_actions_item import PutZoneActionsItem
-        from ..models.put_zone_polygon_item import PutZonePolygonItem
+        from ..models.put_zone_actions_item import PutZoneActionsItem  # noqa: PLC0415
+        from ..models.put_zone_polygon_item import PutZonePolygonItem  # noqa: PLC0415
 
         d = dict(src_dict)
         _actions = d.pop("actions", UNSET)

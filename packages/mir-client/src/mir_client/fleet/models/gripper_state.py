@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class GripperState(str, Enum):
+class GripperState(StrEnum):
     CLOSED = "Closed"
     CLOSING = "Closing"
     ERROR = "Error"

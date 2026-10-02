@@ -88,10 +88,10 @@ class GetActionDefinitions:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.get_action_definitions_descriptions_item import (
-            GetActionDefinitionsDescriptionsItem,
+            GetActionDefinitionsDescriptionsItem,  # noqa: PLC0415
         )
         from ..models.get_action_definitions_parameters_item import (
-            GetActionDefinitionsParametersItem,
+            GetActionDefinitionsParametersItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

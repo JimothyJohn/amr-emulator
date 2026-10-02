@@ -10,8 +10,6 @@ T = TypeVar("T", bound="SubscriptionTypeResponse")
 
 @_attrs_define
 class SubscriptionTypeResponse:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

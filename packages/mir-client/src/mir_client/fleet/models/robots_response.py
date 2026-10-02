@@ -39,7 +39,7 @@ class RobotsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.robot_identity import RobotIdentity
+        from ..models.robot_identity import RobotIdentity  # noqa: PLC0415
 
         d = dict(src_dict)
         robots = []

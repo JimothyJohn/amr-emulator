@@ -10,8 +10,6 @@ T = TypeVar("T", bound="Operational")
 
 @_attrs_define
 class Operational:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

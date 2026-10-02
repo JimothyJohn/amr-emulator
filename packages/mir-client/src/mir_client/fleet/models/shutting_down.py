@@ -10,8 +10,6 @@ T = TypeVar("T", bound="ShuttingDown")
 
 @_attrs_define
 class ShuttingDown:
-    """ """
-
     def to_dict(self) -> dict[str, Any]:
 
         field_dict: dict[str, Any] = {}

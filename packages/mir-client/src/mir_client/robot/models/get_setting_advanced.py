@@ -136,7 +136,9 @@ class GetSettingAdvanced:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_setting_advanced_constraints import GetSettingAdvancedConstraints
+        from ..models.get_setting_advanced_constraints import (
+            GetSettingAdvancedConstraints,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         children_ids = d.pop("children_ids", UNSET)

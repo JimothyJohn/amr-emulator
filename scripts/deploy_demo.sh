@@ -55,6 +55,7 @@ cp "$REPO_ROOT/docs/index.html" "$BUILD_DIR/site/mir_emulator/console.html"
 cp "$REPO_ROOT/docs/landing.html" "$BUILD_DIR/site/mir_emulator/landing.html"
 cp "$REPO_ROOT/docs/vda5050.html" "$BUILD_DIR/site/mir_emulator/vda5050.html"
 cp "$REPO_ROOT/docs/omron.html" "$BUILD_DIR/site/mir_emulator/omron.html"
+cp "$REPO_ROOT/docs/massrobotics.html" "$BUILD_DIR/site/mir_emulator/massrobotics.html"
 
 log "Zipping bundle"
 (cd "$BUILD_DIR/site" && zip -qr "$BUILD_DIR/code.zip" .)
@@ -164,6 +165,7 @@ check 200 "${API_URL}/"
 check 200 "${API_URL}/console"
 check 200 "${API_URL}/vda5050"
 check 200 "${API_URL}/omron"
+check 200 "${API_URL}/massrobotics"
 check 401 "${API_URL}/latest/api/v2.0.0/status"
 check 401 "${API_URL}/fleet/latest/api/v1/system/version"
 for v in $(curl -s "${API_URL}/healthz" | python3 -c 'import json,sys; print(" ".join(json.load(sys.stdin)["versions"]))'); do

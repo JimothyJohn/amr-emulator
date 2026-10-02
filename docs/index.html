@@ -101,43 +101,7 @@ button { font-family: var(--sans); }
 
 .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 80px; }
 
-/* ---------- header ---------- */
-header {
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
-  position: sticky; top: 0; z-index: 20;
-}
-.brandbar { height: 4px; background: var(--brand); }
-.masthead {
-  max-width: 1180px; margin: 0 auto; padding: 16px 20px;
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-}
-.mark {
-  width: 42px; height: 42px; border-radius: 10px; flex: none;
-  background: var(--brand);
-  display: grid; place-items: center;
-}
-.mark svg { display: block; }
-h1 {
-  font-size: 26px; font-weight: 300; line-height: 1.2; color: var(--ink);
-}
-h1 span { color: var(--brand); }
-.sub { font-size: 12.5px; color: var(--ink-dim); }
-.head-right { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.led-box {
-  display: flex; align-items: center; gap: 8px;
-  border: 1px solid var(--line); border-radius: 999px;
-  padding: 6px 14px; background: var(--surface);
-  font-size: 12px; color: var(--ink-dim);
-}
-.led { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-faint); flex: none; }
-.led.on  { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2.2s infinite; }
-.led.err { background: var(--red);   box-shadow: 0 0 8px var(--red); }
-@keyframes pulse { 50% { opacity: .55; } }
-
 /* ---------- panels ---------- */
-.grid { display: grid; grid-template-columns: 340px 1fr; gap: 18px; margin-top: 26px; align-items: start; }
-@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -162,9 +126,6 @@ h1 span { color: var(--brand); }
 .panel-head .tag { margin-left: auto; color: var(--ink-faint); font-size: 11px; font-family: var(--mono); font-weight: 400; }
 .panel-body { padding: 16px; }
 
-
-/* ---------- version picker ---------- */
-.version-select { width: 100%; font-size: 14px; }
 
 /* ---------- console ---------- */
 .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
@@ -206,7 +167,7 @@ textarea { width: 100%; min-height: 96px; resize: vertical; line-height: 1.5; ma
 }
 
 /* ---------- version compare ---------- */
-#console, #compare, #endpoints { scroll-margin-top: 96px; }
+#console, #compare, #endpoints { scroll-margin-top: 16px; }
 .cmp-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
 .cmp-row select { min-width: 150px; }
 #cmp-result { margin-top: 14px; }
@@ -257,22 +218,7 @@ pre.resp .b { color: var(--syn-b); }
 .hint.warn { color: var(--red); }
 .hint.ok { color: var(--green); }
 
-/* ---------- auth strip ---------- */
-.auth { display: grid; gap: 8px; font-size: 12px; }
-.auth label { color: var(--ink-faint); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
-.auth .row { display: flex; gap: 8px; }
-.auth .row > div { flex: 1; min-width: 0; }
-.auth input { width: 100%; padding: 8px 10px; font-size: 12.5px; }
-.token { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); word-break: break-all; line-height: 1.5; }
-.token b { color: var(--ink-dim); }
-
-/* ---------- endpoint selector ---------- */
-.auth label.radio {
-  display: flex; gap: 9px; align-items: center; cursor: pointer;
-  font-size: 12.5px; color: var(--ink); text-transform: none; letter-spacing: 0;
-}
-.auth label.radio input[type=radio] { accent-color: var(--blue); width: auto; flex: none; }
-.auth label.radio .dim { color: var(--ink-faint); font-size: 11px; }
+/* ---------- pill button (version compare) ---------- */
 .connect-btn {
   cursor: pointer; width: 100%;
   font-weight: 600; font-size: 13px;
@@ -282,17 +228,6 @@ pre.resp .b { color: var(--syn-b); }
 }
 .connect-btn:hover { color: var(--blue-deep); border-color: var(--blue-deep); background: var(--tint); }
 .connect-btn[disabled] { opacity: .5; cursor: wait; }
-.auth label .dim { color: var(--ink-faint); text-transform: none; letter-spacing: 0; }
-/* Endpoint panel: one compact wrapping row (minimum height) */
-.ep-compact { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.ep-compact .radio { margin: 0; }
-.ep-compact .connect-btn { width: auto; padding: 8px 18px; }
-.ep-compact #ep-status:empty { display: none; }
-.ep-extra { flex-basis: 100%; display: grid; gap: 6px; }
-.ep-extra:empty { display: none; }
-/* Credentials: robot key beside user/pass on the full-width row */
-.cred-cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; align-items: start; }
-@media (max-width: 720px) { .cred-cols { grid-template-columns: 1fr; } }
 
 /* ---------- telemetry strip ---------- */
 .telemetry {
@@ -313,10 +248,24 @@ pre.resp .b { color: var(--syn-b); }
 #tele-read b { color: var(--blue-deep); font-weight: 600; }
 #tele-read .exec { color: var(--green); }
 
-/* ---------- API catalog ---------- */
+/* ---------- API catalog: version picker + operation search ---------- */
+#console { margin-top: 34px; overflow: visible; } /* the search list overhangs the panel */
+#console .panel-head { border-radius: .4rem .4rem 0 0; }
 .cat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-#op-filter { flex: 1; min-width: 160px; }
-#op-select { flex: 2; min-width: 240px; max-width: 100%; }
+#version-select { flex: 1; min-width: 160px; }
+.combo { position: relative; flex: 2; min-width: 240px; }
+.combo input { width: 100%; }
+#op-list {
+  position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 4px);
+  max-height: 320px; overflow: auto; list-style: none;
+  background: var(--surface); border: 1px solid var(--field-border); border-radius: .4rem;
+  box-shadow: 0 8px 24px rgba(12, 9, 49, .14);
+  font-family: var(--mono); font-size: 12.5px;
+}
+#op-list li { padding: 6px 12px; cursor: pointer; color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#op-list li b { display: inline-block; width: 58px; color: var(--ink); font-weight: 600; }
+#op-list li:hover, #op-list li.active { background: var(--tint); color: var(--blue-deep); }
+#op-list li.none { cursor: default; background: none; color: var(--ink-faint); }
 .op-params { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .op-params > div { display: grid; gap: 2px; }
 .op-params label { color: var(--ink-faint); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
@@ -364,84 +313,47 @@ footer {
 footer a { color: var(--tint-2); }
 footer code { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); color: var(--tint-2); }
 
-@media (prefers-reduced-motion: reduce) { .led.on { animation: none; } }
-
-/* ---------- landing sections (hero, docs, quickstart, endpoints) ---------- */
-#console, #docs, #quickstart { scroll-margin-top: 96px; } /* clear the sticky header */
+/* ---------- landing sections (hero, first request, endpoints) ---------- */
 .hero { padding: 56px 0 10px; max-width: 860px; }
 .hero h2 { font-size: 42px; line-height: 50px; font-weight: 300; margin: 0; }
 .hero h2 span { color: var(--brand); font-weight: 400; }
 .hero p { margin-top: 16px; font-size: 16.5px; color: var(--ink-dim); max-width: 66ch; }
-.cta { margin-top: 26px; display: flex; gap: 12px; flex-wrap: wrap; }
-.btn {
-  display: inline-block; cursor: pointer;
-  font-weight: 600; font-size: 14px; font-family: var(--sans);
-  border-radius: 999px; padding: 10px 26px;
-  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
-}
-.btn-primary { background: var(--blue); border: 1px solid var(--blue); color: #fff; }
-.btn-primary:hover { background: var(--blue-deep); border-color: var(--blue-deep); color: #fff; text-decoration: none; }
-.btn-ghost { background: var(--surface); border: 1px solid var(--blue); color: var(--blue); }
-.btn-ghost:hover { background: var(--tint); color: var(--blue-deep); border-color: var(--blue-deep); text-decoration: none; }
+.hero p.sources { margin-top: 12px; max-width: none; font-size: 12px; color: var(--ink-faint); }
+.hero p.sources a { color: var(--ink-dim); text-decoration: underline; }
+.hero p.sources a:hover { color: var(--blue-deep); }
 .sect-title { font-size: 28px; line-height: 34px; font-weight: 300; margin: 54px 0 6px; }
 .lead { color: var(--ink-dim); max-width: 72ch; }
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
-@media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
-.card {
-  border: 1px solid var(--line); border-radius: .4rem; padding: 20px;
-  background: var(--surface); transition: box-shadow .3s ease;
-}
-.card:hover { box-shadow: 0 0 15px var(--tint-2); }
-.card h3 { font-size: 16.5px; font-weight: 600; margin-bottom: 8px; }
-.card h3::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--brand); margin-right: 9px; vertical-align: 1px; }
-.card p { font-size: 13.5px; color: var(--ink-dim); }
 table.plain { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13.5px; }
 table.plain th, table.plain td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
 table.plain th { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
 table.plain td:first-child { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; color: var(--blue-deep); }
 table.plain td:last-child { color: var(--ink-dim); }
 
-/* ---------- theme toggle ---------- */
-.theme-toggle {
-  width: 34px; height: 34px; flex: none;
-  border: 1px solid var(--line); border-radius: 999px;
-  background: var(--surface); color: var(--ink-dim);
-  font-size: 15px; line-height: 1; cursor: pointer;
-  display: grid; place-items: center;
-  transition: border-color .15s, color .15s, box-shadow .3s ease;
-}
-.theme-toggle:hover { color: var(--blue-deep); border-color: var(--brand); box-shadow: 0 0 12px var(--tint-2); }
-.icon-btn {
-  width: 34px; height: 34px; flex: none;
-  border: 1px solid var(--line); border-radius: 999px;
-  background: var(--surface); color: var(--ink-dim);
-  display: grid; place-items: center; text-decoration: none;
-  transition: border-color .15s, color .15s, box-shadow .3s ease;
-}
-.icon-btn:hover { color: var(--blue-deep); border-color: var(--brand); box-shadow: 0 0 12px var(--tint-2); text-decoration: none; }
-.session-feature {
-  margin-bottom: 14px; padding: 12px 14px;
-  border: 1px solid var(--tint-2); border-left: 4px solid var(--brand);
-  border-radius: .4rem; background: var(--tint);
-}
-.session-feature .row { align-items: stretch; }
-.session-feature #new-session { height: 100%; }
-
-/* Two rules use --ink as a *fill* (not text); it inverts under the dark
-   theme, so re-ground them on stable dark surfaces. */
-:root[data-theme="dark"] footer a { color: var(--brand); }
+/* ---------- site bar (sibling apps, source, theme) ----------
+   Fixed colors: the bar is dark in both themes, so it can't use --ink (which
+   inverts under the dark theme). */
 .advin-bar {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding: .45rem 1.25rem; background: var(--ink); color: #b9bdd1;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  padding: .45rem 1.25rem; background: #0c0931; color: #b9bdd1;
   font-size: .84rem;
 }
 .advin-bar .advin-brand { display: flex; align-items: baseline; gap: .55rem; text-decoration: none; color: #fff; }
 /* advin.io's brand face is Comfortaa — wordmarks match the mothership. */
 .advin-bar .advin-brand span, .advin-wordmark { font-family: 'Comfortaa', sans-serif; font-weight: 700; letter-spacing: .03em; }
 .advin-bar .advin-brand small { color: #8a8fa5; text-transform: uppercase; letter-spacing: .08em; font-size: .7rem; }
-.advin-bar nav { display: flex; gap: 1rem; }
+.advin-bar nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .advin-bar nav a { color: #b9bdd1; text-decoration: none; }
 .advin-bar nav a:hover, .advin-bar nav a[aria-current] { color: #fff; }
+.theme-toggle {
+  width: 26px; height: 26px; flex: none;
+  border: 1px solid rgba(255, 255, 255, .25); border-radius: 999px;
+  background: none; color: #b9bdd1;
+  font-size: 13px; line-height: 1; cursor: pointer;
+  display: grid; place-items: center;
+  transition: border-color .15s, color .15s;
+}
+.theme-toggle:hover { color: #fff; border-color: var(--brand); }
+:root[data-theme="dark"] footer a { color: var(--brand); }
 </style>
 </head>
 <body>
@@ -453,28 +365,11 @@ table.plain td:last-child { color: var(--ink-dim); }
     <a href="/vda5050">VDA 5050</a>
     <a href="/console" aria-current="page"><strong>MiR</strong></a>
     <a href="/omron">Omron ARCL</a>
+    <a href="/massrobotics">MassRobotics</a>
+    <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">GitHub</a>
+    <button class="theme-toggle" id="theme-toggle" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">&#9789;</button>
   </nav>
 </div>
-
-<header>
-  <div class="brandbar"></div>
-  <div class="masthead">
-    <div class="mark">
-      <svg width="26" height="26" viewBox="0 0 100 100"><rect x="8" y="24" width="84" height="40" rx="8" fill="white"/><circle cx="30" cy="44" r="9" fill="#00bfff"/><circle cx="70" cy="44" r="9" fill="#00bfff"/><circle cx="28" cy="76" r="9" fill="white"/><circle cx="72" cy="76" r="9" fill="white"/></svg>
-    </div>
-    <div>
-      <h1>AMR Emulator</h1>
-      <div class="sub">A fake MiR robot with real behavior — develop against it like the real thing</div>
-    </div>
-    <div class="head-right">
-      <div class="led-box"><span class="led" id="led"></span><span id="led-text">probing&hellip;</span></div>
-      <a class="icon-btn" href="https://github.com/JimothyJohn/amr-emulator" rel="noopener" title="Source code on GitHub" aria-label="Source code on GitHub">
-        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-      </a>
-      <button class="theme-toggle" id="theme-toggle" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">&#9789;</button>
-    </div>
-  </div>
-</header>
 
 <div class="wrap">
 
@@ -487,33 +382,84 @@ table.plain td:last-child { color: var(--ink-dim); }
       Write your integration against it in any language; when it works, swap this URL for your
       real robot's IP address and the same code drives the robot.
     </p>
-    <div class="cta">
-      <a class="btn btn-primary" href="#console">Use the live console</a>
-      <a class="btn btn-ghost" href="#endpoints">See the endpoints</a>
-      <a class="btn btn-ghost" href="#compare">Compare versions</a>
-    </div>
+    <p class="sources" id="docs">
+      Documentation &amp; primary sources:
+      <a href="https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/" rel="noopener">MiR robot REST API reference</a>
+      (one PDF per version, free support-portal account) &middot;
+      <a href="https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/index.html?urls.primaryName=MiR+Fleet+Integration+API+v1" rel="noopener">MiR Fleet Enterprise Integration API</a>
+      (public Swagger UI)
+    </p>
   </div>
 
-  <div class="cards" style="margin-top:30px">
-    <div class="card">
-      <h3>A fake robot, real behavior</h3>
-      <p>Same auth, same JSON, same status codes as a physical MiR. Missions queue and execute
-        over simulated time, the battery drains and charges, PLC registers hold what you write —
-        <code>GET /status</code> answers like the real thing.</p>
-    </div>
-    <div class="card">
-      <h3>Every version, side by side</h3>
-      <p>Robots in the field run different software. The emulator serves every tracked MiR
-        software version at once — pick the one your robot runs, or diff two versions to
-        preflight an upgrade. It re-syncs itself weekly from MiR's official docs.</p>
-    </div>
-    <div class="card">
-      <h3>Private, breakable, free</h3>
-      <p>One click gives you a private virtual robot nobody else can touch. Inject emergency
-        stops, drain the battery, block its path — harden your error handling without risking
-        hardware. No signup, nothing to install.</p>
-    </div>
+  <div class="body-label sample-head" style="margin-top:30px">Your first request
+    <select class="lang-select" id="lang-first" aria-label="code sample language"></select>
+    <button class="copy-btn" type="button" data-target="sample-first">Copy</button>
   </div>
+  <pre class="resp sample" id="sample-first"></pre>
+  <p class="hint">
+    Copy it, run it, and a robot answers with its live status &mdash; state, battery, position.
+    It works as-is: <code>distributor</code>/<code>distributor</code> is MiR's factory-default account.
+  </p>
+
+  <section class="panel" id="console">
+    <div class="panel-head">Request console</div>
+    <div class="panel-body">
+      <div class="hint warn" id="conn-status" style="display:none; margin:0 0 12px"></div>
+      <div class="telemetry">
+        <button id="tele-toggle" title="poll GET /status every 2s">&#9654; Telemetry</button>
+        <span id="tele-read">off &mdash; enqueue a mission, then watch your robot run it</span>
+      </div>
+      <div class="body-label" style="margin-top:0">Software version &amp; operation <span id="op-count"></span></div>
+      <div class="cat-row">
+        <select id="version-select" aria-label="MiR software version" disabled><option>loading versions&hellip;</option></select>
+        <div class="combo">
+          <input type="text" id="op-search" role="combobox" aria-label="search API operations"
+            aria-expanded="false" aria-controls="op-list" aria-autocomplete="list"
+            placeholder="search operations&hellip; e.g. mission, registers, PUT" spellcheck="false" autocomplete="off" disabled>
+          <ul id="op-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <div class="op-params" id="op-params"></div>
+      <div class="hint op-info" id="op-info" style="display:none"></div>
+      <select id="method" style="display:none"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
+      <input type="text" id="path" value="/status" style="display:none">
+      <div class="reqline">
+        <button class="send" id="send">Send request</button>
+      </div>
+      <div class="body-label" id="body-label">request body &mdash; JSON</div>
+      <textarea id="body" spellcheck="false"></textarea>
+      <div class="body-label sample-head">Code sample
+        <select class="lang-select" id="lang-live" aria-label="code sample language"></select>
+        <button class="copy-btn" type="button" data-target="sample-live">Copy</button>
+      </div>
+      <pre class="resp sample" id="sample-live"></pre>
+      <div class="resp-meta" id="resp-meta" style="display:none">
+        <span class="status-big" id="resp-status"></span>
+        <span id="resp-time"></span>
+        <span id="resp-type"></span>
+      </div>
+      <pre class="resp" id="resp" style="display:none"></pre>
+      <details class="resp-headers" id="resp-headers" style="display:none">
+        <summary>response headers</summary>
+        <pre id="resp-headers-pre"></pre>
+      </details>
+    </div>
+  </section>
+
+  <h2 class="sect-title" id="compare">Compare versions</h2>
+  <p class="lead">
+    Upgrading a robot's software? Diff any two tracked versions to see exactly which API
+    operations get added, removed, or changed before you commit to the upgrade. Your scripts
+    can get the same answer from
+    <code>GET /_emulator/diff?from=&hellip;&amp;to=&hellip;</code> on this endpoint.
+  </p>
+  <div class="cmp-row">
+    <select id="cmp-from" disabled><option>from&hellip;</option></select>
+    <span style="color:var(--ink-faint)">&rarr;</span>
+    <select id="cmp-to" disabled><option>to&hellip;</option></select>
+    <button class="connect-btn" id="cmp-go" style="width:auto; padding:8px 26px" disabled>Diff</button>
+  </div>
+  <div id="cmp-result" class="hint">loading versions&hellip;</div>
 
   <h2 class="sect-title" id="endpoints">Endpoints</h2>
   <p class="lead">
@@ -534,172 +480,6 @@ table.plain td:last-child { color: var(--ink-dim); }
     <tr><td>/</td><td>JSON index of everything above — browsers get this page instead.</td></tr>
     <tr><td>/healthz</td><td>Liveness + the list of tracked versions.</td></tr>
   </table>
-  <p class="lead" style="margin-top:22px">
-    <b>Your first request.</b> Copy it, run it, and a robot answers with its live status —
-    state, battery, position. The credentials in it are the working defaults
-    (<code>distributor</code>/<code>distributor</code>, MiR's factory default account), so it
-    works as-is. Pick your language:
-  </p>
-  <div class="body-label sample-head" style="margin-top:12px">Your first request
-    <select class="lang-select" id="lang-first" aria-label="code sample language"></select>
-    <button class="copy-btn" type="button" data-target="sample-first">Copy</button>
-  </div>
-  <pre class="resp sample" id="sample-first"></pre>
-
-  <div id="console">
-    <h2 class="sect-title">Try it in your browser</h2>
-    <p class="lead" style="margin-bottom:20px">
-      Everything below is a live client for the emulator — no setup, the defaults already work.
-      Top to bottom: <b>Endpoint</b> is where requests go (this demo, or a MiR on your own
-      network), <b>Credentials</b> are prefilled with the factory defaults, <b>Software
-      version</b> picks which robot generation you're talking to, and the <b>Request console</b>
-      lets you browse every operation in that version's API and send it for real. The code
-      sample underneath always mirrors the request you've built.
-    </p>
-    <section class="panel">
-      <div class="panel-head">Endpoint <span class="tag">where requests go</span></div>
-      <div class="panel-body auth ep-compact">
-        <label class="radio">
-          <input type="radio" name="ep" id="ep-demo" checked>
-          <span>Emulator <span class="dim">amr-emulator.com</span></span>
-        </label>
-        <label class="radio">
-          <input type="radio" name="ep" id="ep-custom">
-          <span>Local robot <span class="dim">same-network MiR</span></span>
-        </label>
-        <div id="custom-row" style="display:none; flex:1; min-width:200px">
-          <input type="text" id="custom-url" placeholder="http://192.168.12.20  or  http://mir.local" spellcheck="false" autocomplete="off">
-        </div>
-        <button class="connect-btn" id="connect">Connect</button>
-        <button class="connect-btn" id="scan">Scan localhost</button>
-        <span class="hint" id="ep-status" style="margin:0"></span>
-        <div class="ep-extra">
-          <div class="hint" id="scan-status"></div>
-          <div id="scan-results"></div>
-          <div class="hint warn" id="mixed-warn" style="display:none">
-            &#9888; This page is HTTPS but the endpoint is plain HTTP &mdash; browsers block that (mixed content).
-            Run the console over HTTP locally to reach a LAN robot:
-            <code>curl -so console.html https://amr-emulator.com/console && python3 -m http.server 8000</code>.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" style="margin-top:18px">
-      <div class="panel-head">Credentials <span class="tag">the defaults already work</span></div>
-      <div class="panel-body auth">
-        <div class="cred-cols">
-          <div class="session-feature">
-            <label for="session"><b>Your robot key</b> <span class="dim">&mdash; a private virtual robot (emulator only)</span></label>
-            <div class="row" style="margin-top:6px">
-              <div style="flex:1"><input type="text" id="session" spellcheck="false" autocomplete="off" maxlength="64"></div>
-              <div style="flex:none">
-                <button class="connect-btn" id="new-session" style="padding:9px 16px" title="fresh isolated robot">New</button>
-              </div>
-            </div>
-            <div class="hint" style="margin-top:8px">Keep this key to keep your robot &mdash; its own queue, registers, and status.
-              It's saved in this browser, so it survives a reload. Clear it to share the default demo robot; real robots ignore it.</div>
-          </div>
-          <div>
-            <div class="row" id="robot-creds">
-              <div style="flex:1"><label for="user">user</label><input type="text" id="user" value="distributor" autocomplete="off"></div>
-              <div style="flex:1"><label for="pass">password</label><input type="text" id="pass" value="distributor" autocomplete="off"></div>
-            </div>
-            <div class="row" id="apikey-row" style="display:none">
-              <div style="flex:1"><label for="apikey">fleet api key <span class="dim">(x-api-key header)</span></label><input type="text" id="apikey" value="distributor" autocomplete="off"></div>
-            </div>
-            <div class="hint" style="margin-top:6px">MiR robots ship with <code>distributor</code>/<code>distributor</code>;
-              the emulator does too. Below is the header that actually goes on the wire &mdash; MiR
-              hashes the password before Basic-encoding it.</div>
-            <div class="token" id="token-view"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="grid" style="margin-top:18px">
-      <div style="display:grid; gap:18px;">
-        <section class="panel">
-          <div class="panel-head">Software version <span class="tag" id="vcount"></span></div>
-          <div class="panel-body">
-            <select id="version-select" class="version-select" disabled><option>connect to load versions&hellip;</option></select>
-          </div>
-        </section>
-      </div>
-
-      <div style="min-width:0;">
-        <section class="panel">
-          <div class="panel-head">Request console <span class="tag" id="target-tag"></span></div>
-          <div class="panel-body">
-            <div class="telemetry">
-              <button id="tele-toggle" title="poll GET /status every 2s">&#9654; Telemetry</button>
-              <span id="tele-read">off &mdash; enqueue a mission, then watch your robot run it</span>
-            </div>
-            <div class="body-label" style="margin-top:0">Action &mdash; pick an API operation <span id="op-count"></span></div>
-            <div class="cat-row">
-              <input type="text" id="op-filter" placeholder="filter operations&hellip; e.g. mission, registers, PUT" spellcheck="false" autocomplete="off">
-              <select id="op-select" disabled><option value="">browse all operations&hellip;</option></select>
-            </div>
-            <div class="op-params" id="op-params"></div>
-            <div class="hint op-info" id="op-info" style="display:none"></div>
-            <select id="method" style="display:none"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
-            <input type="text" id="path" value="/status" style="display:none">
-            <div class="reqline">
-              <button class="send" id="send">Send request</button>
-            </div>
-            <div class="body-label" id="body-label">request body &mdash; JSON</div>
-            <textarea id="body" spellcheck="false"></textarea>
-            <div class="body-label sample-head">Code sample
-              <select class="lang-select" id="lang-live" aria-label="code sample language"></select>
-              <button class="copy-btn" type="button" data-target="sample-live">Copy</button>
-            </div>
-            <pre class="resp sample" id="sample-live"></pre>
-            <div class="resp-meta" id="resp-meta" style="display:none">
-              <span class="status-big" id="resp-status"></span>
-              <span id="resp-time"></span>
-              <span id="resp-type"></span>
-            </div>
-            <pre class="resp" id="resp" style="display:none"></pre>
-            <details class="resp-headers" id="resp-headers" style="display:none">
-              <summary>response headers</summary>
-              <pre id="resp-headers-pre"></pre>
-            </details>
-          </div>
-        </section>
-      </div>
-    </div>
-  </div>
-  <h2 class="sect-title" id="compare">Compare versions</h2>
-  <p class="lead">
-    Upgrading a robot's software? Diff any two tracked versions to see exactly which API
-    operations get added, removed, or changed before you commit to the upgrade. Your scripts
-    can get the same answer from
-    <code>GET /_emulator/diff?from=&hellip;&amp;to=&hellip;</code> on this endpoint.
-  </p>
-  <div class="cmp-row">
-    <select id="cmp-from" disabled><option>from&hellip;</option></select>
-    <span style="color:var(--ink-faint)">&rarr;</span>
-    <select id="cmp-to" disabled><option>to&hellip;</option></select>
-    <button class="connect-btn" id="cmp-go" style="width:auto; padding:8px 26px" disabled>Diff</button>
-  </div>
-  <div id="cmp-result" class="hint">connect to the demo endpoint to compare versions&hellip;</div>
-
-  <h2 class="sect-title" id="docs">Documentation &amp; primary sources</h2>
-  <p class="lead">Everything here is derived from MiR's official API docs. Check it against the sources:</p>
-  <div class="cards">
-    <div class="card">
-      <h3>The official MiR Fleet API docs</h3>
-      <p>MiR's <b>Fleet Enterprise Integration API</b> as a public
-        <a href="https://supportportal.mobile-industrial-robots.com/support-files/manuals/MiR_Fleet_Enterprise_OpenAPI_Specification/1.5.0/index.html?urls.primaryName=MiR+Fleet+Integration+API+v1" rel="noopener">Swagger UI</a>
-        (no login). Served here verbatim at <code>/fleet/&lt;version&gt;/openapi.json</code>.</p>
-    </div>
-    <div class="card">
-      <h3>The official MiR robot API docs</h3>
-      <p>The REST API reference on MiR's
-        <a href="https://supportportal.mobile-industrial-robots.com/documentation/rest-api/rest-api-files/" rel="noopener">support portal</a>
-        — one PDF per version, behind a free account. The primary source for every spec used here.</p>
-    </div>
-  </div>
 
   <footer>
     <div>
@@ -707,7 +487,8 @@ table.plain td:last-child { color: var(--ink-dim); }
       An open-source <a href="https://advin.io" rel="noopener">advin.io</a> project &middot;
       Get help: <a href="mailto:nick@advin.io">nick@advin.io</a> &middot;
       <a href="https://github.com/JimothyJohn/amr-emulator" rel="noopener">github.com/JimothyJohn/amr-emulator</a> &middot;
-      Sibling apps: <a href="/vda5050">VDA 5050</a> / <a href="/omron">Omron ARCL</a>
+      Sibling apps: <a href="/vda5050">VDA 5050</a> / <a href="/omron">Omron ARCL</a><br>
+      AMR Emulator is an independent project, not affiliated with or endorsed by the robot vendors or standards bodies whose interfaces it emulates. Product names are trademarks of their respective owners.
     </div>
   </footer>
 </div>
@@ -715,13 +496,10 @@ table.plain td:last-child { color: var(--ink-dim); }
 <script>
 "use strict";
 /* ================= configuration =================
-   Default endpoint, set at deploy time. Per-visit override: ?api=https://...
-   The endpoint panel persists a custom choice in localStorage. */
-const DEFAULT_BASE = "https://amr-emulator.com";
-const STORE_KEY = "mir-console-endpoint";
+   The one endpoint this console talks to: the public emulator. */
+const BASE = "https://amr-emulator.com";
 /* ================================================= */
 
-const qs = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
 
 /* ---------- theme toggle ----------
@@ -744,20 +522,6 @@ $("theme-toggle").addEventListener("click", () => {
   syncThemeButton();
 });
 
-/* Active connection. MODE:
-   "fleet" — this project's multi-version dispatcher (/<version>/api/v2.0.0)
-   "robot" — a single MiR-shaped API at <base>/api/v2.0.0 (a real robot, or
-             `mir-emulator --cors` running anywhere on the network) */
-let BASE = "";
-let MODE = "fleet";
-
-function normalizeBase(raw) {
-  let v = (raw || "").trim().replace(/\/+$/, "");
-  if (!v) return "";
-  if (!/^https?:\/\//i.test(v)) v = "http://" + v; // bare IP/hostname → LAN http
-  return v;
-}
-
 function fetchT(url, opts = {}, ms = 6000) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
@@ -766,50 +530,51 @@ function fetchT(url, opts = {}, ms = 6000) {
 
 
 let versions = [];       // robot software versions, newest first
-let fleetVersions = [];  // MiR Fleet Enterprise versions (dispatcher endpoints only)
+let fleetVersions = [];  // MiR Fleet Enterprise versions
 let currentVersion = null;
 let currentKind = "robot"; // "robot" | "mirfleet" — which API family is selected
-let detectedVersion = null; // software version the direct target reported at connect time
 
-/* ---------- MiR auth token: BASE64(user ":" SHA256HEX(pass)) ---------- */
+/* ---------- MiR auth token: BASE64(user ":" SHA256HEX(pass)) ----------
+   MiR's factory-default account; the emulator ships the same one. */
+const USER = "distributor", PASSWORD = "distributor", API_KEY = "distributor";
 async function sha256hex(text) {
   if (crypto.subtle) {
     const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
     return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
   }
-  // Insecure-context fallback: only the documented factory default is precomputed.
+  // Insecure-context fallback: the factory default, precomputed.
   if (text === "distributor")
     return "62f2f0f1eff10d3152c95f6f0596576e482bb8e44806433f4cf929792834b014";
-  throw new Error("WebCrypto unavailable — serve this page over HTTPS for custom passwords");
+  throw new Error("WebCrypto unavailable — serve this page over HTTPS");
 }
 async function authToken() {
-  const user = $("user").value || "distributor";
-  const hash = await sha256hex($("pass").value || "");
-  return btoa(user + ":" + hash);
+  return btoa(USER + ":" + await sha256hex(PASSWORD));
 }
 
-/* ---------- virtual robot session ---------- */
+/* ---------- virtual robot session ----------
+   Every browser gets a private virtual robot: a random key, kept in
+   localStorage so the robot survives a reload, sent as X-MiR-Session. */
 const SESSION_KEY = "mir-console-session";
 function newSessionId() {
   const bytes = new Uint8Array(4);
   crypto.getRandomValues(bytes);
   return "web-" + [...bytes].map(b => b.toString(16).padStart(2, "0")).join("");
 }
-function sessionId() {
-  return $("session").value.trim();
-}
-function apiKey() { return $("apikey").value || "distributor"; }
+let SESSION;
+try {
+  SESSION = localStorage.getItem(SESSION_KEY) || newSessionId();
+  localStorage.setItem(SESSION_KEY, SESSION);
+} catch { SESSION = newSessionId(); }
 async function requestHeaders(extra = {}) {
   const headers = currentKind === "mirfleet"
-    ? { "x-api-key": apiKey(), ...extra }
+    ? { "x-api-key": API_KEY, ...extra }
     : { Authorization: "Basic " + await authToken(), ...extra };
-  if (sessionId()) headers["X-MiR-Session"] = sessionId();
+  headers["X-MiR-Session"] = SESSION;
   return headers;
 }
 
 /* ---------- helpers ---------- */
 function apiRoot(v) {
-  if (MODE === "robot") return BASE;
   return currentKind === "mirfleet" ? BASE + "/fleet/" + v : BASE + "/" + v;
 }
 function apiPrefix() { return currentKind === "mirfleet" ? "/api/v1" : "/api/v2.0.0"; }
@@ -1017,40 +782,31 @@ const SAMPLERS = {
   },
 };
 
-/* The live console sample mirrors the request being built; before a
-   connection succeeds it falls back to the public demo endpoint so the
-   sample is always a runnable program. */
-function sampleUrl(v, p) {
-  if (BASE) return fullPath(v, p);
-  const root = currentKind === "mirfleet"
-    ? DEFAULT_BASE + "/fleet/" + (v || "latest")
-    : DEFAULT_BASE + "/" + (v || "latest");
-  return root + apiPrefix() + (p.startsWith("/") ? p : "/" + p);
-}
+/* The live console sample mirrors the request being built; before the
+   versions load it targets /latest so the sample is always runnable. */
 function sampleCtx() {
   const m = $("method").value;
   return {
     method: m,
-    url: sampleUrl(currentVersion || "latest", $("path").value || "/"),
+    url: fullPath(currentVersion || "latest", $("path").value || "/"),
     fleet: currentKind === "mirfleet",
-    user: $("user").value || "distributor",
-    pass: $("pass").value || "distributor",
-    apikey: apiKey(),
-    session: sessionId(),
+    user: USER,
+    pass: PASSWORD,
+    apikey: API_KEY,
+    session: SESSION,
     body: ["POST", "PUT", "PATCH"].includes(m) ? compactBody($("body").value.trim()) : "",
   };
 }
-/* The endpoints section's hello-world: GET /status on the newest robot version. */
+/* The page's hello-world: GET /status on the newest robot version. */
 function firstSampleCtx() {
-  const base = MODE === "robot" && BASE ? BASE : (BASE || DEFAULT_BASE) + "/latest";
   return {
     method: "GET",
-    url: base + "/api/v2.0.0/status",
+    url: BASE + "/latest/api/v2.0.0/status",
     fleet: false,
-    user: $("user").value || "distributor",
-    pass: $("pass").value || "distributor",
-    apikey: apiKey(),
-    session: sessionId(),
+    user: USER,
+    pass: PASSWORD,
+    apikey: API_KEY,
+    session: SESSION,
     body: "",
   };
 }
@@ -1079,33 +835,10 @@ function renderSamples() {
   $("sample-live").textContent = SAMPLERS[lang](sampleCtx());
 }
 
-async function refreshSample() {
-  renderSamples();
-  $("token-view").innerHTML = currentKind === "mirfleet"
-    ? "<b>x-api-key:</b> " + esc(apiKey())
-    : "<b>Authorization:</b> Basic " + esc(await authToken());
-}
-
-/* ---------- version panel ---------- */
+/* ---------- version picker ---------- */
 function renderVersions() {
   const sel = $("version-select");
   sel.innerHTML = "";
-  if (MODE === "robot") {
-    // Direct connection: one fixed target, no version to choose.
-    const fleetDirect = currentKind === "mirfleet";
-    const o = document.createElement("option");
-    o.value = "";
-    o.textContent = (fleetDirect ? "Fleet" : "Robot") +
-      (detectedVersion ? " " + detectedVersion : "") + " (direct)";
-    sel.appendChild(o);
-    sel.disabled = true;
-    $("vcount").textContent = detectedVersion
-      ? "software " + detectedVersion + " (reported)"
-      : "direct — version not reported";
-    $("target-tag").textContent = "target: " + BASE.replace(/^https?:\/\//, "") +
-      (detectedVersion ? " · " + (fleetDirect ? "Fleet " : "") + detectedVersion : "");
-    return;
-  }
   sel.disabled = false;
   const addGroup = (label, list, kind) => {
     if (!list.length) return;
@@ -1122,11 +855,6 @@ function renderVersions() {
   };
   addGroup("MiR robot", versions, "robot");
   addGroup("MiR Fleet", fleetVersions, "mirfleet");
-  $("vcount").textContent =
-    versions.length + " robot" + (fleetVersions.length ? " + " + fleetVersions.length + " fleet" : "");
-  $("target-tag").textContent = currentVersion
-    ? "target: " + (currentKind === "mirfleet" ? "Fleet " : "") + currentVersion
-    : "";
 }
 
 function onVersionChange() {
@@ -1135,20 +863,9 @@ function onVersionChange() {
   if (idx < 0) return;
   currentKind = raw.slice(0, idx);
   currentVersion = raw.slice(idx + 1);
-  syncAuthPanel();
   loadSpec();
-  refreshSample();
-  $("target-tag").textContent =
-    "target: " + (currentKind === "mirfleet" ? "Fleet " : "") + currentVersion;
+  renderSamples();
 }
-
-function syncAuthPanel() {
-  const fleetSelected = currentKind === "mirfleet";
-  $("robot-creds").style.display = fleetSelected ? "none" : "";
-  $("apikey-row").style.display = fleetSelected ? "" : "none";
-}
-
-
 
 
 function syncBodyVisibility() {
@@ -1233,10 +950,8 @@ async function loadSpec() {
   spec = null;
   clearOperation();
   renderCatalog();
-  if (MODE === "fleet" && !currentVersion) return;
+  if (!currentVersion) return;
   try {
-    // Fleet mode and a local `mir-emulator` serve their spec; a real robot
-    // may not — the catalog quietly stays disabled and free-form still works.
     // Fleets publish OpenAPI 3 only; robots publish Swagger 2.0.
     const specFile = currentKind === "mirfleet" ? "/openapi.json" : "/swagger.json";
     const r = await fetchT(apiRoot(currentVersion) + specFile, {}, 10000);
@@ -1246,37 +961,77 @@ async function loadSpec() {
   renderCatalog();
 }
 
+/* ---------- operation search: one box, typing narrows the list ---------- */
+let opMatches = [];  // indexes into spec.ops, in list order
+let opActive = -1;   // highlighted row of opMatches
+let opChosen = null; // label of the selected operation, shown in the box
+const opLabel = (op) => op.m + " " + op.p;
+
 function renderCatalog() {
-  const sel = $("op-select");
-  const q = $("op-filter").value.trim().toLowerCase();
-  sel.innerHTML = '<option value="">browse all operations&hellip;</option>';
-  sel.disabled = !spec;
+  const inp = $("op-search"), list = $("op-list");
+  inp.disabled = !spec;
+  list.innerHTML = "";
+  opMatches = [];
+  opActive = -1;
+  inp.removeAttribute("aria-activedescendant");
   $("op-count").textContent = spec ? "— " + spec.ops.length + " operations" : "";
   if (!spec) return;
-  let shown = 0;
-  let og = null, ogGroup = null;
+  // The chosen operation's own label is not a query: list everything again.
+  const terms = inp.value === opChosen
+    ? [] : inp.value.toLowerCase().split(/\s+/).filter(Boolean);
   spec.ops.forEach((op, i) => {
-    if (q && !(op.m + " " + op.p).toLowerCase().includes(q)) return;
-    if (op.group !== ogGroup) {
-      og = document.createElement("optgroup");
-      og.label = op.group;
-      ogGroup = op.group;
-      sel.appendChild(og);
-    }
-    const o = document.createElement("option");
-    o.value = i;
-    o.textContent = op.m + "  " + op.p;
-    og.appendChild(o);
-    shown++;
+    const hay = opLabel(op).toLowerCase();
+    if (!terms.every((t) => hay.includes(t))) return;
+    const li = document.createElement("li");
+    li.id = "op-opt-" + i;
+    li.setAttribute("role", "option");
+    li.dataset.i = i;
+    const m = document.createElement("b");
+    m.textContent = op.m;
+    li.append(m, op.p);
+    list.appendChild(li);
+    opMatches.push(i);
   });
-  if (q) $("op-count").textContent = "— " + shown + " of " + spec.ops.length + " operations";
+  if (!opMatches.length) {
+    const li = document.createElement("li");
+    li.className = "none";
+    li.textContent = "no operation matches";
+    list.appendChild(li);
+  }
+  if (terms.length)
+    $("op-count").textContent = "— " + opMatches.length + " of " + spec.ops.length + " operations";
+}
+
+function setOpList(open) {
+  $("op-list").hidden = !open;
+  $("op-search").setAttribute("aria-expanded", String(open));
+}
+
+function setOpActive(n) {
+  const list = $("op-list");
+  const prev = list.querySelector("li.active");
+  if (prev) prev.classList.remove("active");
+  opActive = opMatches.length ? (n + opMatches.length) % opMatches.length : -1;
+  if (opActive < 0) return;
+  const li = $("op-opt-" + opMatches[opActive]);
+  li.classList.add("active");
+  li.scrollIntoView({ block: "nearest" });
+  $("op-search").setAttribute("aria-activedescendant", li.id);
+}
+
+function chooseOperation(i) {
+  applyOperation(i);
+  opChosen = opLabel(spec.ops[i]);
+  $("op-search").value = opChosen;
+  setOpList(false);
 }
 
 function clearOperation() {
   pathTemplate = null;
+  opChosen = null;
   $("op-params").innerHTML = "";
   $("op-info").style.display = "none";
-  $("op-select").value = "";
+  $("op-search").value = "";
 }
 
 function applyOperation(i) {
@@ -1314,7 +1069,7 @@ function applyOperation(i) {
     info.style.display = "none";
   }
   syncBodyVisibility();
-  refreshSample();
+  renderSamples();
 }
 
 function rebuildPath() {
@@ -1325,14 +1080,13 @@ function rebuildPath() {
     if (v) p = p.replaceAll("{" + inp.dataset.param + "}", encodeURIComponent(v));
   });
   $("path").value = p;
-  refreshSample();
+  renderSamples();
 }
 
 
 /* ---------- transmit ---------- */
 async function transmit() {
-  if (!BASE) return;
-  if (MODE === "fleet" && !currentVersion) return;
+  if (!currentVersion) return;
   const btn = $("send");
   btn.disabled = true;
   const m = $("method").value;
@@ -1353,10 +1107,8 @@ async function transmit() {
     text = await r.text();
   } catch (e) {
     text = "network error: " + e.message +
-      "\nPossible causes: endpoint down / unreachable from this network," +
-      "\nmixed content (HTTPS page -> HTTP robot; see the endpoint panel)," +
-      "\nor the device does not send CORS headers for browser requests." +
-      "\nThe curl command above talks to it directly and is not affected.";
+      "\nThe emulator is down or unreachable from this network." +
+      "\nThe code sample above talks to it directly — try it from a terminal.";
   }
   const ms = Math.round(performance.now() - t0);
   const meta = $("resp-meta");
@@ -1382,7 +1134,7 @@ async function transmit() {
 let teleTimer = null;
 
 async function teleTick() {
-  if (!BASE) return;
+  if (!currentVersion) return;
   if (currentKind === "mirfleet") {
     try {
       const [rr, ro] = await Promise.all([
@@ -1436,187 +1188,35 @@ function setTelemetry(on) {
   }
 }
 
-/* ---------- endpoint selection / probe ---------- */
-function syncMixedContentWarning(base) {
-  const blocked = location.protocol === "https:" && /^http:\/\//i.test(base);
-  $("mixed-warn").style.display = blocked ? "" : "none";
-  return blocked;
-}
-
-async function connectTo(rawBase) {
-  setTelemetry(false); // don't poll a stale endpoint
-  const led = $("led"), lt = $("led-text"), st = $("ep-status");
-  const base = normalizeBase(rawBase);
-  if (!base) { st.className = "hint warn"; st.textContent = "enter an endpoint first"; return; }
-  syncMixedContentWarning(base);
-
-  $("connect").disabled = true;
-  led.className = "led"; lt.textContent = "probing…";
-  st.className = "hint"; st.textContent = "probing " + base + " …";
-
-  // Connect-time handshake: ask the target what it is and which software
-  // version it runs, instead of assuming one. First hit wins.
-  let mode = null, foundVersions = [], foundFleet = [], directKind = "robot";
-  detectedVersion = null;
-  // Shape 1: this project's multi-version dispatcher (/healthz manifest).
+/* ---------- connect: load the tracked versions ---------- */
+async function connect() {
+  const st = $("conn-status");
   try {
-    const r = await fetchT(base + "/healthz");
-    if (r.ok) {
-      const j = await r.json();
-      if (Array.isArray(j.versions) && j.versions.length) {
-        mode = "fleet"; foundVersions = j.versions;
-        if (Array.isArray(j.fleet_versions)) foundFleet = j.fleet_versions;
-      }
-    }
-  } catch { /* fall through to the direct shapes */ }
-  // Shape 2: an emulator's JSON index — kind and version straight from it.
-  if (!mode) {
-    try {
-      const r = await fetchT(base + "/", { headers: { Accept: "application/json" } });
-      if (r.ok) {
-        const j = await r.json(); // a real robot serves HTML here → throws → next shape
-        if (j.kind === "robot" || j.emulated_mir_version) {
-          mode = "robot"; detectedVersion = j.emulated_mir_version || null;
-        } else if (j.kind === "fleet" || j.emulated_fleet_version) {
-          mode = "robot"; directKind = "mirfleet";
-          detectedVersion = j.emulated_fleet_version || null;
-        }
-      }
-    } catch { /* not a JSON index */ }
-  }
-  // Shape 3: a MiR Fleet — the official version endpoint (real fleets too).
-  if (!mode) {
-    try {
-      const r = await fetchT(base + "/api/v1/system/version", { headers: { "x-api-key": apiKey() } });
-      if (r.ok) {
-        const j = await r.json();
-        if (j && typeof j.version === "string") {
-          mode = "robot"; directKind = "mirfleet"; detectedVersion = j.version;
-        }
-      }
-    } catch { /* not a fleet */ }
-  }
-  // Shape 4: a robot publishing its spec — info.version is the software version.
-  if (!mode) {
-    try {
-      const r = await fetchT(base + "/swagger.json");
-      if (r.ok) {
-        const j = await r.json();
-        if ((j.swagger || j.openapi) && j.info && typeof j.info.version === "string") {
-          mode = "robot"; detectedVersion = j.info.version;
-        }
-      }
-    } catch { /* no spec served */ }
-  }
-  // Shape 5: a locked-down robot: /api/v2.0.0 answers, version stays unknown.
-  if (!mode) {
-    try {
-      // Any HTTP answer (200/401/404...) proves something is listening there;
-      // 200/401 specifically look like a MiR API (401 = auth wall, as shipped).
-      const r = await fetchT(base + "/api/v2.0.0/status");
-      if (r.status === 200 || r.status === 401) mode = "robot";
-    } catch { /* unreachable */ }
-  }
-
-  $("connect").disabled = false;
-  if (!mode) {
-    led.className = "led err"; lt.textContent = "unreachable";
-    st.className = "hint warn";
-    st.textContent = "no MiR API at " + base + " — not reachable from this browser, or no CORS. " +
-      (syncMixedContentWarning(base) ? "Mixed content is blocking this request (see below)." : "");
-    const vsel = $("version-select");
-    vsel.disabled = true;
-    vsel.innerHTML = '<option>connect to an endpoint to load versions&hellip;</option>';
+    const r = await fetchT(BASE + "/healthz");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    if (!Array.isArray(j.versions) || !j.versions.length) throw new Error("no versions listed");
+    versions = j.versions;
+    fleetVersions = Array.isArray(j.fleet_versions) ? j.fleet_versions : [];
+  } catch (e) {
+    st.style.display = "";
+    st.textContent = "Can't reach " + BASE.replace(/^https?:\/\//, "") + " from this browser (" +
+      e.message + ") — reload to retry. The code samples still run from a terminal.";
+    $("version-select").innerHTML = "<option>versions unavailable</option>";
+    $("cmp-result").textContent = "versions unavailable";
     return;
   }
-
-  BASE = base; MODE = mode;
-  versions = foundVersions;
-  fleetVersions = foundFleet;
-  currentKind = mode === "fleet" ? "robot" : directKind;
-  currentVersion = mode === "fleet" ? versions[0] : null;
-  try { localStorage.setItem(STORE_KEY, base); } catch { /* private mode */ }
-  led.className = "led on"; lt.textContent = "online \u00b7 " + base.replace(/^https?:\/\//, "");
-  st.className = "hint ok";
-  const family = currentKind === "mirfleet" ? "MiR Fleet" : "MiR robot";
-  st.textContent = mode === "fleet"
-    ? "connected — emulator fleet, " + versions.length + " versions"
-    : "connected — " + family + " " + (detectedVersion || "(version not reported — assuming newest)") +
-      " at " + base.replace(/^https?:\/\//, "") + apiPrefix();
-  renderVersions(); syncAuthPanel();
-  loadSpec(); fillCompare(); refreshSample();
-}
-
-/* ---------- localhost scan ----------
-   A browser can't sweep an arbitrary LAN (no raw sockets, mixed-content
-   rules), but it CAN probe localhost ports — the common case: an emulator
-   running locally, or a robot port-forwarded to this machine. Same probe
-   ladder as connectTo, run against a handful of usual ports. */
-const SCAN_PORTS = [8080, 8081, 80, 8000, 8888];
-async function probeKind(base) {
-  try {
-    const h = await fetchT(base + "/healthz", {}, 1500);
-    if (h.ok) { const j = await h.json(); if (Array.isArray(j.versions) && j.versions.length)
-      return { kind: "dispatcher", version: (j.versions.length + " versions") }; }
-  } catch { /* next */ }
-  try {
-    const r = await fetchT(base + "/", { headers: { Accept: "application/json" } }, 1500);
-    if (r.ok) { const j = await r.json();
-      if (j.kind === "robot" || j.emulated_mir_version) return { kind: "robot", version: j.emulated_mir_version || null };
-      if (j.kind === "fleet" || j.emulated_fleet_version) return { kind: "fleet", version: j.emulated_fleet_version || null };
-    }
-  } catch { /* next */ }
-  try {
-    const r = await fetchT(base + "/api/v1/system/version", { headers: { "x-api-key": apiKey() } }, 1500);
-    if (r.ok) { const j = await r.json(); if (j && typeof j.version === "string") return { kind: "fleet", version: j.version }; }
-  } catch { /* next */ }
-  try {
-    const r = await fetchT(base + "/api/v2.0.0/status", {}, 1500);
-    if (r.status === 200 || r.status === 401) return { kind: "robot", version: null };
-  } catch { /* unreachable */ }
-  return null;
-}
-
-async function scanLocalhost() {
-  const btn = $("scan"), st = $("scan-status"), out = $("scan-results");
-  btn.disabled = true;
-  st.className = "hint"; st.textContent = "scanning localhost ports " + SCAN_PORTS.join(", ") + " …";
-  out.innerHTML = "";
-  const bases = SCAN_PORTS.map((p) => "http://127.0.0.1:" + p);
-  const results = await Promise.all(bases.map(async (b) => ({ base: b, hit: await probeKind(b) })));
-  btn.disabled = false;
-  const found = results.filter((r) => r.hit);
-  if (!found.length) {
-    st.className = "hint warn";
-    st.textContent = "No MiR targets on localhost. Start one with `uv run mir-emulator`, " +
-      "or if your robot is on the LAN use `mir-discover` from a terminal (browsers can't scan the LAN).";
-    return;
-  }
-  st.className = "hint ok";
-  st.textContent = "Found " + found.length + " on localhost — click to connect:";
-  found.forEach(({ base, hit }) => {
-    const b = document.createElement("button");
-    b.className = "connect-btn";
-    b.style.marginTop = "6px";
-    const label = hit.kind === "dispatcher" ? "dispatcher (" + hit.version + ")"
-      : (hit.kind === "fleet" ? "Fleet" : "robot") + (hit.version ? " " + hit.version : "");
-    b.textContent = base.replace(/^https?:\/\//, "") + " — " + label;
-    b.onclick = () => {
-      $("ep-custom").checked = true;
-      $("custom-row").style.display = "";
-      $("custom-url").value = base;
-      connectTo(base);
-    };
-    out.appendChild(b);
-  });
+  st.style.display = "none";
+  currentKind = "robot";
+  currentVersion = versions[0];
+  renderVersions();
+  loadSpec(); fillCompare(); renderSamples();
 }
 
 /* ---------- version compare (GET /_emulator/diff) ---------- */
 function fillCompare() {
   const from = $("cmp-from"), to = $("cmp-to"), go = $("cmp-go");
-  const usable = MODE === "fleet" && versions.length;
-  [from, to, go].forEach((el) => (el.disabled = !usable));
-  if (!usable) return;
+  [from, to, go].forEach((el) => (el.disabled = false));
   const fill = (sel) => {
     sel.innerHTML = "";
     const grp = (label, list) => {
@@ -1681,64 +1281,45 @@ async function runCompare() {
   }
 }
 
-function selectedEndpoint() {
-  return $("ep-demo").checked ? DEFAULT_BASE : $("custom-url").value;
-}
-
-function syncEndpointForm() {
-  $("custom-row").style.display = $("ep-custom").checked ? "" : "none";
-  syncMixedContentWarning($("ep-demo").checked ? DEFAULT_BASE : normalizeBase($("custom-url").value));
-}
-
 /* ---------- boot ---------- */
-function initialEndpoint() {
-  const fromQuery = qs.get("api");
-  if (fromQuery) return normalizeBase(fromQuery);
-  try {
-    const stored = localStorage.getItem(STORE_KEY);
-    if (stored) return stored;
-  } catch { /* private mode */ }
-  return DEFAULT_BASE;
-}
-
-function probe() {
-  const start = initialEndpoint();
-  if (start !== DEFAULT_BASE) {
-    $("ep-custom").checked = true;
-    $("ep-demo").checked = false;
-    $("custom-url").value = start;
-  }
-  syncEndpointForm();
-  connectTo(start);
-}
-
 syncBodyVisibility();
-["method", "path", "body", "user", "pass", "apikey"].forEach((id) =>
-  $(id).addEventListener("input", () => { syncBodyVisibility(); refreshSample(); }));
+["method", "path", "body"].forEach((id) =>
+  $(id).addEventListener("input", () => { syncBodyVisibility(); renderSamples(); }));
 $("send").onclick = transmit;
 $("version-select").addEventListener("change", onVersionChange);
-$("op-filter").addEventListener("input", renderCatalog);
-$("op-select").addEventListener("change", () => {
-  const v = $("op-select").value;
-  if (v === "") clearOperation(); else applyOperation(Number(v));
+$("op-search").addEventListener("focus", () => {
+  $("op-search").select();
+  renderCatalog();
+  setOpList(true);
 });
-$("connect").onclick = () => connectTo(selectedEndpoint());
-$("scan").onclick = scanLocalhost;
+$("op-search").addEventListener("input", () => {
+  renderCatalog();
+  setOpList(true);
+  if ($("op-search").value.trim()) setOpActive(0);
+});
+$("op-search").addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    setOpList(true);
+    setOpActive(opActive + (e.key === "ArrowDown" ? 1 : -1));
+  } else if (e.key === "Enter") {
+    if (opActive >= 0) chooseOperation(opMatches[opActive]);
+  } else if (e.key === "Escape") {
+    setOpList(false);
+  }
+});
+$("op-search").addEventListener("blur", () => {
+  setOpList(false);
+  if (opChosen) $("op-search").value = opChosen; // drop a half-typed query
+});
+// mousedown, not click: pick before the blur above closes the list
+$("op-list").addEventListener("mousedown", (e) => {
+  e.preventDefault();
+  const li = e.target.closest("li[data-i]");
+  if (li) { chooseOperation(Number(li.dataset.i)); $("op-search").blur(); }
+});
 $("cmp-go").onclick = runCompare;
 $("tele-toggle").onclick = () => setTelemetry(!teleTimer);
-$("new-session").onclick = () => {
-  $("session").value = newSessionId();
-  try { localStorage.setItem(SESSION_KEY, $("session").value); } catch { /* private mode */ }
-  refreshSample();
-};
-$("session").addEventListener("input", () => {
-  try { localStorage.setItem(SESSION_KEY, sessionId()); } catch { /* private mode */ }
-  refreshSample();
-});
-try {
-  $("session").value = localStorage.getItem(SESSION_KEY) ?? newSessionId();
-  localStorage.setItem(SESSION_KEY, $("session").value);
-} catch { $("session").value = newSessionId(); }
 renderLangSelects();
 document.querySelectorAll("button.copy-btn").forEach((b) => {
   b.addEventListener("click", async () => {
@@ -1749,11 +1330,7 @@ document.querySelectorAll("button.copy-btn").forEach((b) => {
     } catch { /* clipboard needs a secure context; the sample is selectable */ }
   });
 });
-$("ep-demo").addEventListener("change", () => { syncEndpointForm(); connectTo(DEFAULT_BASE); });
-$("ep-custom").addEventListener("change", () => { syncEndpointForm(); $("custom-url").focus(); });
-$("custom-url").addEventListener("input", syncEndpointForm);
-$("custom-url").addEventListener("keydown", (e) => { if (e.key === "Enter") connectTo(selectedEndpoint()); });
-probe(); refreshSample();
+connect(); renderSamples();
 </script>
 </body>
 </html>

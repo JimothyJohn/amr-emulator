@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ZoneEventAddress(str, Enum):
+class ZoneEventAddress(StrEnum):
     INTEGRATION = "Integration"
     TOPMODULE = "TopModule"
 

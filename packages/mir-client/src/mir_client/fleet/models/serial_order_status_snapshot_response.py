@@ -41,7 +41,7 @@ class SerialOrderStatusSnapshotResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.serial_order_status_event import SerialOrderStatusEvent
+        from ..models.serial_order_status_event import SerialOrderStatusEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         _serial_order_status_events = d.pop("serial-order-status-events", UNSET)

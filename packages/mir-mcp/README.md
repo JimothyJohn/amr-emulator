@@ -76,7 +76,7 @@ name), `mir_fleet_order_status` (check/abort).
 uv run mir-emulator --fleet-version 1.5.0
 
 # register the server (stdio)
-claude mcp add mir -- uv run --project /path/to/mir-emulator mir-mcp
+claude mcp add mir -- uv run --project /path/to/amr-emulator mir-mcp
 ```
 
 Claude Desktop (`claude_desktop_config.json`):
@@ -86,7 +86,7 @@ Claude Desktop (`claude_desktop_config.json`):
   "mcpServers": {
     "mir": {
       "command": "uv",
-      "args": ["run", "--project", "/path/to/mir-emulator", "mir-mcp"],
+      "args": ["run", "--project", "/path/to/amr-emulator", "mir-mcp"],
       "env": {"MIR_ROBOT_URL": "http://127.0.0.1:8080"}
     }
   }

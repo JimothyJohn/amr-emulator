@@ -56,7 +56,7 @@ class Map:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.geo_json import GeoJson
+        from ..models.geo_json import GeoJson  # noqa: PLC0415
 
         d = dict(src_dict)
         name = d.pop("name")

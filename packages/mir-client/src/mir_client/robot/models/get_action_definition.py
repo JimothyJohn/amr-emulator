@@ -86,9 +86,11 @@ class GetActionDefinition:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.get_action_definition_descriptions_item import (
-            GetActionDefinitionDescriptionsItem,
+            GetActionDefinitionDescriptionsItem,  # noqa: PLC0415
         )
-        from ..models.get_action_definition_parameters_item import GetActionDefinitionParametersItem
+        from ..models.get_action_definition_parameters_item import (
+            GetActionDefinitionParametersItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         action_type = d.pop("action_type", UNSET)
