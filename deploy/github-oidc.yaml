@@ -16,7 +16,7 @@ Parameters:
     Description: Only pushes to this branch may deploy
   StackName:
     Type: String
-    Default: mir-emulator-demo
+    Default: amr-emulator-demo
     Description: The demo stack this identity is allowed to deploy
   HostedZoneId:
     Type: String
@@ -129,7 +129,7 @@ Resources:
               - Sid: FetchLambdaBundle
                 Effect: Allow
                 Action: s3:GetObject
-                Resource: !Sub arn:aws:s3:::mir-emulator-artifacts-${AWS::AccountId}-${AWS::Region}/*
+                Resource: !Sub arn:aws:s3:::amr-emulator-artifacts-${AWS::AccountId}-${AWS::Region}/*
 
   GitHubDeployRole:
     Type: AWS::IAM::Role
@@ -183,8 +183,8 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                 Resource:
-                  - !Sub arn:aws:s3:::mir-emulator-artifacts-${AWS::AccountId}-${AWS::Region}
-                  - !Sub arn:aws:s3:::mir-emulator-artifacts-${AWS::AccountId}-${AWS::Region}/*
+                  - !Sub arn:aws:s3:::amr-emulator-artifacts-${AWS::AccountId}-${AWS::Region}
+                  - !Sub arn:aws:s3:::amr-emulator-artifacts-${AWS::AccountId}-${AWS::Region}/*
               - Sid: ResolveZoneIdIsReadOnly
                 Effect: Allow
                 Action: route53:ListHostedZonesByName

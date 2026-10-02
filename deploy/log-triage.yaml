@@ -10,7 +10,7 @@ Description: >
 Parameters:
   StackName:
     Type: String
-    Default: mir-emulator-demo
+    Default: amr-emulator-demo
     Description: The demo stack whose log groups this identity may read
 
 Resources:

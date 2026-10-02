@@ -24,13 +24,13 @@ sha256() { # portable: macOS has shasum, GitHub runners have both
     fi
 }
 
-STACK_NAME="${STACK_NAME:-mir-emulator-demo}"
+STACK_NAME="${STACK_NAME:-amr-emulator-demo}"
 DOMAIN_NAME="${DOMAIN_NAME:-amr-emulator.com}"        # DOMAIN_NAME="" skips the custom domain
 LEGACY_DOMAIN_NAME="${LEGACY_DOMAIN_NAME:-}"          # old alias kept alive (e.g. mir.advin.io)
 CFN_ROLE_ARN="${CFN_ROLE_ARN:-}"           # optional CloudFormation service role
 REGION="${AWS_REGION:-$(aws configure get region)}"
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
-BUCKET="mir-emulator-artifacts-${ACCOUNT_ID}-${REGION}"
+BUCKET="amr-emulator-artifacts-${ACCOUNT_ID}-${REGION}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/amr-emulator-lambda.XXXXXX")"
 trap 'rm -rf "$BUILD_DIR"' EXIT

@@ -56,13 +56,13 @@ Resources:
   FunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: /aws/lambda/mir-emulator-demo
+      LogGroupName: /aws/lambda/amr-emulator-demo
       RetentionInDays: !Ref LogRetentionDays
 
   AccessLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: /aws/apigateway/mir-emulator-demo
+      LogGroupName: /aws/apigateway/amr-emulator-demo
       RetentionInDays: !Ref LogRetentionDays
 
   FunctionRole:
@@ -90,7 +90,7 @@ Resources:
     Type: AWS::Lambda::Function
     DependsOn: FunctionLogGroup
     Properties:
-      FunctionName: mir-emulator-demo
+      FunctionName: amr-emulator-demo
       Description: MiR REST API emulator - all tracked versions at /<version>/api/v2.0.0
       Runtime: python3.13
       Architectures: [arm64]
@@ -106,7 +106,7 @@ Resources:
   HttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
-      Name: mir-emulator-demo
+      Name: amr-emulator-demo
       Description: Public demo endpoint for the MiR REST API emulator
       ProtocolType: HTTP
 
