@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-ws = ["websockets>=17.1"]
+ws = ["websockets>=17.2"]
 
 [project.scripts]
 amr-emulator = "amr_emulator.cli:main"
