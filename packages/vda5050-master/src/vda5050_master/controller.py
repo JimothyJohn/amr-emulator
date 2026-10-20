@@ -143,7 +143,7 @@ class MissionController:
             task.cancel()
         for task in self._workers.values():
             with contextlib.suppress(asyncio.CancelledError):
-                await task
+                _ = await task
         self._workers.clear()
 
     # ---------------------------------------------------------------- workers
