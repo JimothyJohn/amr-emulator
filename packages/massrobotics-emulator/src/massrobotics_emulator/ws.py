@@ -99,6 +99,8 @@ class WebSocket:
             self._writer.close()
             await self._writer.wait_closed()
         except (ConnectionError, OSError):
+            # Peer may have already dropped the transport; closing is
+            # best-effort during shutdown.
             pass
 
     async def _send_frame(
@@ -313,6 +315,8 @@ class WSServer:
         try:
             await self._handler(socket_, path)
         except (WSClosed, WSError):
+            # Handler-raised close/protocol errors are expected when the
+            # peer disconnects mid-session; the socket is cleaned up below.
             pass
         finally:
             await socket_.close()
