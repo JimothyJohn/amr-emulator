@@ -99,7 +99,7 @@ class Broker:
         for task in list(self._conn_tasks):
             task.cancel()
             with suppress(asyncio.CancelledError):
-                await task
+                _ = await task
         self._sessions.clear()
         if self._server is not None:
             await self._server.wait_closed()

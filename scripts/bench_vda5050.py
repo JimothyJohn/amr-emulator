@@ -121,7 +121,7 @@ async def run_bench(robots: int, duration: float, probe_rate: float, version: st
     watch_task.cancel()
     for task in (probe_task, watch_task):
         with contextlib.suppress(asyncio.CancelledError):
-            await task
+            _ = await task
     await prober.disconnect()
     await watcher.disconnect()
     for robot in fleet:
