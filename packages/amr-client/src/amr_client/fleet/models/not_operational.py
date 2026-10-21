@@ -93,9 +93,7 @@ class NotOperational:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.error import Error  # noqa: PLC0415
-        from ..models.external_cable_charger_connected import (
-            ExternalCableChargerConnected,  # noqa: PLC0415
-        )
+        from ..models.external_cable_charger_connected import ExternalCableChargerConnected  # noqa: PLC0415
         from ..models.key import Key  # noqa: PLC0415
         from ..models.manual_control import ManualControl  # noqa: PLC0415
         from ..models.paused import Paused  # noqa: PLC0415
