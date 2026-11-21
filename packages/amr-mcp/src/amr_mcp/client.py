@@ -32,7 +32,7 @@ import os
 import socket
 from typing import Any
 
-import httpx
+import httpx2
 
 ROBOT_API_PREFIX = "/api/v2.0.0"
 FLEET_API_PREFIX = "/api/v1"
@@ -50,7 +50,7 @@ _ROBOT_STATUS_MARKERS = (
 )
 
 # Tests inject an in-process ASGI transport here; production uses real TCP.
-TRANSPORT: httpx.AsyncBaseTransport | None = None
+TRANSPORT: httpx2.AsyncBaseTransport | None = None
 
 
 def robot_base_url() -> str:
@@ -97,7 +97,7 @@ async def _request(
     json: Any = None,
     params: dict[str, Any] | None = None,
 ) -> tuple[int, Any]:
-    async with httpx.AsyncClient(
+    async with httpx2.AsyncClient(
         transport=TRANSPORT, timeout=REQUEST_TIMEOUT_S, headers=headers
     ) as client:
         response = await client.request(method, f"{base_url}{path}", json=json, params=params)
@@ -120,7 +120,7 @@ _detected: dict[str, dict[str, Any]] = {}
 async def _probe(base_url: str, path: str, headers: dict[str, str] | None = None):
     try:
         return await _request(base_url, headers or {}, "GET", path)
-    except httpx.HTTPError:
+    except httpx2.HTTPError:
         return None
 
 
@@ -253,7 +253,7 @@ async def scan_for_targets(
             url = f"http://{host}:{port}"
             try:
                 info = await asyncio.wait_for(_identify(url), identify_timeout)
-            except (TimeoutError, httpx.HTTPError):
+            except (TimeoutError, httpx2.HTTPError):
                 return None
             if info is None:
                 return None

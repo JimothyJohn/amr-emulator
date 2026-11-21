@@ -6,7 +6,7 @@ transport into the same apps the SDK contract tests use. Deterministic:
 frozen sim clock, stepped manually.
 """
 
-import httpx
+import httpx2
 import pytest
 from amr_client.auth import robot_token
 from amr_client.report import collect_report, render_report, write_report
@@ -58,7 +58,7 @@ def robot_report(robot_app, clock):
     )
     clock.tick(300)  # mission long done
     drive.put("/_emulator/faults", json={"faults": ["blocked_path"]}, headers=AUTH)
-    return collect_report("http://robot.test", transport=httpx.ASGITransport(app=robot_app))
+    return collect_report("http://robot.test", transport=httpx2.ASGITransport(app=robot_app))
 
 
 def test_robot_report_indicators(robot_report):
@@ -108,7 +108,7 @@ def test_render_report_is_a_self_contained_dashboard(robot_report):
 
 def test_write_report(tmp_path, robot_app, robot_report, clock):
     out = tmp_path / "robot.html"
-    path = write_report("http://robot.test", out, transport=httpx.ASGITransport(app=robot_app))
+    path = write_report("http://robot.test", out, transport=httpx2.ASGITransport(app=robot_app))
     assert path == out
     assert out.read_text().startswith("<!DOCTYPE html>")
 
@@ -124,7 +124,7 @@ def test_fleet_report(clock):
         headers=key,
     )
     clock.tick(60)
-    report = collect_report("http://fleet.test", transport=httpx.ASGITransport(app=app))
+    report = collect_report("http://fleet.test", transport=httpx2.ASGITransport(app=app))
     assert report["kind"] == "fleet"
     assert len(report["robots"]) == 2
     assert all(0 <= r["battery"] <= 100 for r in report["robots"])

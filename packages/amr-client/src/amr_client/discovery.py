@@ -29,7 +29,7 @@ import warnings
 from dataclasses import dataclass, field
 from typing import Any
 
-import httpx
+import httpx2
 
 from amr_client import _provenance as provenance
 
@@ -66,7 +66,7 @@ class ServerInfo:
     latest: str | None = field(default=None)  # dispatcher only: newest robot version
 
 
-def _json_or_none(response: httpx.Response) -> Any:
+def _json_or_none(response: httpx2.Response) -> Any:
     try:
         return response.json()
     except ValueError:
@@ -176,11 +176,11 @@ def detect_server(
     software version, without credentials and without changing any state."""
     base = base_url.rstrip("/")
     saw_response, last_error = False, None
-    with httpx.Client(timeout=timeout, **httpx_kwargs) as http:
+    with httpx2.Client(timeout=timeout, **httpx_kwargs) as http:
         for probe, path, headers in _probe_plan(api_key):
             try:
                 response = http.get(base + path, headers=headers)
-            except httpx.HTTPError as exc:
+            except httpx2.HTTPError as exc:
                 last_error = exc
                 continue
             saw_response = True
@@ -200,11 +200,11 @@ async def detect_server_async(
     """Async twin of :func:`detect_server` (same probes, same result)."""
     base = base_url.rstrip("/")
     saw_response, last_error = False, None
-    async with httpx.AsyncClient(timeout=timeout, **httpx_kwargs) as http:
+    async with httpx2.AsyncClient(timeout=timeout, **httpx_kwargs) as http:
         for probe, path, headers in _probe_plan(api_key):
             try:
                 response = await http.get(base + path, headers=headers)
-            except httpx.HTTPError as exc:
+            except httpx2.HTTPError as exc:
                 last_error = exc
                 continue
             saw_response = True

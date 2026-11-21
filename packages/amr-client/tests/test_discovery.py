@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 
-import httpx
+import httpx2
 import pytest
 from amr_client import (
     DiscoveryError,
@@ -33,7 +33,7 @@ def run(coro):
 
 
 def detect(app) -> ServerInfo:
-    return run(detect_server_async("http://target.test", transport=httpx.ASGITransport(app=app)))
+    return run(detect_server_async("http://target.test", transport=httpx2.ASGITransport(app=app)))
 
 
 @pytest.mark.parametrize("version", registry.supported_versions())
@@ -138,9 +138,9 @@ def test_non_mir_server_raises_instead_of_guessing():
 
 
 def test_unreachable_host_raises_with_the_transport_error():
-    class Down(httpx.AsyncBaseTransport):
+    class Down(httpx2.AsyncBaseTransport):
         async def handle_async_request(self, request):
-            raise httpx.ConnectError("boom", request=request)
+            raise httpx2.ConnectError("boom", request=request)
 
     with pytest.raises(DiscoveryError, match="cannot reach"):
         run(detect_server_async("http://target.test", transport=Down()))
@@ -225,7 +225,7 @@ def test_detect_then_drive_end_to_end():
     from amr_client.robot.client import AuthenticatedClient as RobotClient
 
     app = create_app()
-    transport = httpx.ASGITransport(app=app)
+    transport = httpx2.ASGITransport(app=app)
     info = run(detect_server_async("http://target.test", transport=transport))
     client = client_for(info, transport=transport)
     assert isinstance(client, RobotClient)

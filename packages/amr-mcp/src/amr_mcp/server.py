@@ -27,7 +27,7 @@ import asyncio
 import json
 from typing import Annotated, Any, Literal
 
-import httpx
+import httpx2
 from mcp.server.caching import CacheHint
 from mcp.server.mcpserver import (
     Context,
@@ -115,7 +115,7 @@ async def _robot(method: str, path: str, *, json_body: Any = None, api: bool = T
         status, body = await client.robot_request(method, path, json=json_body, api=api)
     except client.TargetResolutionError as exc:
         raise ToolError(str(exc)) from exc
-    except httpx.HTTPError as exc:
+    except httpx2.HTTPError as exc:
         raise ToolError(client.describe_connection_error(exc, client.robot_base_url())) from exc
     if status >= 400:
         raise ToolError(client.describe_http_error(status, body, "robot"))
@@ -127,7 +127,7 @@ async def _fleet(method: str, path: str, *, json_body: Any = None) -> Any:
         status, body = await client.fleet_request(method, path, json=json_body)
     except client.TargetResolutionError as exc:
         raise ToolError(str(exc)) from exc
-    except httpx.HTTPError as exc:
+    except httpx2.HTTPError as exc:
         raise ToolError(client.describe_connection_error(exc, client.fleet_base_url())) from exc
     if status >= 400:
         raise ToolError(client.describe_http_error(status, body, "fleet"))

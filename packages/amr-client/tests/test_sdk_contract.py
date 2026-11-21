@@ -7,7 +7,7 @@ typed models in, typed models out, no sockets.
 
 import asyncio
 
-import httpx
+import httpx2
 import pytest
 from amr_client import fleet_client, provenance, robot_client, robot_token
 from amr_emulator.app import create_app
@@ -21,13 +21,13 @@ def run(coro):
 @pytest.fixture(scope="module")
 def robot():
     app = create_app(provenance.ROBOT_VERSION)
-    return robot_client("http://robot.test", transport=httpx.ASGITransport(app=app))
+    return robot_client("http://robot.test", transport=httpx2.ASGITransport(app=app))
 
 
 @pytest.fixture(scope="module")
 def fleet():
     app = create_fleet_app(provenance.FLEET_VERSION)
-    return fleet_client("http://fleet.test", transport=httpx.ASGITransport(app=app))
+    return fleet_client("http://fleet.test", transport=httpx2.ASGITransport(app=app))
 
 
 def test_provenance_matches_the_registry():
@@ -58,7 +58,7 @@ def test_robot_auth_is_wired_by_the_constructor(robot):
     bad = robot_client(
         "http://robot.test",
         password="wrong",
-        transport=httpx.ASGITransport(app=create_app(provenance.ROBOT_VERSION)),
+        transport=httpx2.ASGITransport(app=create_app(provenance.ROBOT_VERSION)),
     )
     assert run(get_status.asyncio_detailed(client=bad)).status_code == 401
 
@@ -92,7 +92,7 @@ def test_fleet_api_key_is_wired_by_the_constructor():
     bad = fleet_client(
         "http://fleet.test",
         api_key="wrong",
-        transport=httpx.ASGITransport(app=create_fleet_app(provenance.FLEET_VERSION)),
+        transport=httpx2.ASGITransport(app=create_fleet_app(provenance.FLEET_VERSION)),
     )
     assert run(get_api_v1_robots.asyncio_detailed(client=bad)).status_code == 401
 

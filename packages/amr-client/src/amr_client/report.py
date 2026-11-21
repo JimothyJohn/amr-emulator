@@ -25,7 +25,7 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
-import httpx
+import httpx2
 
 from amr_client.auth import DEFAULT_PASSWORD, DEFAULT_USERNAME, robot_token
 from amr_client.discovery import detect_server_async
@@ -39,7 +39,7 @@ def _unsupported_kind_message(kind: str) -> str:
     return f"cannot report on a {kind!r} target; point amr-report at a robot or fleet"
 
 
-async def _get_json(http: httpx.AsyncClient, path: str) -> Any:
+async def _get_json(http: httpx2.AsyncClient, path: str) -> Any:
     response = await http.get(path)
     response.raise_for_status()
     return response.json()
@@ -66,7 +66,7 @@ def _entry_minutes(started: str | None, finished: str | None) -> int | None:
 async def _collect_robot(
     base: str, version: str | None, headers: dict, timeout: float, httpx_kwargs: dict
 ) -> dict:
-    async with httpx.AsyncClient(
+    async with httpx2.AsyncClient(
         base_url=base, headers=headers, timeout=timeout, **httpx_kwargs
     ) as http:
         status = await _get_json(http, f"{ROBOT_BASE}/status")
@@ -131,7 +131,7 @@ async def _collect_robot(
 async def _collect_fleet(
     base: str, version: str | None, headers: dict, timeout: float, httpx_kwargs: dict
 ) -> dict:
-    async with httpx.AsyncClient(
+    async with httpx2.AsyncClient(
         base_url=base, headers=headers, timeout=timeout, **httpx_kwargs
     ) as http:
         listing = await _get_json(http, f"{FLEET_BASE}/robots")

@@ -12,7 +12,7 @@ import asyncio
 import json
 from typing import Any
 
-import httpx
+import httpx2
 import pytest
 from amr_emulator.app import create_app
 from amr_mcp import client as target_client
@@ -46,7 +46,7 @@ def clean_env(monkeypatch):
 @pytest.fixture
 def robot(monkeypatch):
     app = create_app("3.8.1", mission_duration=0.2)
-    monkeypatch.setattr(target_client, "TRANSPORT", httpx.ASGITransport(app=app))
+    monkeypatch.setattr(target_client, "TRANSPORT", httpx2.ASGITransport(app=app))
 
 
 def _accept(payload: dict[str, Any]):

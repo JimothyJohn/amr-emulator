@@ -15,7 +15,7 @@ import time
 from contextlib import closing
 from typing import Any
 
-import httpx
+import httpx2
 import pytest
 import uvicorn
 from amr_emulator.app import create_app
@@ -51,13 +51,13 @@ def clean_env(monkeypatch):
 @pytest.fixture
 def robot(monkeypatch):
     app = create_app("3.8.1", mission_duration=0.2)
-    monkeypatch.setattr(client, "TRANSPORT", httpx.ASGITransport(app=app))
+    monkeypatch.setattr(client, "TRANSPORT", httpx2.ASGITransport(app=app))
 
 
 @pytest.fixture
 def fleet(monkeypatch):
     app = create_fleet_app("1.5.0", mission_duration=0.2)
-    monkeypatch.setattr(client, "TRANSPORT", httpx.ASGITransport(app=app))
+    monkeypatch.setattr(client, "TRANSPORT", httpx2.ASGITransport(app=app))
 
 
 def test_every_tool_is_registered():
@@ -200,7 +200,7 @@ def dispatcher(monkeypatch):
     """The multi-version demo dispatcher at the configured base URL."""
     from amr_emulator.serverless import build_app
 
-    monkeypatch.setattr(client, "TRANSPORT", httpx.ASGITransport(app=build_app()))
+    monkeypatch.setattr(client, "TRANSPORT", httpx2.ASGITransport(app=build_app()))
 
 
 def test_server_info_identifies_a_robot(robot):
@@ -268,9 +268,9 @@ def test_handshake_runs_once_per_base_url(robot, monkeypatch):
 
 
 def test_unreachable_target_reports_unknown_kind(monkeypatch):
-    class Down(httpx.AsyncBaseTransport):
+    class Down(httpx2.AsyncBaseTransport):
         async def handle_async_request(self, request):
-            raise httpx.ConnectError("down", request=request)
+            raise httpx2.ConnectError("down", request=request)
 
     monkeypatch.setattr(client, "TRANSPORT", Down())
     info = run(server.amr_server_info())
